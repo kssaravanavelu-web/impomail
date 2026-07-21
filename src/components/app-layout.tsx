@@ -5,14 +5,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const sidebarItems = [
+type SidebarItem = {
+  to: "/compose" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive";
+  label: string;
+  icon: typeof Inbox;
+  accent?: boolean;
+};
+const sidebarItems: SidebarItem[] = [
   { to: "/compose", label: "Compose", icon: PenSquare, accent: true },
   { to: "/inbox", label: "Inbox", icon: Inbox },
   { to: "/sent", label: "Sent", icon: Send },
   { to: "/drafts", label: "Drafts", icon: FileText },
   { to: "/trash", label: "Trash", icon: Trash2 },
   { to: "/archive", label: "Archive", icon: Archive },
-] as const;
+];
 
 const bottomItems = [
   { to: "/search", label: "Search", icon: Search },
