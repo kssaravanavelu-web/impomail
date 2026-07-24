@@ -33,7 +33,10 @@ function greeting() {
 function Home() {
   const { user } = Route.useRouteContext();
   const name = ((user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? "there").split(" ")[0];
-  const recent = messages.filter((m) => m.folder === "inbox").slice(0, 8);
+  const inbox = messages.filter((m) => m.folder === "inbox");
+  const sectors = (Object.keys(categoryMeta) as Category[])
+    .map((cat) => ({ cat, items: inbox.filter((m) => m.category === cat) }))
+    .filter((s) => s.items.length > 0);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 lg:px-8 lg:py-10">
@@ -67,36 +70,49 @@ function Home() {
 
       <div className="mt-10">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Recent messages</h2>
+          <h2 className="text-lg font-semibold">Sector mail</h2>
           <Link to="/inbox" className="text-sm text-primary hover:underline">View all</Link>
         </div>
-        <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/60 bg-card">
-          {recent.map((m) => {
-            const meta = categoryMeta[m.category];
+        <div className="space-y-6">
+          {sectors.map(({ cat, items }) => {
+            const meta = categoryMeta[cat];
             return (
-              <Link
-                key={m.id}
-                to="/message/$id"
-                params={{ id: m.id }}
-                className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/40"
-              >
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold">
-                  {m.from.charAt(0)}
+              <section key={cat}>
+                <div className="mb-2 flex items-center justify-between">
+                  <Link to="/category/$slug" params={{ slug: cat }} className="flex items-center gap-2">
+                    <span className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${meta.bg} ${meta.color}`}>{meta.label}</span>
+                    <span className="text-xs text-muted-foreground">{items.length}</span>
+                  </Link>
+                  <Link to="/category/$slug" params={{ slug: cat }} className="text-xs text-muted-foreground hover:text-primary">
+                    See all <ChevronRight className="inline h-3 w-3" />
+                  </Link>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`truncate text-sm ${m.unread ? "font-semibold" : "font-medium"}`}>{m.from}</span>
-                    <span className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${meta.bg} ${meta.color}`}>{meta.label}</span>
-                  </div>
-                  <div className={`truncate text-sm ${m.unread ? "text-foreground" : "text-muted-foreground"}`}>{m.subject}</div>
-                  <div className="truncate text-xs text-muted-foreground">{m.preview}</div>
+                <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/60 bg-card">
+                  {items.slice(0, 3).map((m) => (
+                    <Link
+                      key={m.id}
+                      to="/message/$id"
+                      params={{ id: m.id }}
+                      className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/40"
+                    >
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold">
+                        {m.from.charAt(0)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`truncate text-sm ${m.unread ? "font-semibold" : "font-medium"}`}>{m.from}</span>
+                        </div>
+                        <div className={`truncate text-sm ${m.unread ? "text-foreground" : "text-muted-foreground"}`}>{m.subject}</div>
+                        <div className="truncate text-xs text-muted-foreground">{m.preview}</div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-xs text-muted-foreground">{m.time}</span>
+                        {m.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs text-muted-foreground">{m.time}</span>
-                  {m.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
-                </div>
-                <ChevronRight className="hidden h-4 w-4 text-muted-foreground sm:block" />
-              </Link>
+              </section>
             );
           })}
         </div>

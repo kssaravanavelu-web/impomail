@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { User, Bell, Shield, Palette, Sparkles, LogOut } from "lucide-react";
+import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/message-list";
 import { toast } from "sonner";
+import { ACCENTS, useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — ImpoMail" }, { name: "description", content: "Manage your account and preferences." }] }),
@@ -18,7 +19,7 @@ function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [aiCategorize, setAiCategorize] = useState(true);
   const [otpVault, setOtpVault] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const { mode, setMode, accent, setAccent, contrast, setContrast } = useTheme();
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -55,7 +56,59 @@ function Settings() {
       </Section>
 
       <Section icon={Palette} title="Appearance">
-        <Row label="Dark mode" desc="Use the dark ImpoMail theme." checked={darkMode} onChange={setDarkMode} />
+        <div className="px-4 py-3">
+          <div className="mb-2 text-sm font-medium">Theme</div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setMode("light")}
+              className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition ${mode === "light" ? "border-primary bg-primary/10 text-foreground" : "border-border/60 text-muted-foreground hover:bg-accent/40"}`}
+            >
+              <Sun className="h-4 w-4" /> Light
+            </button>
+            <button
+              onClick={() => setMode("dark")}
+              className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition ${mode === "dark" ? "border-primary bg-primary/10 text-foreground" : "border-border/60 text-muted-foreground hover:bg-accent/40"}`}
+            >
+              <Moon className="h-4 w-4" /> Dark
+            </button>
+          </div>
+        </div>
+        <div className="px-4 py-3">
+          <div className="mb-2 text-sm font-medium">Accent color</div>
+          <div className="flex flex-wrap gap-2">
+            {ACCENTS.map((a) => {
+              const active = a.key === accent;
+              return (
+                <button
+                  key={a.key}
+                  onClick={() => setAccent(a.key)}
+                  title={a.label}
+                  className={`relative h-9 w-9 rounded-full border-2 transition ${active ? "border-foreground scale-110" : "border-border/60"}`}
+                  style={{ background: `oklch(0.62 ${a.chroma} ${a.hue})` }}
+                >
+                  {active && <Check className="absolute inset-0 m-auto h-4 w-4 text-white" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="px-4 py-3">
+          <div className="mb-2 flex items-center justify-between">
+            <div className="text-sm font-medium">Contrast</div>
+            <div className="text-xs text-muted-foreground">{contrast}</div>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={contrast}
+            onChange={(e) => setContrast(Number(e.target.value))}
+            className="w-full accent-[var(--primary)]"
+          />
+          <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+            <span>Low</span><span>Default</span><span>High</span>
+          </div>
+        </div>
       </Section>
 
       <Section icon={Shield} title="Account">
