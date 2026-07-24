@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type ThemeMode = "light" | "dark";
 export type AccentPreset = { key: string; label: string; hue: number; chroma: number };
 
 export const ACCENTS: AccentPreset[] = [
@@ -33,28 +32,23 @@ export type BackgroundState =
   | { kind: "custom"; dataUrl: string };
 
 type ThemeState = {
-  mode: ThemeMode;
   accent: string; // AccentPreset.key
   contrast: number; // 0..100 (50 = default)
   background: BackgroundState;
-  setMode: (m: ThemeMode) => void;
   setAccent: (k: string) => void;
   setContrast: (n: number) => void;
   setBackground: (b: BackgroundState) => void;
-  backgroundLocked: boolean; // theme toggle disabled when bg active
 };
 
 const ThemeContext = createContext<ThemeState | null>(null);
 const KEY = "impomail.theme.v1";
 
-function apply(mode: ThemeMode, accent: string, contrast: number, bg: BackgroundState) {
+function apply(accent: string, contrast: number, bg: BackgroundState) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   const bgActive = bg.kind !== "none";
-  // Honor the user's mode choice even when a background is active.
-  const effectiveMode: ThemeMode = mode;
   root.classList.remove("light", "dark");
-  root.classList.add(effectiveMode);
+  root.classList.add("dark");
   const preset = ACCENTS.find((a) => a.key === accent) ?? ACCENTS[0];
   root.style.setProperty("--accent-hue", String(preset.hue));
   root.style.setProperty("--accent-chroma", String(preset.chroma));
@@ -75,13 +69,11 @@ function apply(mode: ThemeMode, accent: string, contrast: number, bg: Background
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setModeState] = useState<ThemeMode>("dark");
   const [accent, setAccentState] = useState<string>("blue");
   const [contrast, setContrastState] = useState<number>(50);
   const [background, setBackgroundState] = useState<BackgroundState>({ kind: "none" });
 
   useEffect(() => {
-    let m: ThemeMode = "dark";
     let a = "blue";
     let c = 50;
     let b: BackgroundState = { kind: "none" };
@@ -89,31 +81,28 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.mode) { m = s.mode; setModeState(s.mode); }
         if (s.accent) { a = s.accent; setAccentState(s.accent); }
         if (typeof s.contrast === "number") { c = s.contrast; setContrastState(s.contrast); }
         if (s.background && typeof s.background === "object") { b = s.background; setBackgroundState(s.background); }
       }
     } catch {}
-    apply(m, a, c, b);
+    apply(a, c, b);
   }, []);
 
-  const persist = (next: Partial<{ mode: ThemeMode; accent: string; contrast: number; background: BackgroundState }>) => {
-    const m = next.mode ?? mode;
+  const persist = (next: Partial<{ accent: string; contrast: number; background: BackgroundState }>) => {
     const a = next.accent ?? accent;
     const c = next.contrast ?? contrast;
     const b = next.background ?? background;
-    apply(m, a, c, b);
-    try { localStorage.setItem(KEY, JSON.stringify({ mode: m, accent: a, contrast: c, background: b })); } catch {}
+    apply(a, c, b);
+    try { localStorage.setItem(KEY, JSON.stringify({ accent: a, contrast: c, background: b })); } catch {}
   };
 
-  const setMode = (m: ThemeMode) => { setModeState(m); persist({ mode: m }); };
   const setAccent = (k: string) => { setAccentState(k); persist({ accent: k }); };
   const setContrast = (n: number) => { setContrastState(n); persist({ contrast: n }); };
   const setBackground = (b: BackgroundState) => { setBackgroundState(b); persist({ background: b }); };
 
   return (
-    <ThemeContext.Provider value={{ mode, accent, contrast, background, backgroundLocked: false, setMode, setAccent, setContrast, setBackground }}>
+    <ThemeContext.Provider value={{ accent, contrast, background, setAccent, setContrast, setBackground }}>
       {children}
     </ThemeContext.Provider>
   );
