@@ -48,7 +48,11 @@ export function AppLayout() {
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
+        <Link
+          to="/home"
+          onClick={() => setOpen(false)}
+          className="flex h-16 items-center gap-2 border-b border-border/60 px-5 transition-colors hover:opacity-80"
+        >
           <div
             className="flex h-9 w-9 items-center justify-center rounded-xl"
             style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
@@ -58,7 +62,7 @@ export function AppLayout() {
           <span className="text-lg font-bold tracking-tight">
             Impo<span className="text-primary">Mail</span>
           </span>
-        </div>
+        </Link>
         <nav className="flex flex-col gap-1 p-3">
           {sidebarItems.map((item) => {
             const active = pathname === item.to;
