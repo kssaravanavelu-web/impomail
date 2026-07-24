@@ -45,7 +45,10 @@ function Settings() {
         </Link>
       </div>
 
-      <div className="mb-4 flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-5">
+      <Link
+        to="/profile"
+        className="mb-4 flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-5 transition hover:border-primary/40"
+      >
         {avatar ? (
           <img src={avatar} alt="" className="h-14 w-14 rounded-full object-cover" />
         ) : (
@@ -55,7 +58,8 @@ function Settings() {
           <div className="truncate font-semibold">{name}</div>
           <div className="truncate text-sm text-muted-foreground">{user.email}</div>
         </div>
-      </div>
+        <span className="text-muted-foreground">›</span>
+      </Link>
 
       <Section icon={Mail} title="Gmail">
         <div className="px-4 py-4">
@@ -135,10 +139,10 @@ function Settings() {
       </Section>
 
       <Section icon={Shield} title="Account">
-        <button className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40" onClick={() => toast.info("Coming soon")}>
+        <Link to="/profile" className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40">
           <span className="flex items-center gap-3"><User className="h-4 w-4 text-muted-foreground" /> Edit profile</span>
           <span className="text-muted-foreground">›</span>
-        </button>
+        </Link>
         <button className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40" onClick={() => toast.info("Coming soon")}>
           <span className="flex items-center gap-3"><Shield className="h-4 w-4 text-muted-foreground" /> Privacy & security</span>
           <span className="text-muted-foreground">›</span>

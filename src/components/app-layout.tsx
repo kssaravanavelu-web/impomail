@@ -1,12 +1,12 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home } from "lucide-react";
+import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home, User } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type SidebarItem = {
-  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings";
+  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
@@ -19,6 +19,7 @@ const sidebarItems: SidebarItem[] = [
   { to: "/drafts", label: "Drafts", icon: FileText },
   { to: "/trash", label: "Trash", icon: Trash2 },
   { to: "/archive", label: "Archive", icon: Archive },
+  { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -131,6 +132,11 @@ export function AppLayout() {
             <Button variant="ghost" size="icon" asChild className="ml-2" aria-label="Settings">
               <Link to="/settings">
                 <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" asChild aria-label="Profile">
+              <Link to="/profile">
+                <User className="h-5 w-5" />
               </Link>
             </Button>
           </div>
