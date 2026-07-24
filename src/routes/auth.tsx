@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : "",
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — ImpoMail" },
@@ -23,6 +26,8 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "";
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,14 +36,20 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/home", replace: true });
+      if (data.session) {
+        if (safeNext) window.location.assign(safeNext);
+        else navigate({ to: "/home", replace: true });
+      }
     });
-  }, [navigate]);
+  }, [navigate, safeNext]);
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
+    const redirectUri = safeNext
+      ? `${window.location.origin}${safeNext}`
+      : window.location.origin;
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: redirectUri,
     });
     if (result.error) {
       toast.error(result.error.message || "Google sign-in failed");
@@ -46,7 +57,8 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/home", replace: true });
+    if (safeNext) window.location.assign(safeNext);
+    else navigate({ to: "/home", replace: true });
   };
 
   const handleEmail = async (e: FormEvent) => {
@@ -56,12 +68,17 @@ function AuthPage() {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/home", replace: true });
+        if (safeNext) window.location.assign(safeNext);
+        else navigate({ to: "/home", replace: true });
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: safeNext
+              ? `${window.location.origin}${safeNext}`
+              : window.location.origin,
+          },
         });
         if (error) throw error;
         toast.success("Check your email to confirm your account.");
