@@ -4,27 +4,28 @@ export type ThemeMode = "light" | "dark";
 export type AccentPreset = { key: string; label: string; hue: number; chroma: number };
 
 export const ACCENTS: AccentPreset[] = [
+  { key: "champagne", label: "Champagne", hue: 85, chroma: 0.09 },
+  { key: "gold", label: "Gold", hue: 75, chroma: 0.14 },
+  { key: "platinum", label: "Platinum", hue: 250, chroma: 0.02 },
+  { key: "obsidian", label: "Obsidian", hue: 260, chroma: 0.04 },
+  { key: "burgundy", label: "Burgundy", hue: 15, chroma: 0.12 },
+  { key: "british-racing", label: "Racing Green", hue: 155, chroma: 0.09 },
+  { key: "midnight", label: "Midnight", hue: 240, chroma: 0.08 },
   { key: "indigo", label: "Indigo", hue: 268, chroma: 0.19 },
   { key: "blue", label: "Blue", hue: 258, chroma: 0.19 },
-  { key: "cyan", label: "Cyan", hue: 220, chroma: 0.15 },
-  { key: "emerald", label: "Emerald", hue: 155, chroma: 0.17 },
-  { key: "amber", label: "Amber", hue: 75, chroma: 0.17 },
-  { key: "rose", label: "Rose", hue: 15, chroma: 0.2 },
-  { key: "pink", label: "Pink", hue: 350, chroma: 0.2 },
-  { key: "violet", label: "Violet", hue: 300, chroma: 0.2 },
 ];
 
 export type BackgroundPreset = { key: string; label: string; css: string; kind: "gradient" | "pattern" | "photo" };
 
 export const BACKGROUNDS: BackgroundPreset[] = [
-  { key: "aurora", label: "Aurora", kind: "gradient", css: "radial-gradient(1200px 800px at 10% 10%, #6366f1 0%, transparent 60%), radial-gradient(1000px 700px at 90% 20%, #ec4899 0%, transparent 55%), radial-gradient(900px 900px at 50% 100%, #06b6d4 0%, transparent 60%), #0b0f1a" },
-  { key: "sunset", label: "Sunset", kind: "gradient", css: "linear-gradient(135deg, #ff6a3d 0%, #ff2e63 45%, #7a1cac 100%)" },
-  { key: "ocean", label: "Ocean", kind: "gradient", css: "linear-gradient(160deg, #0f172a 0%, #1e3a8a 50%, #0ea5e9 100%)" },
-  { key: "forest", label: "Forest", kind: "gradient", css: "linear-gradient(160deg, #052e2b 0%, #065f46 50%, #10b981 100%)" },
-  { key: "mesh", label: "Mesh", kind: "gradient", css: "radial-gradient(600px 400px at 20% 30%, #a78bfa 0%, transparent 60%), radial-gradient(700px 500px at 80% 70%, #f472b6 0%, transparent 60%), radial-gradient(500px 500px at 60% 20%, #38bdf8 0%, transparent 60%), #111827" },
-  { key: "graphite", label: "Graphite", kind: "pattern", css: "repeating-linear-gradient(45deg, #1f2937 0 2px, #111827 2px 12px)" },
-  { key: "paper", label: "Paper", kind: "pattern", css: "radial-gradient(#e5e7eb 1px, #fafaf9 1px) 0 0/16px 16px" },
-  { key: "mint", label: "Mint", kind: "gradient", css: "linear-gradient(135deg, #a7f3d0 0%, #99f6e4 50%, #bae6fd 100%)" },
+  { key: "obsidian", label: "Obsidian", kind: "gradient", css: "radial-gradient(1000px 700px at 15% 10%, #1a1815 0%, transparent 60%), radial-gradient(900px 700px at 85% 90%, #0f0d0a 0%, transparent 55%), #050505" },
+  { key: "champagne", label: "Champagne Mist", kind: "gradient", css: "radial-gradient(1200px 800px at 20% 20%, rgba(201,168,76,0.18) 0%, transparent 55%), radial-gradient(900px 700px at 80% 80%, rgba(240,215,140,0.10) 0%, transparent 60%), #0a0908" },
+  { key: "midnight-leather", label: "Midnight Leather", kind: "gradient", css: "linear-gradient(160deg, #0b0b10 0%, #14131a 55%, #1c1a22 100%)" },
+  { key: "racing-green", label: "Racing Green", kind: "gradient", css: "linear-gradient(160deg, #050b08 0%, #0d1f18 55%, #133a2a 100%)" },
+  { key: "burgundy", label: "Burgundy", kind: "gradient", css: "linear-gradient(160deg, #0a0505 0%, #1e0a0a 55%, #3a1418 100%)" },
+  { key: "pinstripe", label: "Pinstripe", kind: "pattern", css: "repeating-linear-gradient(90deg, #0a0908 0 22px, #0d0c0a 22px 23px), #0a0908" },
+  { key: "starlight", label: "Starlight", kind: "gradient", css: "radial-gradient(2px 2px at 20% 30%, rgba(240,215,140,0.6), transparent 60%), radial-gradient(1px 1px at 70% 50%, rgba(240,215,140,0.5), transparent 60%), radial-gradient(1.5px 1.5px at 40% 80%, rgba(240,215,140,0.55), transparent 60%), radial-gradient(1px 1px at 85% 20%, rgba(240,215,140,0.5), transparent 60%), #050505" },
+  { key: "ivory", label: "Ivory", kind: "gradient", css: "linear-gradient(135deg, #f5efe0 0%, #ece3cc 55%, #d8caa4 100%)" },
 ];
 
 export type BackgroundState =
@@ -73,13 +74,13 @@ function apply(mode: ThemeMode, accent: string, contrast: number, bg: Background
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>("dark");
-  const [accent, setAccentState] = useState<string>("blue");
+  const [accent, setAccentState] = useState<string>("champagne");
   const [contrast, setContrastState] = useState<number>(50);
   const [background, setBackgroundState] = useState<BackgroundState>({ kind: "none" });
 
   useEffect(() => {
     let m: ThemeMode = "dark";
-    let a = "blue";
+    let a = "champagne";
     let c = 50;
     let b: BackgroundState = { kind: "none" };
     try {
