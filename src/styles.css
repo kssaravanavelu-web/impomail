@@ -147,6 +147,17 @@
   html[data-bg-active="true"] body {
     background-color: transparent;
   }
+  /* Let the background image dominate: make major surfaces translucent so the
+     chosen aesthetic bg shows through cards, sidebar and header. */
+  html[data-bg-active="true"] {
+    --card: color-mix(in oklab, var(--background) 55%, transparent);
+    --popover: color-mix(in oklab, var(--background) 75%, transparent);
+    --secondary: color-mix(in oklab, var(--background) 45%, transparent);
+    --muted: color-mix(in oklab, var(--background) 45%, transparent);
+    --accent: color-mix(in oklab, var(--background) 40%, transparent);
+    --sidebar: color-mix(in oklab, var(--background) 55%, transparent);
+    --input: color-mix(in oklab, var(--background) 60%, transparent);
+  }
   html[data-bg-active="true"] body::before {
     content: "";
     position: fixed;
