@@ -140,4 +140,30 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  /* Aesthetic background layer: painted behind the app when a preset or
+     custom image is chosen. When active, the base background is transparent
+     so the image shows through; a subtle overlay keeps text legible. */
+  html[data-bg-active="true"] body {
+    background-color: transparent;
+  }
+  html[data-bg-active="true"] body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: var(--app-bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+  html[data-bg-active="true"] body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55));
+    pointer-events: none;
+  }
 }

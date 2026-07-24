@@ -1,18 +1,19 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu } from "lucide-react";
+import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type SidebarItem = {
-  to: "/compose" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive";
+  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
 };
 const sidebarItems: SidebarItem[] = [
   { to: "/compose", label: "Compose", icon: PenSquare, accent: true },
+  { to: "/home", label: "Home", icon: Home },
   { to: "/inbox", label: "Inbox", icon: Inbox },
   { to: "/sent", label: "Sent", icon: Send },
   { to: "/drafts", label: "Drafts", icon: FileText },
@@ -21,10 +22,10 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const bottomItems = [
+  { to: "/home", label: "Home", icon: Home },
   { to: "/search", label: "Search", icon: Search },
   { to: "/compose", label: "Compose", icon: PenSquare },
   { to: "/ai-search", label: "AI", icon: Sparkles },
-  { to: "/archive", label: "Archive", icon: Archive },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
