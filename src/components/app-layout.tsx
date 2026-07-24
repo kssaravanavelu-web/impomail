@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,32 @@ export function AppLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [initial, setInitial] = useState<string>("?");
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || ignore) return;
+      const fallback = ((user.user_metadata?.full_name as string | undefined) ?? user.email ?? "?").charAt(0).toUpperCase();
+      setInitial(fallback);
+      const metaAvatar = (user.user_metadata?.avatar_url as string | undefined) ?? null;
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", user.id).maybeSingle();
+      if (ignore) return;
+      const name = data?.full_name ?? (user.user_metadata?.full_name as string | undefined) ?? user.email ?? "?";
+      setInitial(name.charAt(0).toUpperCase());
+      setAvatarUrl(data?.avatar_url ?? metaAvatar ?? null);
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "USER_UPDATED") load();
+    });
+    return () => {
+      ignore = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [pathname]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -134,11 +160,22 @@ export function AppLayout() {
                 <Settings className="h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild aria-label="Profile">
-              <Link to="/profile">
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
+            <Link
+              to="/profile"
+              aria-label="Profile"
+              className="ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-primary/40 bg-card text-xs font-semibold transition hover:border-primary"
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  onError={() => setAvatarUrl(null)}
+                />
+              ) : (
+                <span>{initial}</span>
+              )}
+            </Link>
           </div>
         </header>
 
