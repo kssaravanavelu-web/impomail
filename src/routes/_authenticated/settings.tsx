@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
-import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Upload, ImageIcon, Ban } from "lucide-react";
+import { useEffect, useState } from "react";
+import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/message-list";
 import { toast } from "sonner";
-import { BACKGROUNDS, useTheme } from "@/lib/theme";
+import { ACCENTS, useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — ImpoMail" }, { name: "description", content: "Manage your account and preferences." }] }),
@@ -19,20 +19,9 @@ function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [aiCategorize, setAiCategorize] = useState(true);
   const [otpVault, setOtpVault] = useState(true);
-  const { mode, setMode, contrast, setContrast, background, setBackground } = useTheme();
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const onUploadBg = (file: File) => {
-    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result || "");
-      if (!dataUrl) return;
-      setBackground({ kind: "custom", dataUrl });
-      toast.success("Custom background applied");
-    };
-    reader.readAsDataURL(file);
-  };
+  const { mode, setMode, accent, setAccent, contrast, setContrast, background, setBackground } = useTheme();
+  // Ensure no aesthetic background is applied since we removed that feature
+  useEffect(() => { if (background.kind !== "none") setBackground({ kind: "none" }); }, [background.kind, setBackground]);
 
   const connectGmail = () => {
     toast.info("Approve the Gmail connector prompt from Lovable to link your inbox.", { duration: 6000 });
@@ -108,6 +97,25 @@ function Settings() {
           </div>
         </div>
         <div className="px-4 py-3">
+          <div className="mb-2 text-sm font-medium">Accent color</div>
+          <div className="flex flex-wrap gap-2">
+            {ACCENTS.map((a) => {
+              const active = a.key === accent;
+              return (
+                <button
+                  key={a.key}
+                  onClick={() => setAccent(a.key)}
+                  title={a.label}
+                  className={`relative h-9 w-9 rounded-full border-2 transition ${active ? "border-foreground scale-110" : "border-border/60"}`}
+                  style={{ background: `oklch(0.72 ${a.chroma} ${a.hue})` }}
+                >
+                  {active && <Check className="absolute inset-0 m-auto h-4 w-4 text-primary-foreground" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="px-4 py-3">
           <div className="mb-2 flex items-center justify-between">
             <div className="text-sm font-medium">Contrast</div>
             <div className="text-xs text-muted-foreground">{contrast}</div>
@@ -123,60 +131,6 @@ function Settings() {
           <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
             <span>Low</span><span>Default</span><span>High</span>
           </div>
-        </div>
-      </Section>
-
-      <Section icon={ImageIcon} title="Aesthetic background">
-        <div className="px-4 py-3">
-          <p className="mb-3 text-xs text-muted-foreground">
-            Pick a preset or upload your own image.
-          </p>
-          <div className="mb-3 grid grid-cols-4 gap-2">
-            <button
-              onClick={() => setBackground({ kind: "none" })}
-              title="None"
-              className={`group relative flex aspect-square items-center justify-center rounded-lg border-2 transition ${background.kind === "none" ? "border-primary" : "border-border/60 hover:border-primary/40"}`}
-            >
-              <Ban className="h-4 w-4 text-muted-foreground" />
-            </button>
-            {BACKGROUNDS.map((b) => {
-              const active = background.kind === "preset" && background.presetKey === b.key;
-              return (
-                <button
-                  key={b.key}
-                  onClick={() => setBackground({ kind: "preset", presetKey: b.key })}
-                  title={b.label}
-                  className={`relative aspect-square overflow-hidden rounded-lg border-2 transition ${active ? "border-primary" : "border-border/60 hover:border-primary/40"}`}
-                  style={{ background: b.css, backgroundSize: "cover", backgroundPosition: "center" }}
-                >
-                  {active && <Check className="absolute right-1 top-1 h-3.5 w-3.5 rounded-full bg-primary p-0.5 text-primary-foreground" />}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => fileRef.current?.click()}
-              title="Upload"
-              className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-[10px] transition ${background.kind === "custom" ? "border-primary text-primary" : "border-border/60 text-muted-foreground hover:border-primary/40"}`}
-            >
-              <Upload className="h-4 w-4" /> Upload
-            </button>
-          </div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) onUploadBg(f);
-              e.target.value = "";
-            }}
-          />
-          {background.kind !== "none" && (
-            <Button variant="outline" size="sm" onClick={() => setBackground({ kind: "none" })} className="w-full gap-2">
-              <Ban className="h-3.5 w-3.5" /> Remove background
-            </Button>
-          )}
         </div>
       </Section>
 
