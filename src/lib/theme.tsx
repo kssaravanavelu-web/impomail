@@ -51,9 +51,8 @@ function apply(mode: ThemeMode, accent: string, contrast: number, bg: Background
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   const bgActive = bg.kind !== "none";
-  // When a custom background is active, force dark-neutral tokens so text stays readable
-  // and lock the mode toggle. Otherwise honor the user's mode choice.
-  const effectiveMode: ThemeMode = bgActive ? "dark" : mode;
+  // Honor the user's mode choice even when a background is active.
+  const effectiveMode: ThemeMode = mode;
   root.classList.remove("light", "dark");
   root.classList.add(effectiveMode);
   const preset = ACCENTS.find((a) => a.key === accent) ?? ACCENTS[0];
@@ -114,7 +113,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setBackground = (b: BackgroundState) => { setBackgroundState(b); persist({ background: b }); };
 
   return (
-    <ThemeContext.Provider value={{ mode, accent, contrast, background, backgroundLocked: background.kind !== "none", setMode, setAccent, setContrast, setBackground }}>
+    <ThemeContext.Provider value={{ mode, accent, contrast, background, backgroundLocked: false, setMode, setAccent, setContrast, setBackground }}>
       {children}
     </ThemeContext.Provider>
   );
