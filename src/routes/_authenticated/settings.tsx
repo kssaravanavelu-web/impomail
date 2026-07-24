@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/message-list";
 import { toast } from "sonner";
-import { ACCENTS, BACKGROUNDS, useTheme } from "@/lib/theme";
+import { BACKGROUNDS, useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — ImpoMail" }, { name: "description", content: "Manage your account and preferences." }] }),
@@ -19,7 +19,7 @@ function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [aiCategorize, setAiCategorize] = useState(true);
   const [otpVault, setOtpVault] = useState(true);
-  const { mode, setMode, accent, setAccent, contrast, setContrast, background, setBackground } = useTheme();
+  const { mode, setMode, contrast, setContrast, background, setBackground } = useTheme();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const onUploadBg = (file: File) => {
@@ -105,26 +105,6 @@ function Settings() {
             >
               <Moon className="h-4 w-4" /> Dark
             </button>
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">Surfaces are tinted with your accent color.</p>
-        </div>
-        <div className="px-4 py-3">
-          <div className="mb-2 text-sm font-medium">Accent color</div>
-          <div className="flex flex-wrap gap-2">
-            {ACCENTS.map((a) => {
-              const active = a.key === accent;
-              return (
-                <button
-                  key={a.key}
-                  onClick={() => setAccent(a.key)}
-                  title={a.label}
-                  className={`relative h-9 w-9 rounded-full border-2 transition ${active ? "border-foreground scale-110" : "border-border/60"}`}
-                  style={{ background: `oklch(0.62 ${a.chroma} ${a.hue})` }}
-                >
-                  {active && <Check className="absolute inset-0 m-auto h-4 w-4 text-white" />}
-                </button>
-              );
-            })}
           </div>
         </div>
         <div className="px-4 py-3">
