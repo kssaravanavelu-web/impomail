@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
+export type ThemeMode = "light" | "dark";
 export type AccentPreset = { key: string; label: string; hue: number; chroma: number };
 
 export const ACCENTS: AccentPreset[] = [
@@ -32,9 +33,11 @@ export type BackgroundState =
   | { kind: "custom"; dataUrl: string };
 
 type ThemeState = {
+  mode: ThemeMode;
   accent: string; // AccentPreset.key
   contrast: number; // 0..100 (50 = default)
   background: BackgroundState;
+  setMode: (m: ThemeMode) => void;
   setAccent: (k: string) => void;
   setContrast: (n: number) => void;
   setBackground: (b: BackgroundState) => void;
@@ -43,12 +46,12 @@ type ThemeState = {
 const ThemeContext = createContext<ThemeState | null>(null);
 const KEY = "impomail.theme.v1";
 
-function apply(accent: string, contrast: number, bg: BackgroundState) {
+function apply(mode: ThemeMode, accent: string, contrast: number, bg: BackgroundState) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   const bgActive = bg.kind !== "none";
   root.classList.remove("light", "dark");
-  root.classList.add("dark");
+  root.classList.add(mode);
   const preset = ACCENTS.find((a) => a.key === accent) ?? ACCENTS[0];
   root.style.setProperty("--accent-hue", String(preset.hue));
   root.style.setProperty("--accent-chroma", String(preset.chroma));
@@ -69,11 +72,13 @@ function apply(accent: string, contrast: number, bg: BackgroundState) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [mode, setModeState] = useState<ThemeMode>("dark");
   const [accent, setAccentState] = useState<string>("blue");
   const [contrast, setContrastState] = useState<number>(50);
   const [background, setBackgroundState] = useState<BackgroundState>({ kind: "none" });
 
   useEffect(() => {
+    let m: ThemeMode = "dark";
     let a = "blue";
     let c = 50;
     let b: BackgroundState = { kind: "none" };
@@ -81,28 +86,31 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const s = JSON.parse(raw);
+        if (s.mode === "light" || s.mode === "dark") { m = s.mode; setModeState(s.mode); }
         if (s.accent) { a = s.accent; setAccentState(s.accent); }
         if (typeof s.contrast === "number") { c = s.contrast; setContrastState(s.contrast); }
         if (s.background && typeof s.background === "object") { b = s.background; setBackgroundState(s.background); }
       }
     } catch {}
-    apply(a, c, b);
+    apply(m, a, c, b);
   }, []);
 
-  const persist = (next: Partial<{ accent: string; contrast: number; background: BackgroundState }>) => {
+  const persist = (next: Partial<{ mode: ThemeMode; accent: string; contrast: number; background: BackgroundState }>) => {
+    const m = next.mode ?? mode;
     const a = next.accent ?? accent;
     const c = next.contrast ?? contrast;
     const b = next.background ?? background;
-    apply(a, c, b);
-    try { localStorage.setItem(KEY, JSON.stringify({ accent: a, contrast: c, background: b })); } catch {}
+    apply(m, a, c, b);
+    try { localStorage.setItem(KEY, JSON.stringify({ mode: m, accent: a, contrast: c, background: b })); } catch {}
   };
 
+  const setMode = (m: ThemeMode) => { setModeState(m); persist({ mode: m }); };
   const setAccent = (k: string) => { setAccentState(k); persist({ accent: k }); };
   const setContrast = (n: number) => { setContrastState(n); persist({ contrast: n }); };
   const setBackground = (b: BackgroundState) => { setBackgroundState(b); persist({ background: b }); };
 
   return (
-    <ThemeContext.Provider value={{ accent, contrast, background, setAccent, setContrast, setBackground }}>
+    <ThemeContext.Provider value={{ mode, accent, contrast, background, setMode, setAccent, setContrast, setBackground }}>
       {children}
     </ThemeContext.Provider>
   );

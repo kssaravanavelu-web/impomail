@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { User, Bell, Shield, Palette, Sparkles, LogOut, Check, Home, Mail, Upload, ImageIcon, Ban } from "lucide-react";
+import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Upload, ImageIcon, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -19,7 +19,7 @@ function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [aiCategorize, setAiCategorize] = useState(true);
   const [otpVault, setOtpVault] = useState(true);
-  const { accent, setAccent, contrast, setContrast, background, setBackground } = useTheme();
+  const { mode, setMode, accent, setAccent, contrast, setContrast, background, setBackground } = useTheme();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const onUploadBg = (file: File) => {
@@ -90,6 +90,24 @@ function Settings() {
       </Section>
 
       <Section icon={Palette} title="Appearance">
+        <div className="px-4 py-3">
+          <div className="mb-2 text-sm font-medium">Theme</div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setMode("light")}
+              className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition ${mode === "light" ? "border-primary bg-primary/10 text-foreground" : "border-border/60 text-muted-foreground hover:bg-accent/40"}`}
+            >
+              <Sun className="h-4 w-4" /> Light
+            </button>
+            <button
+              onClick={() => setMode("dark")}
+              className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition ${mode === "dark" ? "border-primary bg-primary/10 text-foreground" : "border-border/60 text-muted-foreground hover:bg-accent/40"}`}
+            >
+              <Moon className="h-4 w-4" /> Dark
+            </button>
+          </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">Surfaces are tinted with your accent color.</p>
+        </div>
         <div className="px-4 py-3">
           <div className="mb-2 text-sm font-medium">Accent color</div>
           <div className="flex flex-wrap gap-2">
