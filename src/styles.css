@@ -139,6 +139,38 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+    letter-spacing: 0.005em;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: "Cormorant Garamond", "Times New Roman", serif;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+  }
+  h1 { letter-spacing: -0.01em; }
+
+  /* Subtle hairline gold divider used across cards / headers */
+  .rr-hairline {
+    background: linear-gradient(90deg, transparent, oklch(0.78 var(--accent-chroma) var(--accent-hue) / 0.55), transparent);
+    height: 1px;
+    width: 100%;
+  }
+
+  /* Rolls-Royce style body ambience — faint radial vignette behind everything */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    background:
+      radial-gradient(1200px 800px at 12% 8%, oklch(0.78 var(--accent-chroma) var(--accent-hue) / 0.06), transparent 60%),
+      radial-gradient(900px 700px at 88% 92%, oklch(0.78 var(--accent-chroma) var(--accent-hue) / 0.05), transparent 60%);
+    pointer-events: none;
+  }
+  html[data-bg-active="true"] body::before {
+    display: none;
   }
 
   /* Aesthetic background layer: painted behind the app when a preset or
