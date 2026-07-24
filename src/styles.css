@@ -147,6 +147,9 @@
   html[data-bg-active="true"] body {
     background-color: transparent;
   }
+  html[data-bg-active="true"] .app-shell {
+    background-color: transparent;
+  }
   /* Let the background image dominate: make major surfaces translucent so the
      chosen aesthetic bg shows through cards, sidebar and header. */
   html[data-bg-active="true"] {

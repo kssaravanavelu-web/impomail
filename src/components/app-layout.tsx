@@ -41,7 +41,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground [html[data-bg-active='true']_&]:bg-transparent">
+    <div className="app-shell min-h-screen bg-background text-foreground">
       {/* Sidebar (desktop) */}
       <aside
         className={cn(
