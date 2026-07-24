@@ -121,12 +121,19 @@ export function AppLayout() {
               <Search className="h-4 w-4" /> Search mail…
             </Link>
           </div>
-          <Link
-            to="/ai-search"
-            className="ml-2 hidden items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary sm:inline-flex"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> AI Search
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              to="/ai-search"
+              className="ml-2 hidden items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary sm:inline-flex"
+            >
+              <Sparkles className="h-3.5 w-3.5" /> AI Search
+            </Link>
+            <Button variant="ghost" size="icon" asChild className="ml-2" aria-label="Settings">
+              <Link to="/settings">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </header>
 
         <main className="pb-24 lg:pb-8">
