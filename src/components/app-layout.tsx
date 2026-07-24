@@ -72,10 +72,11 @@ export function AppLayout() {
       {/* Sidebar (desktop) */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 border-r border-border/60 bg-card/50 backdrop-blur transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-64 border-r border-primary/10 bg-card/60 backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
+        <span className="ambient-glow -top-16 -left-10 h-40 w-40" aria-hidden />
         <Link
           to="/home"
           onClick={() => setOpen(false)}
@@ -163,7 +164,7 @@ export function AppLayout() {
             <Link
               to="/profile"
               aria-label="Profile"
-              className="ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-primary/40 bg-card text-xs font-semibold transition hover:border-primary"
+              className="silk-hover ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-primary/40 bg-card text-xs font-semibold shadow-[0_0_0_1px_oklch(0.85_var(--accent-chroma)_var(--accent-hue)/0.08),0_8px_24px_-12px_oklch(0.85_var(--accent-chroma)_var(--accent-hue)/0.5)] hover:border-primary"
             >
               {avatarUrl ? (
                 <img
