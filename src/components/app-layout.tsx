@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type SidebarItem = {
-  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive";
+  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
@@ -19,6 +19,7 @@ const sidebarItems: SidebarItem[] = [
   { to: "/drafts", label: "Drafts", icon: FileText },
   { to: "/trash", label: "Trash", icon: Trash2 },
   { to: "/archive", label: "Archive", icon: Archive },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 const bottomItems = [
