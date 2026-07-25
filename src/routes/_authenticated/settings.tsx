@@ -159,7 +159,7 @@ function Settings() {
         <LogOut className="h-4 w-4" /> Sign out
       </Button>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">ImpoMail v1.0 · Made with ♥ by Vishnuvardhan &amp; Co.</p>
+      <p className="mt-6 text-center text-xs text-muted-foreground">ImpoMail v1.0 · Founder: Saravanavel · Support Founder: Vishnuvardhan</p>
     </div>
   );
 }
