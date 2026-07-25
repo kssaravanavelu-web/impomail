@@ -18,7 +18,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/message-list";
-import { getGmailConnectionDetails, disconnectGmail } from "@/lib/gmail.functions";
+import { getGmailConnectionDetails, disconnectGmail, GOOGLE_SCOPES } from "@/lib/gmail.functions";
 
 const SCOPE_LABELS: Record<string, string> = {
   "https://www.googleapis.com/auth/userinfo.email": "Read your email address",
