@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send, Paperclip, X, FileIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,19 @@ function Compose() {
   const [sending, setSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const send = useServerFn(sendGmailMessage);
+
+  // Prefill from Impo assistant ([[compose:...]])
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("impo-compose-prefill");
+      if (!raw) return;
+      sessionStorage.removeItem("impo-compose-prefill");
+      const p = JSON.parse(raw) as { to?: string; subject?: string; body?: string };
+      if (p.to) setTo(p.to);
+      if (p.subject) setSubject(p.subject);
+      if (p.body) setBody(p.body);
+    } catch { /* ignore */ }
+  }, []);
 
   const MAX_TOTAL = 20 * 1024 * 1024; // 20MB
 

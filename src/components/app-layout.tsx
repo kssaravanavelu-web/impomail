@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
 import { HeaderSearch } from "@/components/header-search";
 import { ChatWidget } from "@/components/chat-widget";
+import { VoiceCommandProvider } from "@/lib/voice-command";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ export function AppLayout() {
   };
 
   return (
+    <VoiceCommandProvider>
     <div className="app-shell min-h-screen bg-background text-foreground">
       {/* Drawer (mobile) */}
       <aside
@@ -278,5 +280,6 @@ export function AppLayout() {
 
       <ChatWidget />
     </div>
+    </VoiceCommandProvider>
   );
 }
