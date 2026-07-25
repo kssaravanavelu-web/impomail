@@ -108,3 +108,37 @@ export function voiceProfile(role: string): { rate: number; pitch: number } {
   const rate = 0.95 + (((h >> 3) % 15) / 100); // 0.95 – 1.09
   return { rate, pitch };
 }
+
+export function stopSpeech() {
+  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+/** Speak text with per-role voices. Returns false when speech is unavailable. */
+export function speakText(
+  text: string,
+  voices: SpeechSynthesisVoice[],
+  onEnd?: () => void,
+): boolean {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
+  const segments = parseDialogue(text);
+  if (!segments.length) return false;
+  window.speechSynthesis.cancel();
+  segments.forEach((seg, i) => {
+    const u = new SpeechSynthesisUtterance(seg.text);
+    u.lang = seg.lang;
+    const voice = pickVoiceForRole(voices, seg.role, seg.lang);
+    if (voice) u.voice = voice;
+    const prof = voiceProfile(seg.role);
+    u.rate = prof.rate;
+    u.pitch = prof.pitch;
+    u.volume = 1;
+    if (i === segments.length - 1) {
+      u.onend = () => onEnd?.();
+      u.onerror = () => onEnd?.();
+    }
+    window.speechSynthesis.speak(u);
+  });
+  return true;
+}
