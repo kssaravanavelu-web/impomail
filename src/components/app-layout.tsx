@@ -154,12 +154,7 @@ export function AppLayout() {
             </span>
           </Link>
           <div className="flex flex-1 items-center gap-2 lg:max-w-sm lg:justify-start">
-            <Link
-              to="/search"
-              className="flex w-full max-w-md items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/50"
-            >
-              <Search className="h-4 w-4" /> Search mail…
-            </Link>
+            <HeaderSearch />
           </div>
           <div className="flex items-center gap-1">
             <Link
