@@ -3,21 +3,39 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
-import { Inbox, Sparkles, Shield, Zap, Mail, ArrowRight, Check } from "lucide-react";
+import { Inbox, Sparkles, Shield, Zap, Mail, ArrowRight, Check, Search, Lock, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ImpoMail — Only what matters" },
-      { name: "description", content: "ImpoMail is a smart Gmail companion that sorts your important mail into clear categories — OTPs, jobs, bills, payments, and more — so you only see what matters." },
-      { property: "og:title", content: "ImpoMail — Only what matters" },
-      { property: "og:description", content: "ImpoMail is a smart Gmail companion that sorts your important mail into clear categories — OTPs, jobs, bills, payments, and more." },
+      { title: "ImpoMail — Smart Gmail Companion" },
+      { name: "description", content: "ImpoMail is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
+      { property: "og:title", content: "ImpoMail — Smart Gmail Companion" },
+      { property: "og:description", content: "ImpoMail organizes your Gmail into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://impomail.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "canonical", href: "https://impomail.lovable.app/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "ImpoMail",
+          url: "https://impomail.lovable.app/",
+          description: "ImpoMail is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls.",
+          applicationCategory: "EmailApplication",
+          operatingSystem: "Web",
+          author: {
+            "@type": "Organization",
+            name: "ImpoMail",
+          },
+        }),
+      },
     ],
   }),
   component: LandingPage,
