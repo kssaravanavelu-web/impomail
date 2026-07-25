@@ -1,7 +1,7 @@
-export type Category = "business" | "jobs" | "internships" | "otp" | "recharges" | "personal" | "promotions" | "updates";
+export type Category = "payment" | "jobs" | "internships" | "otp" | "recharges" | "personal" | "promotions" | "updates";
 
 export const categoryMeta: Record<Category, { label: string; color: string; bg: string }> = {
-  business:    { label: "Business",    color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
+  payment:     { label: "Payment",     color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
   jobs:        { label: "Jobs",        color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
   internships: { label: "Internships", color: "text-violet-300",  bg: "bg-violet-500/15 border-violet-500/30" },
   otp:         { label: "OTP",         color: "text-amber-300",   bg: "bg-amber-500/15 border-amber-500/30" },
@@ -48,7 +48,7 @@ export const messages: Message[] = [
   { id: "m5", from: "Notion", fromEmail: "team@notion.so", subject: "Your Notion workspace invoice",
     preview: "Invoice #INV-8821 for July 2026 is ready.",
     body: "Your invoice for July 2026 is ready.\n\nAmount: $16.00\nPlan: Plus\n\nDownload from your billing dashboard.",
-    category: "business", folder: "inbox", time: "Mon", unread: false, starred: false },
+    category: "payment", folder: "inbox", time: "Mon", unread: false, starred: false },
   { id: "m6", from: "Amazon", fromEmail: "no-reply@amazon.in", subject: "OTP 991204 for your order",
     preview: "Please share this OTP with the delivery agent.",
     body: "Your delivery OTP is: 991204. Share only with the Amazon delivery agent.",
@@ -72,7 +72,7 @@ export const messages: Message[] = [
   { id: "m11", from: "Draft", fromEmail: "shyam@impomail.app", subject: "Proposal draft — Q3 roadmap",
     preview: "Working on the Q3 roadmap proposal…",
     body: "Working on the Q3 roadmap proposal…",
-    category: "business", folder: "drafts", time: "Today", unread: false, starred: false },
+    category: "payment", folder: "drafts", time: "Today", unread: false, starred: false },
   { id: "m12", from: "Old newsletter", fromEmail: "news@old.com", subject: "Unsubscribed",
     preview: "Moved to trash.",
     body: "This message was moved to trash.",
@@ -84,7 +84,7 @@ export const messages: Message[] = [
 ];
 
 export const metrics = [
-  { key: "business",    label: "Business",    count: 24, category: "business" as Category },
+  { key: "payment",     label: "Payment",     count: 24, category: "payment" as Category },
   { key: "jobs",        label: "Jobs",        count: 12, category: "jobs" as Category },
   { key: "internships", label: "Internships", count: 7,  category: "internships" as Category },
   { key: "otp",         label: "OTP Vault",   count: 38, category: "otp" as Category },

@@ -58,7 +58,7 @@
             "category": {
               "type": "string",
               "enum": [
-                "business",
+                "payment",
                 "jobs",
                 "internships",
                 "otp",
