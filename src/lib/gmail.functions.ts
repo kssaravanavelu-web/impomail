@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
 const CONNECTOR_ID = "google_mail";
 
-const GOOGLE_SCOPES = [
+export const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/userinfo.email",
   "https://www.googleapis.com/auth/userinfo.profile",
   "https://www.googleapis.com/auth/gmail.readonly",
@@ -104,6 +104,68 @@ export const disconnectGmail = createServerFn({ method: "POST" })
       await deleteConnectionKeyForUser(context.userId, CONNECTOR_ID);
     }
     return { ok: true };
+  });
+
+export const getGmailConnectionDetails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { getConnectionKeyForUser, getConnectionMetadataForUser } = await import(
+      "./app-user-connections.server"
+    );
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    const metadata = await getConnectionMetadataForUser(context.userId, CONNECTOR_ID);
+    if (!key) {
+      return {
+        connected: false as const,
+        scopes: GOOGLE_SCOPES,
+        verification: { status: "disconnected" as const, error: null },
+        lastSyncAt: null,
+        createdAt: null,
+        email: null,
+        messagesTotal: 0,
+      };
+    }
+    try {
+      const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+      const res = await callAsAppUser({
+        gatewayBaseUrl: GATEWAY_BASE_URL,
+        connectionAPIKey: key,
+        connectorId: CONNECTOR_ID,
+        path: "/gmail/v1/users/me/profile",
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        return {
+          connected: true as const,
+          scopes: GOOGLE_SCOPES,
+          verification: { status: "failed" as const, error: `Google API returned ${res.status}: ${body.slice(0, 200)}` },
+          lastSyncAt: metadata?.updated_at ?? null,
+          createdAt: metadata?.created_at ?? null,
+          email: null,
+          messagesTotal: 0,
+        };
+      }
+      const p = (await res.json()) as { emailAddress?: string; messagesTotal?: number };
+      return {
+        connected: true as const,
+        scopes: GOOGLE_SCOPES,
+        verification: { status: "verified" as const, error: null },
+        lastSyncAt: metadata?.updated_at ?? null,
+        createdAt: metadata?.created_at ?? null,
+        email: p.emailAddress ?? null,
+        messagesTotal: p.messagesTotal ?? 0,
+      };
+    } catch (e) {
+      return {
+        connected: true as const,
+        scopes: GOOGLE_SCOPES,
+        verification: { status: "failed" as const, error: e instanceof Error ? e.message : "Connection test failed" },
+        lastSyncAt: metadata?.updated_at ?? null,
+        createdAt: metadata?.created_at ?? null,
+        email: null,
+        messagesTotal: 0,
+      };
+    }
   });
 
 export type GmailMessageSummary = {
