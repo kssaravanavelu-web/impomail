@@ -30,6 +30,18 @@ export async function getConnectionKeyForUser(userId: string, connectorId: strin
   return data ? decryptConnectionKey(data.connection_key_ciphertext) : null;
 }
 
+export async function getConnectionMetadataForUser(userId: string, connectorId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("app_user_connections")
+    .select("created_at,updated_at")
+    .eq("user_id", userId)
+    .eq("connector_id", connectorId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function deleteConnectionKeyForUser(userId: string, connectorId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { error } = await supabaseAdmin
