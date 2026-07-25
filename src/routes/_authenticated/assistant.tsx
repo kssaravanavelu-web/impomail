@@ -119,6 +119,31 @@ function Assistant() {
     });
   };
 
+  const runActions = useCallback(
+    (actions: SiteAction[]) => {
+      // Impo may only drive ImpoMail itself — parseSiteActions whitelists
+      // in-app routes, so anything else is dropped before it reaches here.
+      for (const a of actions) {
+        if (a.type === "go") {
+          navigate({ to: a.path });
+          toast.info(`Opening ${a.path}`);
+        } else if (a.type === "search") {
+          window.dispatchEvent(new CustomEvent("impo:search", { detail: a.query }));
+          toast.info(`Searching “${a.query}”`);
+        } else if (a.type === "compose") {
+          try {
+            sessionStorage.setItem(
+              "impo-compose-prefill",
+              JSON.stringify({ to: a.to ?? "", subject: a.subject ?? "", body: a.body ?? "" }),
+            );
+          } catch { /* ignore */ }
+          navigate({ to: "/compose" });
+        }
+      }
+    },
+    [navigate],
+  );
+
   const mutation = useMutation({
     mutationFn: async (content: string) => sendFn({ data: { content } }),
     onMutate: (content) => {
