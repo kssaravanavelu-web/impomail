@@ -21,6 +21,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedDraftsRouteImport } from './routes/_authenticated/drafts'
+import { Route as AuthenticatedConnectGmailRouteImport } from './routes/_authenticated/connect-gmail'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
 import { Route as AuthenticatedAiSearchRouteImport } from './routes/_authenticated/ai-search'
@@ -90,6 +91,12 @@ const AuthenticatedDraftsRoute = AuthenticatedDraftsRouteImport.update({
   path: '/drafts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConnectGmailRoute =
+  AuthenticatedConnectGmailRouteImport.update({
+    id: '/connect-gmail',
+    path: '/connect-gmail',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   id: '/compose',
   path: '/compose',
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/ai-search': typeof AuthenticatedAiSearchRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/compose': typeof AuthenticatedComposeRoute
+  '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
@@ -171,6 +179,7 @@ export interface FileRoutesByTo {
   '/ai-search': typeof AuthenticatedAiSearchRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/compose': typeof AuthenticatedComposeRoute
+  '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
@@ -195,6 +204,7 @@ export interface FileRoutesById {
   '/_authenticated/ai-search': typeof AuthenticatedAiSearchRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
+  '/_authenticated/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/_authenticated/drafts': typeof AuthenticatedDraftsRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/ai-search'
     | '/archive'
     | '/compose'
+    | '/connect-gmail'
     | '/drafts'
     | '/home'
     | '/inbox'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/ai-search'
     | '/archive'
     | '/compose'
+    | '/connect-gmail'
     | '/drafts'
     | '/home'
     | '/inbox'
@@ -264,6 +276,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ai-search'
     | '/_authenticated/archive'
     | '/_authenticated/compose'
+    | '/_authenticated/connect-gmail'
     | '/_authenticated/drafts'
     | '/_authenticated/home'
     | '/_authenticated/inbox'
@@ -375,6 +388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDraftsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/connect-gmail': {
+      id: '/_authenticated/connect-gmail'
+      path: '/connect-gmail'
+      fullPath: '/connect-gmail'
+      preLoaderRoute: typeof AuthenticatedConnectGmailRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/compose': {
       id: '/_authenticated/compose'
       path: '/compose'
@@ -445,6 +465,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiSearchRoute: typeof AuthenticatedAiSearchRoute
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
+  AuthenticatedConnectGmailRoute: typeof AuthenticatedConnectGmailRoute
   AuthenticatedDraftsRoute: typeof AuthenticatedDraftsRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
@@ -461,6 +482,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiSearchRoute: AuthenticatedAiSearchRoute,
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
+  AuthenticatedConnectGmailRoute: AuthenticatedConnectGmailRoute,
   AuthenticatedDraftsRoute: AuthenticatedDraftsRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
