@@ -5,6 +5,7 @@ import { messages } from "@/lib/mock-data";
 import { MessageList, PageHeader } from "@/components/message-list";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { MicButton } from "@/components/mic-button";
 
 const suggestions = [
   "Show me OTP codes from today",
@@ -47,6 +48,7 @@ function AISearch() {
           placeholder="e.g. Any OTPs from Google today?"
           className="h-11 border-0 bg-transparent focus-visible:ring-0"
         />
+        <MicButton onTranscript={(t) => setQ(t)} onFinal={() => setRan(true)} title="Speak your question" />
         <Button size="icon" onClick={() => setRan(true)} style={{ background: "var(--gradient-primary)" }}>
           <Send className="h-4 w-4" />
         </Button>

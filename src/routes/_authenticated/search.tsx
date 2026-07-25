@@ -4,6 +4,7 @@ import { Search as SearchIcon } from "lucide-react";
 import { messages, categoryMeta, type Category } from "@/lib/mock-data";
 import { MessageList, PageHeader } from "@/components/message-list";
 import { Input } from "@/components/ui/input";
+import { MicButton } from "@/components/mic-button";
 
 const categories = Object.keys(categoryMeta) as Category[];
 
@@ -30,7 +31,10 @@ function SearchPage() {
       <PageHeader title="Search" subtitle="Find messages, senders, and subjects" />
       <div className="relative mb-4">
         <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search mail…" className="h-11 pl-10" />
+        <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search mail or tap the mic…" className="h-11 pl-10 pr-12" />
+        <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+          <MicButton onTranscript={(t) => setQ(t)} title="Speak to search" />
+        </div>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">
         <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>All</FilterChip>
