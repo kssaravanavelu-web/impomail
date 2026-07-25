@@ -88,7 +88,7 @@ function Assistant() {
     }
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US";
+    u.lang = detectLang(text);
     u.rate = 1;
     u.pitch = 1;
     u.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
@@ -157,7 +157,7 @@ function Assistant() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">Impo</h1>
-            <p className="text-xs text-muted-foreground">Your ImpoMail concierge · English</p>
+            <p className="text-xs text-muted-foreground">Your ImpoMail concierge · Speaks any language</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
