@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listChatHistory, sendChatMessage } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
-import { useVoiceMode } from "@/lib/voice-command";
+import { useVoiceCommand, useVoiceMode } from "@/lib/voice-command";
 import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
 import { speakText, stopSpeech } from "@/lib/multi-voice";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ export function ChatWidget() {
   const navigate = useNavigate();
   const history = useServerFn(listChatHistory);
   const send = useServerFn(sendChatMessage);
+  const { conversing } = useVoiceCommand();
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -112,6 +113,7 @@ export function ChatWidget() {
       setOpen(true);
       setAutoSpeak(true);
       setInput(rest);
+      toast.info("Conversation mode on — just speak. Say “end conversation” to stop.");
     },
     onDictate: (t) => setInput(t),
     onFinal: (t) => {
@@ -121,6 +123,13 @@ export function ChatWidget() {
       setOpen(true);
       setAutoSpeak(true);
       mutateRef.current.mutate(text);
+    },
+    onEndConversation: () => {
+      setInput("");
+      stopSpeech();
+      setSpeaking(false);
+      setAutoSpeak(false);
+      toast.info("Conversation ended. Say “hello Impo” to start again.");
     },
   });
 
@@ -135,7 +144,9 @@ export function ChatWidget() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold leading-tight">Impo</p>
-              <p className="truncate text-[11px] text-muted-foreground">Your ImpoMail concierge</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {conversing ? "Listening — say “end conversation” to stop" : "Your ImpoMail concierge"}
+              </p>
             </div>
             <Link to="/assistant" aria-label="Open full assistant" className="rounded-full p-1.5 text-muted-foreground hover:text-foreground">
               <Maximize2 className="h-4 w-4" />
