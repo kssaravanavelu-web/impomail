@@ -7,7 +7,7 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -99,12 +99,7 @@ function AuthPage() {
       />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <img
-            src={logoAsset.url}
-            alt="ImpoMail"
-            className="h-14 w-14 rounded-2xl object-cover"
-            style={{ boxShadow: "var(--shadow-glow)" }}
-          />
+          <BrandLogo className="h-14 w-14 rounded-2xl" />
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Welcome to Impo<span className="text-primary">Mail</span>
