@@ -88,12 +88,12 @@ export function AppLayout() {
           onClick={() => setOpen(false)}
           className="flex h-16 items-center gap-2 border-b border-border/60 px-5 transition-colors hover:opacity-80"
         >
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            <Mail className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="ImpoMail"
+            className="h-9 w-9 rounded-xl object-cover"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          />
           <span className="text-lg font-bold tracking-tight">
             Impo<span className="text-primary">Mail</span>
           </span>
