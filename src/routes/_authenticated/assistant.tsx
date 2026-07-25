@@ -1,6 +1,6 @@
-import { stripSiteActions } from "@/lib/site-commands";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Bot, Loader2, Send, Sparkles, Trash2, Volume2, VolumeX, Square } from "lucide-react";
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
 import { MusicPlayer } from "@/components/music-player";
-import { parseDialogue, pickVoiceForRole, voiceProfile } from "@/lib/multi-voice";
+import { parseDialogue, pickVoiceForRole, voiceProfile, SOFT_VOLUME } from "@/lib/multi-voice";
 
 export const Route = createFileRoute("/_authenticated/assistant")({
   head: () => ({
@@ -31,6 +31,7 @@ type ChatMsg = { id: string; role: "user" | "assistant"; content: string; create
 
 function Assistant() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const listFn = useServerFn(listChatHistory);
   const sendFn = useServerFn(sendChatMessage);
   const clearFn = useServerFn(clearChatHistory);
@@ -110,7 +111,7 @@ function Assistant() {
       const prof = voiceProfile(seg.role);
       u.rate = prof.rate;
       u.pitch = prof.pitch;
-      u.volume = 1;
+      u.volume = SOFT_VOLUME;
       if (i === segments.length - 1) {
         u.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
         u.onerror = () => setSpeakingId((cur) => (cur === id ? null : cur));
@@ -119,6 +120,31 @@ function Assistant() {
     });
   };
 
+  const runActions = useCallback(
+    (actions: SiteAction[]) => {
+      // Impo may only drive ImpoMail itself — parseSiteActions whitelists
+      // in-app routes, so anything else is dropped before it reaches here.
+      for (const a of actions) {
+        if (a.type === "go") {
+          navigate({ to: a.path });
+          toast.info(`Opening ${a.path}`);
+        } else if (a.type === "search") {
+          window.dispatchEvent(new CustomEvent("impo:search", { detail: a.query }));
+          toast.info(`Searching “${a.query}”`);
+        } else if (a.type === "compose") {
+          try {
+            sessionStorage.setItem(
+              "impo-compose-prefill",
+              JSON.stringify({ to: a.to ?? "", subject: a.subject ?? "", body: a.body ?? "" }),
+            );
+          } catch { /* ignore */ }
+          navigate({ to: "/compose" });
+        }
+      }
+    },
+    [navigate],
+  );
+
   const mutation = useMutation({
     mutationFn: async (content: string) => sendFn({ data: { content } }),
     onMutate: (content) => {
@@ -126,9 +152,11 @@ function Assistant() {
       const typing: ChatMsg = { id: `local-a-${Date.now()}`, role: "assistant", content: "…" };
       setPending((p) => [...p, userMsg, typing]);
     },
-    onSuccess: async () => {
+    onSuccess: async (res: unknown) => {
       setPending([]);
       await qc.invalidateQueries({ queryKey: ["assistant-history"] });
+      const reply = (res as { reply?: string })?.reply ?? "";
+      runActions(parseSiteActions(reply).actions);
     },
     onError: (e: unknown) => {
       setPending([]);
