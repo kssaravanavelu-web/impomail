@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/auth")({
@@ -34,6 +35,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -45,6 +47,10 @@ function AuthPage() {
   }, [navigate, safeNext]);
 
   const handleGoogle = async () => {
+    if (!accepted) {
+      toast.error("Please accept the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
     setGoogleLoading(true);
     const redirectUri = safeNext
       ? `${window.location.origin}${safeNext}`
@@ -64,6 +70,10 @@ function AuthPage() {
 
   const handleEmail = async (e: FormEvent) => {
     e.preventDefault();
+    if (!accepted) {
+      toast.error("Please accept the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signin") {
@@ -118,7 +128,7 @@ function AuthPage() {
             variant="secondary"
             className="h-11 w-full gap-3 bg-secondary/80 font-medium hover:bg-secondary"
             onClick={handleGoogle}
-            disabled={googleLoading}
+            disabled={googleLoading || !accepted}
           >
             {googleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
             Continue with Google
@@ -158,7 +168,7 @@ function AuthPage() {
             </div>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !accepted}
               className="h-11 w-full font-semibold text-primary-foreground"
               style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
             >
@@ -171,6 +181,25 @@ function AuthPage() {
               )}
             </Button>
           </form>
+          <div className="mt-5 flex items-start gap-3 rounded-xl border border-border/60 bg-background/30 p-3">
+            <Checkbox
+              id="legal-consent"
+              checked={accepted}
+              onCheckedChange={(v) => setAccepted(v === true)}
+              className="mt-0.5"
+            />
+            <Label htmlFor="legal-consent" className="text-xs font-normal leading-relaxed text-muted-foreground">
+              I have read and agree to the{" "}
+              <Link to="/terms" target="_blank" className="text-primary hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" target="_blank" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              , including ImpoMail accessing my Gmail data to display and send mail.
+            </Label>
+          </div>
           <p className="mt-5 text-center text-sm text-muted-foreground">
             {mode === "signin" ? "New to ImpoMail?" : "Already have an account?"}{" "}
             <button
@@ -183,7 +212,9 @@ function AuthPage() {
           </p>
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          By continuing, you agree to our Terms and Privacy Policy.
+          <Link to="/terms" className="hover:text-foreground hover:underline">Terms of Service</Link>
+          {" · "}
+          <Link to="/privacy" className="hover:text-foreground hover:underline">Privacy Policy</Link>
         </p>
       </div>
     </div>
