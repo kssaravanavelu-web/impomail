@@ -20,6 +20,7 @@ import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedGmailStatusRouteImport } from './routes/_authenticated/gmail-status'
 import { Route as AuthenticatedDraftsRouteImport } from './routes/_authenticated/drafts'
 import { Route as AuthenticatedConnectGmailRouteImport } from './routes/_authenticated/connect-gmail'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
@@ -86,6 +87,12 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGmailStatusRoute =
+  AuthenticatedGmailStatusRouteImport.update({
+    id: '/gmail-status',
+    path: '/gmail-status',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDraftsRoute = AuthenticatedDraftsRouteImport.update({
   id: '/drafts',
   path: '/drafts',
@@ -158,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/compose': typeof AuthenticatedComposeRoute
   '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
+  '/gmail-status': typeof AuthenticatedGmailStatusRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -181,6 +189,7 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
+  '/gmail-status': typeof AuthenticatedGmailStatusRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -206,6 +215,7 @@ export interface FileRoutesById {
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/_authenticated/drafts': typeof AuthenticatedDraftsRoute
+  '/_authenticated/gmail-status': typeof AuthenticatedGmailStatusRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/compose'
     | '/connect-gmail'
     | '/drafts'
+    | '/gmail-status'
     | '/home'
     | '/inbox'
     | '/profile'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/compose'
     | '/connect-gmail'
     | '/drafts'
+    | '/gmail-status'
     | '/home'
     | '/inbox'
     | '/profile'
@@ -278,6 +290,7 @@ export interface FileRouteTypes {
     | '/_authenticated/compose'
     | '/_authenticated/connect-gmail'
     | '/_authenticated/drafts'
+    | '/_authenticated/gmail-status'
     | '/_authenticated/home'
     | '/_authenticated/inbox'
     | '/_authenticated/profile'
@@ -381,6 +394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gmail-status': {
+      id: '/_authenticated/gmail-status'
+      path: '/gmail-status'
+      fullPath: '/gmail-status'
+      preLoaderRoute: typeof AuthenticatedGmailStatusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/drafts': {
       id: '/_authenticated/drafts'
       path: '/drafts'
@@ -467,6 +487,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedConnectGmailRoute: typeof AuthenticatedConnectGmailRoute
   AuthenticatedDraftsRoute: typeof AuthenticatedDraftsRoute
+  AuthenticatedGmailStatusRoute: typeof AuthenticatedGmailStatusRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -484,6 +505,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedConnectGmailRoute: AuthenticatedConnectGmailRoute,
   AuthenticatedDraftsRoute: AuthenticatedDraftsRoute,
+  AuthenticatedGmailStatusRoute: AuthenticatedGmailStatusRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
