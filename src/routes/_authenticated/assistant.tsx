@@ -10,6 +10,21 @@ import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
 
+function detectLang(text: string): string {
+  const t = text || "";
+  if (/[\u0B80-\u0BFF]/.test(t)) return "ta-IN"; // Tamil
+  if (/[\u0900-\u097F]/.test(t)) return "hi-IN"; // Hindi
+  if (/[\u0600-\u06FF]/.test(t)) return "ar-SA"; // Arabic
+  if (/[\u4E00-\u9FFF]/.test(t)) return "zh-CN"; // Chinese
+  if (/[\u3040-\u30FF]/.test(t)) return "ja-JP"; // Japanese
+  if (/[\uAC00-\uD7AF]/.test(t)) return "ko-KR"; // Korean
+  if (/[\u0400-\u04FF]/.test(t)) return "ru-RU"; // Cyrillic
+  if (/[àâçéèêëîïôûùüÿœæ]/i.test(t)) return "fr-FR";
+  if (/[ñáéíóúü¿¡]/i.test(t)) return "es-ES";
+  if (/[äöüß]/i.test(t)) return "de-DE";
+  return "en-US";
+}
+
 export const Route = createFileRoute("/_authenticated/assistant")({
   head: () => ({
     meta: [
