@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
+import { MicButton } from "@/components/mic-button";
 
 export const Route = createFileRoute("/_authenticated/assistant")({
   head: () => ({
@@ -275,6 +276,12 @@ function Assistant() {
           <span className="text-[11px] text-muted-foreground">
             {muted ? "Voice muted" : "Voice ready · tap Speak on any reply"} · Enter to send
           </span>
+          <div className="flex items-center gap-1">
+          <MicButton
+            size="sm"
+            onTranscript={(t) => setInput(t)}
+            title="Speak your message"
+          />
           <Button
             size="sm"
             className="gap-2"
@@ -285,6 +292,7 @@ function Assistant() {
             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             Send
           </Button>
+          </div>
         </div>
       </div>
     </div>
