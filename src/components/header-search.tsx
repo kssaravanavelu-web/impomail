@@ -60,6 +60,7 @@ export function HeaderSearch() {
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         )}
         <input
+          ref={inputRef}
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
