@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Briefcase, GraduationCap, KeyRound, Smartphone, Building2, ChevronRight, Inbox as InboxIcon } from "lucide-react";
-import { messages, metrics, categoryMeta, type Category } from "@/lib/mock-data";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Briefcase, GraduationCap, KeyRound, Smartphone, Building2, ChevronRight, Inbox as InboxIcon, Loader2 } from "lucide-react";
+import { categoryMeta, type Category } from "@/lib/mock-data";
+import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   business: Building2,
@@ -33,11 +36,36 @@ function greeting() {
 function Home() {
   const { user } = Route.useRouteContext();
   const name = ((user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? "there").split(" ")[0];
-  const inbox = messages.filter((m) => m.folder === "inbox");
+  const fetchFn = useServerFn(listGmailMessages);
+  const { data, isLoading } = useQuery({
+    queryKey: ["gmail", "inbox-all"],
+    queryFn: () => fetchFn({ data: { labelIds: ["INBOX"], maxResults: 50 } }),
+  });
+  const inbox: GmailMessageSummary[] = data ?? [];
   const unreadTotal = inbox.filter((m) => m.unread).length;
+  const dynamicMetrics = (["business", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
+    key: cat,
+    label: categoryMeta[cat].label,
+    category: cat,
+    count: inbox.filter((m) => m.category === cat).length,
+  }));
   const sectors = (Object.keys(categoryMeta) as Category[])
     .map((cat) => ({ cat, items: inbox.filter((m) => m.category === cat) }))
     .filter((s) => s.items.length > 0);
+  const nameOf = (from: string) => {
+    const m = from.match(/^"?([^"<]+?)"?\s*<[^>]+>/);
+    return (m ? m[1] : from.split("@")[0] ?? from).trim() || from;
+  };
+  const timeOf = (date: string) => {
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return "";
+    const now = new Date();
+    if (d.toDateString() === now.toDateString())
+      return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    const days = Math.floor((now.getTime() - d.getTime()) / 86400000);
+    if (days < 7) return d.toLocaleDateString(undefined, { weekday: "short" });
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
 
   return (
     <div className="relative mx-auto max-w-5xl px-4 py-6 lg:px-8 lg:py-10">
@@ -65,8 +93,12 @@ function Home() {
             Priority Access
           </span>
           <div>
-            <span className="font-display text-5xl font-light text-foreground">{unreadTotal}</span>
-            <p className="mt-1 text-sm text-muted-foreground">Unread high-priority</p>
+            <span className="font-display text-5xl font-light text-foreground">
+              {isLoading ? <Loader2 className="inline h-8 w-8 animate-spin" /> : unreadTotal}
+            </span>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {isLoading ? "Syncing Gmail…" : "Unread in your Gmail inbox"}
+            </p>
           </div>
         </div>
         <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary">
@@ -76,7 +108,7 @@ function Home() {
 
       {/* Category pebbles */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {metrics.map((m, i) => {
+        {dynamicMetrics.map((m, i) => {
           const Icon = iconFor[m.category];
           const meta = categoryMeta[m.category];
           return (
@@ -107,6 +139,16 @@ function Home() {
             View all
           </Link>
         </div>
+        {isLoading && (
+          <div className="glass-card flex items-center justify-center gap-3 rounded-2xl p-10 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading your inbox…
+          </div>
+        )}
+        {!isLoading && sectors.length === 0 && (
+          <div className="glass-card rounded-2xl p-10 text-center text-sm text-muted-foreground">
+            No mail yet. <Link to="/connect-gmail" className="text-primary hover:underline">Connect Gmail</Link> to sync your messages.
+          </div>
+        )}
         <div className="space-y-6">
           {sectors.map(({ cat, items }, si) => {
             const meta = categoryMeta[cat];
@@ -139,11 +181,11 @@ function Home() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-baseline justify-between gap-3">
-                          <span className={`truncate text-sm ${m.unread ? "font-semibold text-foreground" : "font-medium text-foreground/85"}`}>{m.from}</span>
-                          <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">{m.time}</span>
+                          <span className={`truncate text-sm ${m.unread ? "font-semibold text-foreground" : "font-medium text-foreground/85"}`}>{nameOf(m.from)}</span>
+                          <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">{timeOf(m.date)}</span>
                         </div>
-                        <div className={`truncate text-sm ${m.unread ? "text-foreground/90" : "text-muted-foreground"}`}>{m.subject}</div>
-                        <div className="truncate text-xs text-muted-foreground/80">{m.preview}</div>
+                        <div className={`truncate text-sm ${m.unread ? "text-foreground/90" : "text-muted-foreground"}`}>{m.subject || "(no subject)"}</div>
+                        <div className="truncate text-xs text-muted-foreground/80">{m.snippet}</div>
                       </div>
                     </Link>
                   ))}
