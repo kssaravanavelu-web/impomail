@@ -1,12 +1,12 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home, User } from "lucide-react";
+import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type SidebarItem = {
-  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile";
+  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
@@ -19,13 +19,14 @@ const sidebarItems: SidebarItem[] = [
   { to: "/drafts", label: "Drafts", icon: FileText },
   { to: "/trash", label: "Trash", icon: Trash2 },
   { to: "/archive", label: "Archive", icon: Archive },
+  { to: "/assistant", label: "Assistant", icon: Bot },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
-  { to: "/search", label: "Search", icon: Search },
+  { to: "/assistant", label: "Impo", icon: Bot },
   { to: "/compose", label: "Compose", icon: PenSquare },
   { to: "/ai-search", label: "AI", icon: Sparkles },
   { to: "/settings", label: "Settings", icon: Settings },

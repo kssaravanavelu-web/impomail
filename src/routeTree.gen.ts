@@ -24,6 +24,7 @@ import { Route as AuthenticatedGmailStatusRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDraftsRouteImport } from './routes/_authenticated/drafts'
 import { Route as AuthenticatedConnectGmailRouteImport } from './routes/_authenticated/connect-gmail'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
+import { Route as AuthenticatedAssistantRouteImport } from './routes/_authenticated/assistant'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
 import { Route as AuthenticatedAiSearchRouteImport } from './routes/_authenticated/ai-search'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -109,6 +110,11 @@ const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   path: '/compose',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAssistantRoute = AuthenticatedAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ai-search': typeof AuthenticatedAiSearchRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/assistant': typeof AuthenticatedAssistantRoute
   '/compose': typeof AuthenticatedComposeRoute
   '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ai-search': typeof AuthenticatedAiSearchRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/assistant': typeof AuthenticatedAssistantRoute
   '/compose': typeof AuthenticatedComposeRoute
   '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/ai-search': typeof AuthenticatedAiSearchRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
+  '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/_authenticated/drafts': typeof AuthenticatedDraftsRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/ai-search'
     | '/archive'
+    | '/assistant'
     | '/compose'
     | '/connect-gmail'
     | '/drafts'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/ai-search'
     | '/archive'
+    | '/assistant'
     | '/compose'
     | '/connect-gmail'
     | '/drafts'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/ai-search'
     | '/_authenticated/archive'
+    | '/_authenticated/assistant'
     | '/_authenticated/compose'
     | '/_authenticated/connect-gmail'
     | '/_authenticated/drafts'
@@ -422,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/assistant': {
+      id: '/_authenticated/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AuthenticatedAssistantRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/archive': {
       id: '/_authenticated/archive'
       path: '/archive'
@@ -484,6 +503,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAiSearchRoute: typeof AuthenticatedAiSearchRoute
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
+  AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRoute
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedConnectGmailRoute: typeof AuthenticatedConnectGmailRoute
   AuthenticatedDraftsRoute: typeof AuthenticatedDraftsRoute
@@ -502,6 +522,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAiSearchRoute: AuthenticatedAiSearchRoute,
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
+  AuthenticatedAssistantRoute: AuthenticatedAssistantRoute,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedConnectGmailRoute: AuthenticatedConnectGmailRoute,
   AuthenticatedDraftsRoute: AuthenticatedDraftsRoute,
