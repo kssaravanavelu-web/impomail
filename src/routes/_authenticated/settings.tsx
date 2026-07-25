@@ -24,7 +24,7 @@ function Settings() {
   useEffect(() => { if (background.kind !== "none") setBackground({ kind: "none" }); }, [background.kind, setBackground]);
 
   const connectGmail = () => {
-    toast.info("Approve the Gmail connector prompt from Lovable to link your inbox.", { duration: 6000 });
+    navigate({ to: "/connect-gmail" });
   };
 
   const signOut = async () => {
