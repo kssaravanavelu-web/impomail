@@ -186,9 +186,12 @@ export function AppLayout() {
         </main>
       </div>
 
-      {/* Bottom nav (mobile) */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-card/95 backdrop-blur lg:hidden">
-        <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
+      {/* Bottom nav (mobile) — floating pill */}
+      <nav className="fixed inset-x-0 bottom-4 z-30 flex justify-center px-4 lg:hidden">
+        <div
+          className="relative flex items-center gap-1 rounded-full border border-primary/20 bg-card/80 px-2 py-2 backdrop-blur-xl"
+          style={{ boxShadow: "0 20px 50px -20px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(0.85 var(--accent-chroma) var(--accent-hue) / 0.06)" }}
+        >
           {bottomItems.map((item) => {
             const active = pathname === item.to;
             const Icon = item.icon;
@@ -198,10 +201,11 @@ export function AppLayout() {
                 <Link
                   key={item.label}
                   to={item.to}
-                  className="-mt-6 flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground shadow-lg"
+                  aria-label={item.label}
+                  className="mx-1 flex h-12 w-12 items-center justify-center rounded-full text-primary-foreground transition-transform hover:scale-105"
                   style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5" strokeWidth={2} />
                 </Link>
               );
             }
@@ -209,13 +213,18 @@ export function AppLayout() {
               <Link
                 key={item.label}
                 to={item.to}
+                aria-label={item.label}
                 className={cn(
-                  "flex flex-1 flex-col items-center gap-0.5 rounded-lg py-2 text-[11px] font-medium transition-colors",
-                  active ? "text-primary" : "text-muted-foreground",
+                  "relative flex h-11 w-11 items-center justify-center rounded-full transition-all",
+                  active
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="h-5 w-5" />
-                {item.label}
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                {active && (
+                  <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-primary" aria-hidden />
+                )}
               </Link>
             );
           })}

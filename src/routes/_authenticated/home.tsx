@@ -104,31 +104,43 @@ function Home() {
         </Link>
       </div>
 
-      {/* Category cards — modern row */}
-      <div className="mb-14 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
-        {dynamicMetrics.map((m, i) => {
-          const Icon = iconFor[m.category];
-          const meta = categoryMeta[m.category];
-          return (
-            <Link
-              key={m.key}
-              to="/category/$slug"
-              params={{ slug: m.category }}
-              className={`silk-rise silk-hover glass-card group relative flex flex-col justify-between overflow-hidden rounded-2xl p-5 rise-${Math.min(6, i + 1)}`}
-            >
-              <div className="flex items-start justify-between">
-                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border ${meta.bg}`}>
-                  <Icon className={`h-4.5 w-4.5 ${meta.color}`} strokeWidth={1.5} />
+      {/* Category cards — horizontal swipe rail */}
+      <div className="silk-rise -mx-5 mb-14 lg:-mx-10">
+        <div className="mb-4 flex items-end justify-between px-5 lg:px-10">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Curated</p>
+            <h2 className="mt-2 font-display text-2xl tracking-tight lg:text-3xl">Swipe categories</h2>
+          </div>
+          <span className="hidden text-[10px] uppercase tracking-[0.24em] text-muted-foreground/60 sm:inline">← swipe →</span>
+        </div>
+        <div
+          className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-5 pb-4 lg:px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ scrollPaddingLeft: "1.25rem" }}
+        >
+          {dynamicMetrics.map((m, i) => {
+            const Icon = iconFor[m.category];
+            const meta = categoryMeta[m.category];
+            return (
+              <Link
+                key={m.key}
+                to="/category/$slug"
+                params={{ slug: m.category }}
+                className={`silk-hover glass-card gold-hairline group relative flex min-w-[180px] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl p-5 rise-${Math.min(6, i + 1)} sm:min-w-[210px]`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border ${meta.bg}`}>
+                    <Icon className={`h-5 w-5 ${meta.color}`} strokeWidth={1.5} />
+                  </div>
+                  <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
                 </div>
-                <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:text-primary" strokeWidth={1.5} />
-              </div>
-              <div className="mt-6">
-                <div className="font-display text-4xl font-light leading-none tracking-tight">{m.count}</div>
-                <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{m.label}</div>
-              </div>
-            </Link>
-          );
-        })}
+                <div className="mt-8">
+                  <div className="font-display text-5xl font-light leading-none tracking-tight">{m.count}</div>
+                  <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{m.label}</div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Sector mail */}
