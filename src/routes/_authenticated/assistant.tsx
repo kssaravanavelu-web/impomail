@@ -9,21 +9,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
-
-function detectLang(text: string): string {
-  const t = text || "";
-  if (/[\u0B80-\u0BFF]/.test(t)) return "ta-IN"; // Tamil
-  if (/[\u0900-\u097F]/.test(t)) return "hi-IN"; // Hindi
-  if (/[\u0600-\u06FF]/.test(t)) return "ar-SA"; // Arabic
-  if (/[\u4E00-\u9FFF]/.test(t)) return "zh-CN"; // Chinese
-  if (/[\u3040-\u30FF]/.test(t)) return "ja-JP"; // Japanese
-  if (/[\uAC00-\uD7AF]/.test(t)) return "ko-KR"; // Korean
-  if (/[\u0400-\u04FF]/.test(t)) return "ru-RU"; // Cyrillic
-  if (/[àâçéèêëîïôûùüÿœæ]/i.test(t)) return "fr-FR";
-  if (/[ñáéíóúü¿¡]/i.test(t)) return "es-ES";
-  if (/[äöüß]/i.test(t)) return "de-DE";
-  return "en-US";
-}
+import { MusicPlayer } from "@/components/music-player";
+import { parseDialogue, pickVoiceForRole, voiceProfile } from "@/lib/multi-voice";
 
 export const Route = createFileRoute("/_authenticated/assistant")({
   head: () => ({
@@ -59,8 +46,17 @@ function Assistant() {
     return window.localStorage.getItem("impo-assistant-muted") === "1";
   });
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const load = () => setVoices(window.speechSynthesis.getVoices());
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
 
   const messages: ChatMsg[] = useMemo(() => {
     return [...(history ?? []), ...pending];
@@ -102,14 +98,24 @@ function Assistant() {
       return;
     }
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = detectLang(text);
-    u.rate = 1;
-    u.pitch = 1;
-    u.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
-    u.onerror = () => setSpeakingId((cur) => (cur === id ? null : cur));
+    const segments = parseDialogue(text);
+    if (!segments.length) return;
     setSpeakingId(id);
-    window.speechSynthesis.speak(u);
+    segments.forEach((seg, i) => {
+      const u = new SpeechSynthesisUtterance(seg.text);
+      u.lang = seg.lang;
+      const voice = pickVoiceForRole(voices, seg.role, seg.lang);
+      if (voice) u.voice = voice;
+      const prof = voiceProfile(seg.role);
+      u.rate = prof.rate;
+      u.pitch = prof.pitch;
+      u.volume = 1;
+      if (i === segments.length - 1) {
+        u.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
+        u.onerror = () => setSpeakingId((cur) => (cur === id ? null : cur));
+      }
+      window.speechSynthesis.speak(u);
+    });
   };
 
   const mutation = useMutation({
@@ -176,6 +182,7 @@ function Assistant() {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          <MusicPlayer />
           <Button
             variant="ghost"
             size="icon"
