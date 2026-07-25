@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
+import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
 import { HeaderSearch } from "@/components/header-search";
 import { ChatWidget } from "@/components/chat-widget";
 import { VoiceCommandProvider } from "@/lib/voice-command";
@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 type SidebarItem = {
   to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
