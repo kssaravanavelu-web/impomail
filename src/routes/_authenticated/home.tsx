@@ -1,19 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, GraduationCap, KeyRound, Smartphone, Building2, ChevronRight, Inbox as InboxIcon, Loader2 } from "lucide-react";
+import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 
 const iconFor: Record<Category, typeof Briefcase> = {
-  business: Building2,
+  payment: CreditCard,
   jobs: Briefcase,
   internships: GraduationCap,
   otp: KeyRound,
   recharges: Smartphone,
-  personal: Building2,
-  promotions: Building2,
-  updates: Building2,
+  personal: User,
+  promotions: Tag,
+  updates: Bell,
 };
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -43,7 +43,7 @@ function Home() {
   });
   const inbox: GmailMessageSummary[] = data ?? [];
   const unreadTotal = inbox.filter((m) => m.unread).length;
-  const dynamicMetrics = (["business", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
+  const dynamicMetrics = (["payment", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
     key: cat,
     label: categoryMeta[cat].label,
     category: cat,
@@ -68,46 +68,44 @@ function Home() {
   };
 
   return (
-    <div className="relative mx-auto max-w-5xl px-4 py-6 lg:px-8 lg:py-10">
+    <div className="relative mx-auto max-w-6xl px-5 py-8 lg:px-10 lg:py-12">
       {/* Ambient gold glows */}
       <span className="ambient-glow -top-24 -right-16 h-64 w-64" aria-hidden />
       <span className="ambient-glow -bottom-24 -left-10 h-56 w-56" style={{ animationDelay: "-4s" }} aria-hidden />
 
-      {/* Greeting */}
-      <div className="silk-rise mb-8">
-        <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Overview · {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
-        <h1 className="mt-2 font-display text-4xl lg:text-5xl">
-          <span className="italic">{greeting()},</span>{" "}
-          <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>{name}</span>
-        </h1>
+      {/* Greeting + hero row */}
+      <div className="silk-rise mb-10 flex flex-col gap-8 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">
+            {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+          </p>
+          <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight lg:text-6xl">
+            <span className="italic text-foreground/80">{greeting()},</span>{" "}
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>{name}</span>
+          </h1>
+        </div>
+
+        <Link
+          to="/inbox"
+          className="silk-hover glass-card gold-hairline group relative flex min-w-[240px] items-center justify-between gap-6 overflow-hidden rounded-2xl px-5 py-4"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+              <InboxIcon className="h-5 w-5" strokeWidth={1.5} />
+            </div>
+            <div className="leading-tight">
+              <div className="font-display text-3xl font-light">
+                {isLoading ? <Loader2 className="inline h-6 w-6 animate-spin" /> : unreadTotal}
+              </div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Unread</div>
+            </div>
+          </div>
+          <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
+        </Link>
       </div>
 
-      {/* Priority hero card */}
-      <Link
-        to="/inbox"
-        className="silk-rise rise-1 silk-hover glass-card gold-hairline group relative mb-8 flex items-start justify-between overflow-hidden rounded-3xl p-6"
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(120%_80%_at_0%_0%,oklch(0.85_var(--accent-chroma)_var(--accent-hue)/0.18),transparent_55%)]" />
-        <div className="relative space-y-4">
-          <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">
-            Priority Access
-          </span>
-          <div>
-            <span className="font-display text-5xl font-light text-foreground">
-              {isLoading ? <Loader2 className="inline h-8 w-8 animate-spin" /> : unreadTotal}
-            </span>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {isLoading ? "Syncing Gmail…" : "Unread in your Gmail inbox"}
-            </p>
-          </div>
-        </div>
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary">
-          <InboxIcon className="h-5 w-5" strokeWidth={1.5} />
-        </div>
-      </Link>
-
-      {/* Category pebbles */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {/* Category cards — modern row */}
+      <div className="mb-14 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
         {dynamicMetrics.map((m, i) => {
           const Icon = iconFor[m.category];
           const meta = categoryMeta[m.category];
@@ -116,27 +114,32 @@ function Home() {
               key={m.key}
               to="/category/$slug"
               params={{ slug: m.category }}
-              className={`silk-rise silk-hover glass-card group relative overflow-hidden rounded-2xl p-4 rise-${Math.min(6, i + 2)}`}
+              className={`silk-rise silk-hover glass-card group relative flex flex-col justify-between overflow-hidden rounded-2xl p-5 rise-${Math.min(6, i + 1)}`}
             >
-              <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border ${meta.bg}`}>
-                <Icon className={`h-5 w-5 ${meta.color}`} strokeWidth={1.5} />
+              <div className="flex items-start justify-between">
+                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border ${meta.bg}`}>
+                  <Icon className={`h-4.5 w-4.5 ${meta.color}`} strokeWidth={1.5} />
+                </div>
+                <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:text-primary" strokeWidth={1.5} />
               </div>
-              <div className="font-display text-3xl font-light">{m.count}</div>
-              <div className="mt-0.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{m.label}</div>
+              <div className="mt-6">
+                <div className="font-display text-4xl font-light leading-none tracking-tight">{m.count}</div>
+                <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{m.label}</div>
+              </div>
             </Link>
           );
         })}
       </div>
 
       {/* Sector mail */}
-      <div className="mt-12">
-        <div className="mb-4 flex items-end justify-between">
+      <div>
+        <div className="mb-6 flex items-end justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Sovereign Sector</p>
-            <h2 className="font-display text-2xl">Sector mail</h2>
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Curated</p>
+            <h2 className="mt-2 font-display text-3xl tracking-tight">Sector mail</h2>
           </div>
-          <Link to="/inbox" className="text-xs font-medium uppercase tracking-[0.18em] text-primary hover:opacity-80">
-            View all
+          <Link to="/inbox" className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em] text-primary hover:opacity-80">
+            View all <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
           </Link>
         </div>
         {isLoading && (
@@ -149,12 +152,12 @@ function Home() {
             No mail yet. <Link to="/connect-gmail" className="text-primary hover:underline">Connect Gmail</Link> to sync your messages.
           </div>
         )}
-        <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
           {sectors.map(({ cat, items }, si) => {
             const meta = categoryMeta[cat];
             return (
               <section key={cat} className={`silk-rise rise-${Math.min(6, si + 1)}`}>
-                <div className="mb-2 flex items-center justify-between">
+                <div className="mb-3 flex items-center justify-between px-1">
                   <Link to="/category/$slug" params={{ slug: cat }} className="flex items-center gap-2">
                     <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${meta.bg} ${meta.color}`}>{meta.label}</span>
                     <span className="text-xs text-muted-foreground">{items.length}</span>
