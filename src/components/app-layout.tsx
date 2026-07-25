@@ -70,10 +70,10 @@ export function AppLayout() {
 
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
-      {/* Sidebar (desktop) */}
+      {/* Drawer (mobile) */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 border-r border-primary/10 bg-card/60 backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-64 border-r border-primary/10 bg-card/60 backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -137,12 +137,23 @@ export function AppLayout() {
       )}
 
       {/* Main */}
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border/60 bg-background/70 px-4 backdrop-blur lg:px-8">
+      <div>
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur lg:px-8">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex flex-1 items-center gap-2 lg:justify-start">
+          <Link to="/home" className="hidden shrink-0 items-center gap-2 transition-opacity hover:opacity-80 lg:flex">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-xl"
+              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+            >
+              <Mail className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+            </div>
+            <span className="text-lg font-bold tracking-tight">
+              Impo<span className="text-primary">Mail</span>
+            </span>
+          </Link>
+          <div className="flex flex-1 items-center gap-2 lg:max-w-sm lg:justify-start">
             <Link
               to="/search"
               className="flex w-full max-w-md items-center gap-2 rounded-full border border-border/60 bg-card px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/50"
@@ -180,6 +191,43 @@ export function AppLayout() {
             </Link>
           </div>
         </header>
+
+        {/* Top nav (desktop) */}
+        <nav className="sticky top-16 z-10 hidden border-b border-border/60 bg-background/70 backdrop-blur lg:block">
+          <div className="flex items-center gap-1 overflow-x-auto px-8 py-2">
+            {sidebarItems.map((item) => {
+              const active = pathname === item.to;
+              const Icon = item.icon;
+              if (item.accent) {
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="mr-2 flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-[1.03]"
+                    style={{ background: "var(--gradient-primary)" }}
+                  >
+                    <Icon className="h-4 w-4" /> {item.label}
+                  </Link>
+                );
+              }
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors",
+                    active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4" /> {item.label}
+                </Link>
+              );
+            })}
+            <Button variant="ghost" size="sm" onClick={signOut} className="ml-auto shrink-0 gap-2 text-muted-foreground">
+              <LogOut className="h-4 w-4" /> Sign out
+            </Button>
+          </div>
+        </nav>
 
         <main className="pb-24 lg:pb-8">
           <Outlet />
