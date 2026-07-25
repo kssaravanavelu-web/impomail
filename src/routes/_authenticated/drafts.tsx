@@ -1,13 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { messages } from "@/lib/mock-data";
-import { MessageList, PageHeader } from "@/components/message-list";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { PageHeader } from "@/components/message-list";
+import { GmailList } from "@/components/gmail-list";
+import { listGmailMessages } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/drafts")({
   head: () => ({ meta: [{ title: "Drafts — ImpoMail" }, { name: "description", content: "Your saved drafts." }] }),
-  component: () => (
+  component: DraftsPage,
+});
+
+function DraftsPage() {
+  const fetchFn = useServerFn(listGmailMessages);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["gmail", "drafts"],
+    queryFn: () => fetchFn({ data: { labelIds: ["DRAFT"], maxResults: 30 } }),
+  });
+  return (
     <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8 lg:py-10">
       <PageHeader title="Drafts" />
-      <MessageList items={messages.filter((m) => m.folder === "drafts")} emptyText="No drafts saved." />
+      <GmailList items={data ?? []} loading={isLoading} error={error ? (error as Error).message : null} emptyText="No drafts saved." />
     </div>
-  ),
-});
+  );
+}
