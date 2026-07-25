@@ -41,7 +41,7 @@ export function ChatWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 flex h-[min(70vh,540px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-xl lg:bottom-24 lg:right-6"
+        <div className="fixed bottom-44 right-4 z-50 flex h-[min(60vh,540px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-xl lg:bottom-24 lg:right-6"
           style={{ boxShadow: "0 30px 80px -30px oklch(0 0 0 / 0.75)" }}>
           <div className="flex items-center gap-2 border-b border-primary/10 px-4 py-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: "var(--gradient-primary)" }}>
