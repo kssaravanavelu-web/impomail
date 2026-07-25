@@ -63,14 +63,17 @@ function hashStr(s: string): number {
   return Math.abs(h);
 }
 
-// Score voices to prefer modern/soft/professional ones (Neural, Google, Microsoft Natural, Apple Siri).
+// Score voices to prefer soft, natural, professional ones (Neural, Google, Microsoft Natural, Apple Siri).
 function scoreVoice(v: SpeechSynthesisVoice): number {
   const n = `${v.name} ${v.voiceURI}`.toLowerCase();
   let s = 0;
   if (/neural|natural|studio|wavenet|premium|enhanced/.test(n)) s += 40;
   if (/google/.test(n)) s += 20;
   if (/microsoft/.test(n)) s += 15;
-  if (/samantha|ava|serena|karen|daniel|siri|allison/.test(n)) s += 25;
+  if (/samantha|ava|serena|siri|allison|aria|jenny|libby|sonia|nova|shimmer|zira/.test(n)) s += 30;
+  if (/soft|calm|gentle|warm/.test(n)) s += 15;
+  // Harsh / robotic voices go last.
+  if (/compact|espeak|robot|fred|albert|ralph|junior|bad news|boing/.test(n)) s -= 60;
   if (/novelty|whisper|bells|cellos|organ|zarvox|trinoids|bahh/.test(n)) s -= 100;
   return s;
 }
@@ -100,14 +103,17 @@ export function pickVoiceForRole(
   return pool[idx];
 }
 
-// Gently vary pitch/rate per role for character distinction; keep it professional.
+// Soft, unhurried delivery. Roles vary only slightly so everything stays gentle.
 export function voiceProfile(role: string): { rate: number; pitch: number } {
-  if (role === NARRATOR) return { rate: 1.0, pitch: 1.0 };
+  if (role === NARRATOR) return { rate: 0.92, pitch: 1.02 };
   const h = hashStr(role);
-  const pitch = 0.85 + ((h % 40) / 100); // 0.85 – 1.24
-  const rate = 0.95 + (((h >> 3) % 15) / 100); // 0.95 – 1.09
+  const pitch = 0.96 + ((h % 16) / 100); // 0.96 – 1.11
+  const rate = 0.88 + (((h >> 3) % 8) / 100); // 0.88 – 0.95
   return { rate, pitch };
 }
+
+/** Soft playback volume so the assistant never feels loud. */
+export const SOFT_VOLUME = 0.82;
 
 export function stopSpeech() {
   if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -133,7 +139,7 @@ export function speakText(
     const prof = voiceProfile(seg.role);
     u.rate = prof.rate;
     u.pitch = prof.pitch;
-    u.volume = 1;
+    u.volume = SOFT_VOLUME;
     if (i === segments.length - 1) {
       u.onend = () => onEnd?.();
       u.onerror = () => onEnd?.();
