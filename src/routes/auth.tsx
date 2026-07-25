@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { Mail, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -98,12 +99,12 @@ function AuthPage() {
       />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div
-            className="flex h-14 w-14 items-center justify-center rounded-2xl"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            <Mail className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="ImpoMail"
+            className="h-14 w-14 rounded-2xl object-cover"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          />
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Welcome to Impo<span className="text-primary">Mail</span>

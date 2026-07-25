@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
+import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
 import { HeaderSearch } from "@/components/header-search";
 import { ChatWidget } from "@/components/chat-widget";
 import { VoiceCommandProvider } from "@/lib/voice-command";
@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 type SidebarItem = {
   to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
@@ -87,12 +88,12 @@ export function AppLayout() {
           onClick={() => setOpen(false)}
           className="flex h-16 items-center gap-2 border-b border-border/60 px-5 transition-colors hover:opacity-80"
         >
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            <Mail className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="ImpoMail"
+            className="h-9 w-9 rounded-xl object-cover"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          />
           <span className="text-lg font-bold tracking-tight">
             Impo<span className="text-primary">Mail</span>
           </span>
@@ -147,12 +148,12 @@ export function AppLayout() {
             <Menu className="h-5 w-5" />
           </Button>
           <Link to="/home" className="hidden shrink-0 items-center gap-2 transition-opacity hover:opacity-80 lg:flex">
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-xl"
-              style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Mail className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
-            </div>
+            <img
+              src={logoAsset.url}
+              alt="ImpoMail"
+              className="h-9 w-9 rounded-xl object-cover"
+              style={{ boxShadow: "var(--shadow-glow)" }}
+            />
             <span className="text-lg font-bold tracking-tight">
               Impo<span className="text-primary">Mail</span>
             </span>

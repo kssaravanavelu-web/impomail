@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -36,12 +36,12 @@ function Splash() {
           visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
         }`}
       >
-        <div
-          className="flex h-24 w-24 items-center justify-center rounded-3xl shadow-2xl"
-          style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-        >
-          <Mail className="h-12 w-12 text-primary-foreground" strokeWidth={2.5} />
-        </div>
+        <img
+          src={logoAsset.url}
+          alt="ImpoMail"
+          className="h-24 w-24 rounded-3xl object-cover shadow-2xl"
+          style={{ boxShadow: "var(--shadow-glow)" }}
+        />
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             Impo<span className="text-primary">Mail</span>

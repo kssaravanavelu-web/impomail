@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { connectAppUser } from "@/integrations/lovable/appUserConnectorClient";
@@ -10,6 +10,7 @@ import {
   saveGmailConnection,
   startGmailConnect,
 } from "@/lib/gmail.functions";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
 
@@ -83,8 +84,8 @@ function ConnectGmailPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="glass-card rounded-3xl p-10 max-w-lg w-full text-center silk-rise">
-        <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mb-6">
-          <Mail className="w-8 h-8 text-primary" />
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mb-6 overflow-hidden">
+          <img src={logoAsset.url} alt="ImpoMail" className="h-full w-full object-cover" />
         </div>
         <h1 className="font-serif italic text-3xl mb-3">Connect your Gmail</h1>
         <p className="text-muted-foreground mb-8">
