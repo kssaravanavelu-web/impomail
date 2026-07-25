@@ -414,9 +414,11 @@ export const sendGmailMessage = createServerFn({ method: "POST" })
       connectionAPIKey: key,
       connectorId: CONNECTOR_ID,
       path: "/gmail/v1/users/me/messages/send",
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ raw }),
+      init: {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ raw }),
+      },
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
