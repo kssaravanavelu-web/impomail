@@ -334,3 +334,93 @@ export const getGmailMessage = createServerFn({ method: "GET" })
       category: categorizeGmail(from, subject),
     };
   });
+
+export type SendAttachmentInput = {
+  filename: string;
+  mimeType: string;
+  dataBase64: string; // raw base64 (no data: prefix)
+};
+
+function encodeBase64Url(input: string): string {
+  return Buffer.from(input, "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function rawBase64ToUrl(b64: string): string {
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function buildMime(opts: {
+  to: string;
+  subject: string;
+  body: string;
+  attachments: SendAttachmentInput[];
+}): string {
+  const boundary = `impomail_${Math.random().toString(36).slice(2)}`;
+  const headers = [
+    `To: ${opts.to}`,
+    `Subject: ${opts.subject}`,
+    "MIME-Version: 1.0",
+  ];
+  if (!opts.attachments.length) {
+    headers.push('Content-Type: text/plain; charset="UTF-8"');
+    return `${headers.join("\r\n")}\r\n\r\n${opts.body}`;
+  }
+  headers.push(`Content-Type: multipart/mixed; boundary="${boundary}"`);
+  const parts: string[] = [];
+  parts.push(
+    `--${boundary}\r\nContent-Type: text/plain; charset="UTF-8"\r\nContent-Transfer-Encoding: 7bit\r\n\r\n${opts.body}`,
+  );
+  for (const a of opts.attachments) {
+    const b64 = rawBase64ToUrl(a.dataBase64)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const wrapped = b64.match(/.{1,76}/g)?.join("\r\n") ?? b64;
+    parts.push(
+      `--${boundary}\r\nContent-Type: ${a.mimeType}; name="${a.filename}"\r\nContent-Disposition: attachment; filename="${a.filename}"\r\nContent-Transfer-Encoding: base64\r\n\r\n${wrapped}`,
+    );
+  }
+  parts.push(`--${boundary}--`);
+  return `${headers.join("\r\n")}\r\n\r\n${parts.join("\r\n")}`;
+}
+
+export const sendGmailMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: {
+      to: string;
+      subject: string;
+      body: string;
+      attachments?: SendAttachmentInput[];
+    }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    if (!key) throw new Error("Gmail is not connected");
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const mime = buildMime({
+      to: data.to,
+      subject: data.subject,
+      body: data.body,
+      attachments: data.attachments ?? [],
+    });
+    const raw = encodeBase64Url(mime);
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey: key,
+      connectorId: CONNECTOR_ID,
+      path: "/gmail/v1/users/me/messages/send",
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ raw }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Gmail send failed [${res.status}]: ${body.slice(0, 300)}`);
+    }
+    return { ok: true as const };
+  });
