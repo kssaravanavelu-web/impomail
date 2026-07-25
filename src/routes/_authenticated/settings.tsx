@@ -144,15 +144,19 @@ function Settings() {
         </div>
       </Section>
 
-      <Section icon={Shield} title="Account">
+      <Section icon={Shield} title="Account & legal">
         <Link to="/profile" className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40">
           <span className="flex items-center gap-3"><User className="h-4 w-4 text-muted-foreground" /> Edit profile</span>
           <span className="text-muted-foreground">›</span>
         </Link>
-        <button className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40" onClick={() => toast.info("Coming soon")}>
-          <span className="flex items-center gap-3"><Shield className="h-4 w-4 text-muted-foreground" /> Privacy & security</span>
+        <Link to="/privacy" className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40">
+          <span className="flex items-center gap-3"><Shield className="h-4 w-4 text-muted-foreground" /> Privacy Policy</span>
           <span className="text-muted-foreground">›</span>
-        </button>
+        </Link>
+        <Link to="/terms" className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40">
+          <span className="flex items-center gap-3"><Shield className="h-4 w-4 text-muted-foreground" /> Terms of Service</span>
+          <span className="text-muted-foreground">›</span>
+        </Link>
       </Section>
 
       <Button variant="outline" className="mt-6 w-full gap-2 text-destructive hover:text-destructive" onClick={signOut}>
