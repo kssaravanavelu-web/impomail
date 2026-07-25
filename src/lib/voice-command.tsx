@@ -42,7 +42,7 @@ type VoiceCtx = {
 const Ctx = createContext<VoiceCtx | null>(null);
 
 const WAKE: { mode: VoiceMode; phrases: string[] }[] = [
-  { mode: "impo", phrases: ["hi impo", "hey impo", "hi impu", "hey impu", "hi info", "hi impo mail"] },
+  { mode: "impo", phrases: ["hello impo", "hey impo", "hello impu", "hey impu", "hello info", "hello impo mail"] },
   { mode: "search", phrases: ["search"] },
 ];
 
