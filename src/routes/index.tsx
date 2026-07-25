@@ -167,7 +167,7 @@ function LandingPage() {
             <FeatureCard
               icon={Sparkles}
               title="Voice + AI assistant"
-              desc="Ask "Impo" to search, read, compose, or navigate the app — hands-free."
+              desc="Ask Impo to search, read, compose, or navigate the app — hands-free."
             />
             <FeatureCard
               icon={Shield}
