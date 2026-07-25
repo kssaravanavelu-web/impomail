@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { connectAppUser } from "@/integrations/lovable/appUserConnectorClient";
@@ -10,6 +10,7 @@ import {
   saveGmailConnection,
   startGmailConnect,
 } from "@/lib/gmail.functions";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
 
