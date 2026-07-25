@@ -33,20 +33,12 @@ function ConnectGmailPage() {
   const [checking, setChecking] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [connected, setConnected] = useState(false);
-
-  useEffect(() => {
-    status({})
-      .then((s) => {
-        if (s.connected) {
-          setConnected(true);
-          navigate({ to: "/home", replace: true });
-        }
-      })
-      .finally(() => setChecking(false));
-  }, [status, navigate]);
+  const [autoTried, setAutoTried] = useState(false);
+  const [popupBlocked, setPopupBlocked] = useState(false);
 
   const handleConnect = async () => {
     setConnecting(true);
+    setPopupBlocked(false);
     try {
       const result = await connectAppUser({
         connectorId: "google_mail",
@@ -54,6 +46,7 @@ function ConnectGmailPage() {
         start: (targetOrigin) => start({ data: targetOrigin }),
       });
       if (!result.success) {
+        if (result.error?.toLowerCase().includes("popup")) setPopupBlocked(true);
         toast.error(result.error ?? "Failed to connect Gmail");
         return;
       }
@@ -70,6 +63,23 @@ function ConnectGmailPage() {
     }
   };
 
+  useEffect(() => {
+    status({})
+      .then((s) => {
+        if (s.connected) {
+          setConnected(true);
+          navigate({ to: "/home", replace: true });
+          return;
+        }
+        if (!autoTried) {
+          setAutoTried(true);
+          void handleConnect();
+        }
+      })
+      .finally(() => setChecking(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="glass-card rounded-3xl p-10 max-w-lg w-full text-center silk-rise">
@@ -78,7 +88,9 @@ function ConnectGmailPage() {
         </div>
         <h1 className="font-serif italic text-3xl mb-3">Connect your Gmail</h1>
         <p className="text-muted-foreground mb-8">
-          ImpoMail needs access to your inbox to sort what actually matters. Your credentials never touch our servers.
+          {popupBlocked
+            ? "Your browser blocked the sign-in popup. Click below to continue."
+            : "Opening Google sign-in… If nothing happens, click the button below."}
         </p>
         <ul className="text-left space-y-3 mb-8">
           <li className="flex gap-3 items-start">
