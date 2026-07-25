@@ -99,12 +99,12 @@ function AuthPage() {
       />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div
-            className="flex h-14 w-14 items-center justify-center rounded-2xl"
-            style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
-          >
-            <Mail className="h-7 w-7 text-primary-foreground" strokeWidth={2.5} />
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="ImpoMail"
+            className="h-14 w-14 rounded-2xl object-cover"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          />
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Welcome to Impo<span className="text-primary">Mail</span>
