@@ -106,7 +106,7 @@ export function ChatWidget() {
     mutation.mutate(text);
   };
 
-  // Wake word: "hi impo" (say it once) opens the widget and dictates into it.
+  // Wake word: "hello impo" (say it once) opens the widget and dictates into it.
   useVoiceMode("impo", {
     onWake: (rest) => {
       setOpen(true);

@@ -100,11 +100,11 @@ export function HeaderSearch() {
             if (wake.enabled) wake.sleep();
             wake.toggle();
             toast.info(
-              wake.enabled ? "Wake words off" : "Wake words on — say “search …” or “hi Impo”",
+              wake.enabled ? "Wake words off" : "Wake words on — say \"search …\" or \"hello Impo\"",
             );
           }}
           aria-label={wake.enabled ? "Disable wake words" : "Enable wake words"}
-          title={wake.enabled ? "Wake words on — say “search” or “hi Impo”" : "Enable “search” / “hi Impo” wake words"}
+          title={wake.enabled ? "Wake words on — say \"search\" or \"hello Impo\"" : "Enable \"search\" / \"hello Impo\" wake words"}
           className={cn(
             "shrink-0 text-muted-foreground transition-colors hover:text-foreground",
             wake.enabled && "text-primary",
