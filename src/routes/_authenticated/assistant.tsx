@@ -31,6 +31,7 @@ type ChatMsg = { id: string; role: "user" | "assistant"; content: string; create
 
 function Assistant() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const listFn = useServerFn(listChatHistory);
   const sendFn = useServerFn(sendChatMessage);
   const clearFn = useServerFn(clearChatHistory);
