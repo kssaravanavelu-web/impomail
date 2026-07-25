@@ -194,6 +194,84 @@ function LandingPage() {
             />
           </div>
         </section>
+
+        {/* What is ImpoMail? */}
+        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
+          <div className="rounded-3xl border border-border/60 p-8 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">What is ImpoMail?</p>
+              <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">
+                A Gmail companion built for clarity
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground lg:text-lg">
+                ImpoMail is a web application that helps Gmail users organize their inbox by automatically categorizing messages into meaningful sections: <strong className="text-foreground">payments, jobs, internships, OTPs, recharges, personal conversations, promotions, and updates.</strong> It also includes an AI assistant named Impo who can read, search, summarize, and compose messages on your behalf using voice or text commands.
+              </p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                The app is built for professionals, students, and anyone who receives a high volume of transactional email and wants to find what matters in seconds.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
+          <div className="mb-10 text-center">
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">How it works</p>
+            <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">Three steps to a calm inbox</h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-3">
+            <StepCard
+              step="1"
+              icon={Mail}
+              title="Sign in with Gmail"
+              desc="Create an ImpoMail account and securely connect your Gmail inbox with encrypted OAuth tokens."
+            />
+            <StepCard
+              step="2"
+              icon={Search}
+              title="Auto-organize"
+              desc="ImpoMail reads your messages and places them into smart categories so you can browse by purpose."
+            />
+            <StepCard
+              step="3"
+              icon={MessageCircle}
+              title="Ask Impo"
+              desc="Use voice or text to search, read, compose, and manage your mail across any language."
+            />
+          </div>
+        </section>
+
+        {/* Trust & contact */}
+        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
+          <div className="grid items-center gap-8 rounded-3xl border border-border/60 p-8 lg:grid-cols-2 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
+            <div>
+              <h2 className="font-display text-2xl tracking-tight lg:text-3xl">Built with privacy in mind</h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Your Gmail messages are processed through official Google APIs with encrypted tokens. We do not sell your data, serve ads, or train third-party models on your mail. You can disconnect your Gmail account at any time from the Settings page.
+              </p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/30 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">AES-256 encrypted tokens</p>
+                  <p className="text-xs text-muted-foreground">OAuth credentials are encrypted at rest.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/30 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">No ads or data selling</p>
+                  <p className="text-xs text-muted-foreground">Your mail is never sold to advertisers.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
@@ -205,9 +283,25 @@ function LandingPage() {
           <div className="flex items-center gap-5">
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+            <a href="mailto:support@impomail.lovable.app" className="hover:text-foreground">Contact support</a>
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function StepCard({ step, icon: Icon, title, desc }: { step: string; icon: typeof Inbox; title: string; desc: string }) {
+  return (
+    <div className="glass-card gold-hairline rounded-2xl p-6 transition hover:border-primary/30">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary font-display text-lg">
+        {step}
+      </div>
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary">
+        <Icon className="h-5 w-5" strokeWidth={1.5} />
+      </div>
+      <h3 className="font-display text-lg font-medium tracking-tight">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
     </div>
   );
 }
