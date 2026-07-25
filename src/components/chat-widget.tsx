@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bot, X, Send, Loader2, Maximize2 } from "lucide-react";
+import { Bot, X, Send, Loader2, Maximize2, Volume2, VolumeX } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,17 +7,40 @@ import { listChatHistory, sendChatMessage } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
 import { useVoiceMode } from "@/lib/voice-command";
 import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
+import { speakText, stopSpeech } from "@/lib/multi-voice";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [autoSpeak, setAutoSpeak] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
   const navigate = useNavigate();
   const history = useServerFn(listChatHistory);
   const send = useServerFn(sendChatMessage);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const load = () => setVoices(window.speechSynthesis.getVoices());
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
+
+  const speakReply = useCallback(
+    (text: string) => {
+      const clean = stripSiteActions(text).trim();
+      if (!clean) return;
+      setSpeaking(true);
+      const ok = speakText(clean, voices, () => setSpeaking(false));
+      if (!ok) setSpeaking(false);
+    },
+    [voices],
+  );
 
   const { data: messages } = useQuery({
     queryKey: ["chat-history"],
@@ -54,8 +77,19 @@ export function ChatWidget() {
       qc.invalidateQueries({ queryKey: ["chat-history"] });
       const reply = (res as { reply?: string })?.reply ?? "";
       runActions(parseSiteActions(reply).actions);
+      if (autoSpeakRef.current) speakReply(reply);
     },
   });
+
+  const autoSpeakRef = useRef(autoSpeak);
+  autoSpeakRef.current = autoSpeak;
+  const speakReplyRef = useRef(speakReply);
+  speakReplyRef.current = speakReply;
+
+  useEffect(() => {
+    if (!open || !autoSpeak) stopSpeech();
+    if (!open) setSpeaking(false);
+  }, [open, autoSpeak]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -76,6 +110,7 @@ export function ChatWidget() {
   useVoiceMode("impo", {
     onWake: (rest) => {
       setOpen(true);
+      setAutoSpeak(true);
       setInput(rest);
     },
     onDictate: (t) => setInput(t),
@@ -84,6 +119,7 @@ export function ChatWidget() {
       setInput("");
       if (!text || mutateRef.current.isPending) return;
       setOpen(true);
+      setAutoSpeak(true);
       mutateRef.current.mutate(text);
     },
   });
@@ -104,6 +140,23 @@ export function ChatWidget() {
             <Link to="/assistant" aria-label="Open full assistant" className="rounded-full p-1.5 text-muted-foreground hover:text-foreground">
               <Maximize2 className="h-4 w-4" />
             </Link>
+            <button
+              aria-label={autoSpeak ? "Mute spoken replies" : "Speak replies aloud"}
+              title={autoSpeak ? "Voice replies on" : "Voice replies off"}
+              onClick={() => {
+                setAutoSpeak((v) => {
+                  if (v) { stopSpeech(); setSpeaking(false); }
+                  return !v;
+                });
+              }}
+              className={cn(
+                "rounded-full p-1.5 text-muted-foreground hover:text-foreground",
+                autoSpeak && "text-primary",
+                speaking && "animate-pulse",
+              )}
+            >
+              {autoSpeak ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </button>
             <button aria-label="Close chat" onClick={() => setOpen(false)} className="rounded-full p-1.5 text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
             </button>
