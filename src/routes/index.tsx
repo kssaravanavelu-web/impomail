@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   ssr: false,
