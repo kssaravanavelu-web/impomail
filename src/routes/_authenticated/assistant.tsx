@@ -1,6 +1,6 @@
-import { stripSiteActions } from "@/lib/site-commands";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Bot, Loader2, Send, Sparkles, Trash2, Volume2, VolumeX, Square } from "lucide-react";
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
 import { MusicPlayer } from "@/components/music-player";
-import { parseDialogue, pickVoiceForRole, voiceProfile } from "@/lib/multi-voice";
+import { parseDialogue, pickVoiceForRole, voiceProfile, SOFT_VOLUME } from "@/lib/multi-voice";
 
 export const Route = createFileRoute("/_authenticated/assistant")({
   head: () => ({
@@ -110,7 +110,7 @@ function Assistant() {
       const prof = voiceProfile(seg.role);
       u.rate = prof.rate;
       u.pitch = prof.pitch;
-      u.volume = 1;
+      u.volume = SOFT_VOLUME;
       if (i === segments.length - 1) {
         u.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
         u.onerror = () => setSpeakingId((cur) => (cur === id ? null : cur));
