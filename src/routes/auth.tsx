@@ -38,7 +38,7 @@ function AuthPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         if (safeNext) window.location.assign(safeNext);
-        else navigate({ to: "/home", replace: true });
+        else navigate({ to: "/connect-gmail", replace: true });
       }
     });
   }, [navigate, safeNext]);
@@ -58,7 +58,7 @@ function AuthPage() {
     }
     if (result.redirected) return;
     if (safeNext) window.location.assign(safeNext);
-    else navigate({ to: "/home", replace: true });
+    else navigate({ to: "/connect-gmail", replace: true });
   };
 
   const handleEmail = async (e: FormEvent) => {
@@ -69,7 +69,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (safeNext) window.location.assign(safeNext);
-        else navigate({ to: "/home", replace: true });
+        else navigate({ to: "/connect-gmail", replace: true });
       } else {
         const { error } = await supabase.auth.signUp({
           email,
