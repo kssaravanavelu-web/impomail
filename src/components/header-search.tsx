@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listGmailMessages } from "@/lib/gmail.functions";
 import { GmailList } from "@/components/gmail-list";
 import { MicButton } from "@/components/mic-button";
-import { useWakeWord } from "@/hooks/use-wake-word";
+import { useVoiceCommand, useVoiceMode } from "@/lib/voice-command";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -17,8 +17,9 @@ export function HeaderSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   const list = useServerFn(listGmailMessages);
 
-  const wake = useWakeWord({
-    word: "search",
+  const wake = useVoiceCommand();
+
+  useVoiceMode("search", {
     onWake: (rest) => {
       setOpen(true);
       inputRef.current?.focus();
@@ -29,6 +30,19 @@ export function HeaderSearch() {
       if (text) setQ(text);
     },
   });
+
+  // Impo can trigger a search from the chat widget.
+  useEffect(() => {
+    const onSearch = (e: Event) => {
+      const q = (e as CustomEvent<string>).detail;
+      if (!q) return;
+      setQ(q);
+      setOpen(true);
+      inputRef.current?.focus();
+    };
+    window.addEventListener("impo:search", onSearch);
+    return () => window.removeEventListener("impo:search", onSearch);
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(q.trim()), 350);
@@ -85,14 +99,16 @@ export function HeaderSearch() {
             }
             if (wake.enabled) wake.sleep();
             wake.toggle();
-            toast.info(wake.enabled ? "Wake word off" : "Wake word on — just say “search”");
+            toast.info(
+              wake.enabled ? "Wake words off" : "Wake words on — say “search …” or “hi Impo”",
+            );
           }}
-          aria-label={wake.enabled ? "Disable wake word" : "Enable wake word"}
-          title={wake.enabled ? "Wake word on — say “search”" : "Enable “search” wake word"}
+          aria-label={wake.enabled ? "Disable wake words" : "Enable wake words"}
+          title={wake.enabled ? "Wake words on — say “search” or “hi Impo”" : "Enable “search” / “hi Impo” wake words"}
           className={cn(
             "shrink-0 text-muted-foreground transition-colors hover:text-foreground",
             wake.enabled && "text-primary",
-            wake.awake && "animate-pulse text-primary",
+            wake.mode && "animate-pulse text-primary",
           )}
         >
           {wake.enabled ? <Ear className="h-4 w-4" /> : <EarOff className="h-4 w-4" />}
