@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -36,12 +36,7 @@ function Splash() {
           visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
         }`}
       >
-        <img
-          src={logoAsset.url}
-          alt="ImpoMail"
-          className="h-24 w-24 rounded-3xl object-cover shadow-2xl"
-          style={{ boxShadow: "var(--shadow-glow)" }}
-        />
+        <BrandLogo className="h-24 w-24 rounded-3xl" />
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             Impo<span className="text-primary">Mail</span>
