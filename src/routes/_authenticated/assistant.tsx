@@ -126,9 +126,11 @@ function Assistant() {
       const typing: ChatMsg = { id: `local-a-${Date.now()}`, role: "assistant", content: "…" };
       setPending((p) => [...p, userMsg, typing]);
     },
-    onSuccess: async () => {
+    onSuccess: async (res: unknown) => {
       setPending([]);
       await qc.invalidateQueries({ queryKey: ["assistant-history"] });
+      const reply = (res as { reply?: string })?.reply ?? "";
+      runActions(parseSiteActions(reply).actions);
     },
     onError: (e: unknown) => {
       setPending([]);
