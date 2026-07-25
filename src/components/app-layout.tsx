@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, Search, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
+import { Mail, Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
+import { HeaderSearch } from "@/components/header-search";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
