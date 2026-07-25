@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, X, Send, Loader2, Maximize2 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listChatHistory, sendChatMessage } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
+import { useVoiceMode } from "@/lib/voice-command";
+import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export function ChatWidget() {
@@ -12,6 +15,7 @@ export function ChatWidget() {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const history = useServerFn(listChatHistory);
   const send = useServerFn(sendChatMessage);
 
@@ -21,14 +25,44 @@ export function ChatWidget() {
     enabled: open,
   });
 
+  const runActions = useCallback(
+    (actions: SiteAction[]) => {
+      for (const a of actions) {
+        if (a.type === "go") {
+          navigate({ to: a.path });
+          toast.info(`Opening ${a.path}`);
+        } else if (a.type === "search") {
+          window.dispatchEvent(new CustomEvent("impo:search", { detail: a.query }));
+          toast.info(`Searching “${a.query}”`);
+        } else if (a.type === "compose") {
+          try {
+            sessionStorage.setItem(
+              "impo-compose-prefill",
+              JSON.stringify({ to: a.to ?? "", subject: a.subject ?? "", body: a.body ?? "" }),
+            );
+          } catch { /* ignore */ }
+          navigate({ to: "/compose" });
+        }
+      }
+    },
+    [navigate],
+  );
+
   const mutation = useMutation({
     mutationFn: (content: string) => send({ data: { content } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["chat-history"] }),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["chat-history"] });
+      const reply = (res as { reply?: string })?.reply ?? "";
+      runActions(parseSiteActions(reply).actions);
+    },
   });
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, mutation.isPending, open]);
+
+  const mutateRef = useRef(mutation);
+  mutateRef.current = mutation;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +71,22 @@ export function ChatWidget() {
     setInput("");
     mutation.mutate(text);
   };
+
+  // Wake word: "hi impo" (say it once) opens the widget and dictates into it.
+  useVoiceMode("impo", {
+    onWake: (rest) => {
+      setOpen(true);
+      setInput(rest);
+    },
+    onDictate: (t) => setInput(t),
+    onFinal: (t) => {
+      const text = t.trim();
+      setInput("");
+      if (!text || mutateRef.current.isPending) return;
+      setOpen(true);
+      mutateRef.current.mutate(text);
+    },
+  });
 
   return (
     <>
@@ -75,7 +125,7 @@ export function ChatWidget() {
                       : "text-foreground",
                   )}
                 >
-                  {m.content}
+                  {m.role === "assistant" ? stripSiteActions(m.content) : m.content}
                 </div>
               </div>
             ))}
