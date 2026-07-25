@@ -257,13 +257,13 @@ function Assistant() {
                           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Impo is thinking…
                         </span>
                       ) : (
-                        m.content
+                        stripSiteActions(m.content)
                       )}
                     </div>
                     {!isUser && !isTyping && (
                       <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                         <button
-                          onClick={() => speak(m.id, m.content)}
+                          onClick={() => speak(m.id, stripSiteActions(m.content))}
                           className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
                           aria-label={speakingId === m.id ? "Stop speaking" : "Speak this reply"}
                           title={muted ? "Unmute to hear" : speakingId === m.id ? "Stop" : "Speak"}
