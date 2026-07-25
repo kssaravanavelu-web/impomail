@@ -114,11 +114,14 @@ export type GmailMessageSummary = {
   subject: string;
   date: string;
   unread: boolean;
+  category: import("@/lib/mock-data").Category;
 };
 
 export const listGmailMessages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { q?: string; maxResults?: number } | undefined) => input ?? {})
+  .inputValidator(
+    (input: { q?: string; maxResults?: number; labelIds?: string[] } | undefined) => input ?? {},
+  )
   .handler(async ({ data, context }): Promise<GmailMessageSummary[]> => {
     const { getConnectionKeyForUser } = await import(
       "./app-user-connections.server"
@@ -128,9 +131,11 @@ export const listGmailMessages = createServerFn({ method: "GET" })
     const { callAsAppUser } = await import(
       "@/integrations/lovable/appUserConnector"
     );
+    const { categorizeGmail } = await import("./categorize");
     const params = new URLSearchParams();
     params.set("maxResults", String(Math.min(data.maxResults ?? 20, 50)));
     if (data.q) params.set("q", data.q);
+    for (const l of data.labelIds ?? []) params.append("labelIds", l);
     const listRes = await callAsAppUser({
       gatewayBaseUrl: GATEWAY_BASE_URL,
       connectionAPIKey: key,
@@ -159,16 +164,111 @@ export const listGmailMessages = createServerFn({ method: "GET" })
         };
         const h = (n: string) =>
           msg.payload?.headers?.find((x) => x.name.toLowerCase() === n.toLowerCase())?.value ?? "";
+        const from = h("From");
+        const subject = h("Subject");
         return {
           id: msg.id,
           threadId: msg.threadId,
           snippet: msg.snippet ?? "",
-          from: h("From"),
-          subject: h("Subject"),
+          from,
+          subject,
           date: h("Date") || (msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : ""),
           unread: (msg.labelIds ?? []).includes("UNREAD"),
+          category: categorizeGmail(from, subject),
         } satisfies GmailMessageSummary;
       }),
     );
     return detailed.filter((x): x is GmailMessageSummary => x !== null);
+  });
+
+export type GmailMessageFull = {
+  id: string;
+  threadId: string;
+  from: string;
+  fromEmail: string;
+  to: string;
+  subject: string;
+  date: string;
+  bodyText: string;
+  bodyHtml: string;
+  unread: boolean;
+  category: import("@/lib/mock-data").Category;
+};
+
+function decodeB64Url(input: string): string {
+  const b64 = input.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = b64.length % 4 ? b64 + "=".repeat(4 - (b64.length % 4)) : b64;
+  try {
+    return Buffer.from(pad, "base64").toString("utf8");
+  } catch {
+    return "";
+  }
+}
+
+type GmailPart = {
+  mimeType?: string;
+  body?: { data?: string; size?: number };
+  parts?: GmailPart[];
+};
+
+function extractBodies(part: GmailPart | undefined): { text: string; html: string } {
+  if (!part) return { text: "", html: "" };
+  let text = "";
+  let html = "";
+  const walk = (p: GmailPart) => {
+    if (p.body?.data) {
+      const decoded = decodeB64Url(p.body.data);
+      if (p.mimeType === "text/plain" && !text) text = decoded;
+      else if (p.mimeType === "text/html" && !html) html = decoded;
+    }
+    for (const c of p.parts ?? []) walk(c);
+  };
+  walk(part);
+  return { text, html };
+}
+
+export const getGmailMessage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }): Promise<GmailMessageFull | null> => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    if (!key) return null;
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const { categorizeGmail } = await import("./categorize");
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey: key,
+      connectorId: CONNECTOR_ID,
+      path: `/gmail/v1/users/me/messages/${data.id}?format=full`,
+    });
+    if (!res.ok) throw new Error(`Gmail get failed: ${res.status}`);
+    const msg = (await res.json()) as {
+      id: string;
+      threadId: string;
+      labelIds?: string[];
+      internalDate?: string;
+      payload?: GmailPart & { headers?: { name: string; value: string }[] };
+    };
+    const h = (n: string) =>
+      msg.payload?.headers?.find((x) => x.name.toLowerCase() === n.toLowerCase())?.value ?? "";
+    const from = h("From");
+    const subject = h("Subject");
+    const emailMatch = from.match(/<([^>]+)>/);
+    const fromEmail = emailMatch ? emailMatch[1] : from;
+    const fromName = from.replace(/<[^>]+>/, "").replace(/"/g, "").trim() || fromEmail;
+    const { text, html } = extractBodies(msg.payload);
+    return {
+      id: msg.id,
+      threadId: msg.threadId,
+      from: fromName,
+      fromEmail,
+      to: h("To"),
+      subject,
+      date: h("Date") || (msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : ""),
+      bodyText: text,
+      bodyHtml: html,
+      unread: (msg.labelIds ?? []).includes("UNREAD"),
+      category: categorizeGmail(from, subject),
+    };
   });
