@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
+import { BrandLogo } from "@/components/brand-logo";
 
 type SidebarItem = {
   to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
@@ -88,12 +88,7 @@ export function AppLayout() {
           onClick={() => setOpen(false)}
           className="flex h-16 items-center gap-2 border-b border-border/60 px-5 transition-colors hover:opacity-80"
         >
-          <img
-            src={logoAsset.url}
-            alt="ImpoMail"
-            className="h-9 w-9 rounded-xl object-cover"
-            style={{ boxShadow: "var(--shadow-glow)" }}
-          />
+          <BrandLogo className="h-9 w-9 rounded-xl" />
           <span className="text-lg font-bold tracking-tight">
             Impo<span className="text-primary">Mail</span>
           </span>
@@ -148,12 +143,7 @@ export function AppLayout() {
             <Menu className="h-5 w-5" />
           </Button>
           <Link to="/home" className="hidden shrink-0 items-center gap-2 transition-opacity hover:opacity-80 lg:flex">
-            <img
-              src={logoAsset.url}
-              alt="ImpoMail"
-              className="h-9 w-9 rounded-xl object-cover"
-              style={{ boxShadow: "var(--shadow-glow)" }}
-            />
+            <BrandLogo className="h-9 w-9 rounded-xl" />
             <span className="text-lg font-bold tracking-tight">
               Impo<span className="text-primary">Mail</span>
             </span>

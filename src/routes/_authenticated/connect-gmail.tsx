@@ -10,7 +10,7 @@ import {
   saveGmailConnection,
   startGmailConnect,
 } from "@/lib/gmail.functions";
-import logoAsset from "@/../public/impo-mail-logo.png.asset.json";
+import { BrandLogo } from "@/components/brand-logo";
 
 const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
 
@@ -85,7 +85,7 @@ function ConnectGmailPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="glass-card rounded-3xl p-10 max-w-lg w-full text-center silk-rise">
         <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mb-6 overflow-hidden">
-          <img src={logoAsset.url} alt="ImpoMail" className="h-full w-full object-cover" />
+          <BrandLogo className="h-full w-full" glow={false} />
         </div>
         <h1 className="font-serif italic text-3xl mb-3">Connect your Gmail</h1>
         <p className="text-muted-foreground mb-8">
