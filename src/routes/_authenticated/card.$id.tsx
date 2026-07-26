@@ -15,6 +15,8 @@ import {
   Trash2,
   MessagesSquare,
 } from "lucide-react";
+import { ImageIcon } from "lucide-react";
+import { VoiceRecorderButton } from "@/components/voice-recorder-button";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +113,7 @@ function CardChat() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editingName, setEditingName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   const { data: cards, isLoading: cardsLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
@@ -198,6 +201,7 @@ function CardChat() {
     }
     if (added.length) setAttachments((p) => [...p, ...added]);
     if (fileRef.current) fileRef.current.value = "";
+    if (photoRef.current) photoRef.current.value = "";
   };
 
   const sendMut = useMutation({
@@ -445,27 +449,85 @@ function CardChat() {
       <div className="glass-card rounded-b-3xl border-t border-primary/10 px-3 py-3 sm:px-4">
         {attachments.length > 0 && (
           <div className="mb-2 flex flex-wrap gap-2">
-            {attachments.map((a, i) => (
-              <span key={`${a.filename}-${i}`} className="inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs">
-                <FileIcon className="h-3 w-3" /> {a.filename}
-                <button onClick={() => setAttachments((p) => p.filter((_, j) => j !== i))} aria-label={`Remove ${a.filename}`}>
+            {attachments.map((a, i) => {
+              const src = `data:${a.mimeType};base64,${a.dataBase64}`;
+              const remove = (
+                <button
+                  onClick={() => setAttachments((p) => p.filter((_, j) => j !== i))}
+                  aria-label={`Remove ${a.filename}`}
+                  className="absolute -right-1.5 -top-1.5 rounded-full border border-border/60 bg-background p-0.5"
+                >
                   <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
                 </button>
-              </span>
-            ))}
+              );
+              if (a.mimeType.startsWith("image/")) {
+                return (
+                  <span key={`${a.filename}-${i}`} className="relative inline-block">
+                    <img
+                      src={src}
+                      alt={a.filename}
+                      className="h-16 w-16 rounded-xl border border-border/60 object-cover"
+                    />
+                    {remove}
+                  </span>
+                );
+              }
+              if (a.mimeType.startsWith("audio/")) {
+                return (
+                  <span
+                    key={`${a.filename}-${i}`}
+                    className="relative inline-flex items-center gap-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-3 py-2"
+                  >
+                    <audio controls src={src} className="h-8 max-w-[200px]" />
+                    {remove}
+                  </span>
+                );
+              }
+              return (
+                <span
+                  key={`${a.filename}-${i}`}
+                  className="relative inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs"
+                >
+                  <FileIcon className="h-3 w-3" /> {a.filename}
+                  {remove}
+                </span>
+              );
+            })}
           </div>
         )}
         <div className="flex items-end gap-2">
-          <input ref={fileRef} type="file" multiple hidden onChange={(e) => onFiles(e.target.files)} />
+          <input ref={fileRef} type="file" multiple hidden accept="*/*" onChange={(e) => onFiles(e.target.files)} />
+          <input
+            ref={photoRef}
+            type="file"
+            multiple
+            hidden
+            accept="image/*,application/pdf"
+            onChange={(e) => onFiles(e.target.files)}
+          />
           <Button
             variant="ghost"
             size="icon"
             className="h-10 w-10 shrink-0 rounded-full text-muted-foreground hover:text-primary"
             onClick={() => fileRef.current?.click()}
             aria-label="Attach files"
+            title="Attach any file"
           >
             <Paperclip className="h-4 w-4" />
           </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 shrink-0 rounded-full text-muted-foreground hover:text-primary"
+            onClick={() => photoRef.current?.click()}
+            aria-label="Attach photos or PDFs"
+            title="Photos & PDFs"
+          >
+            <ImageIcon className="h-4 w-4" />
+          </Button>
+          <VoiceRecorderButton
+            onRecorded={(v) => setAttachments((p) => [...p, v])}
+          />
           <Textarea
             rows={1}
             placeholder={emails.length ? `Message ${card.name}…` : "Add a member first"}
