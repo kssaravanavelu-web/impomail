@@ -195,16 +195,16 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* What is ImpoMail? */}
+        {/* What is IMPOMAIL? */}
         <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
           <div className="rounded-3xl border border-border/60 p-8 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">What is ImpoMail?</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">What is IMPOMAIL?</p>
               <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">
                 A Gmail companion built for clarity
               </h2>
               <p className="mt-5 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                ImpoMail is a web application that helps Gmail users organize their inbox by automatically categorizing messages into meaningful sections: <strong className="text-foreground">payments, jobs, internships, OTPs, recharges, personal conversations, promotions, and updates.</strong> It also includes an AI assistant named Impo who can read, search, summarize, and compose messages on your behalf using voice or text commands.
+                IMPOMAIL is a web application that helps Gmail users organize their inbox by automatically categorizing messages into meaningful sections: <strong className="text-foreground">payments, jobs, internships, OTPs, recharges, personal conversations, promotions, and updates.</strong> It also includes an AI assistant named Impo who can read, search, summarize, and compose messages on your behalf using voice or text commands.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">
                 The app is built for professionals, students, and anyone who receives a high volume of transactional email and wants to find what matters in seconds.
