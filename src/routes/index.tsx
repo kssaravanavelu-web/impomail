@@ -25,14 +25,14 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: "ImpoMail",
+          name: "IMPOMAIL",
           url: "https://impomail.lovable.app/",
-          description: "ImpoMail is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls.",
+          description: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls.",
           applicationCategory: "EmailApplication",
           operatingSystem: "Web",
           author: {
             "@type": "Organization",
-            name: "ImpoMail",
+            name: "IMPOMAIL",
           },
         }),
       },
