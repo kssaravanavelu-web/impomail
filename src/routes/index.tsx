@@ -8,10 +8,10 @@ import { Inbox, Sparkles, Shield, Zap, Mail, ArrowRight, Check, Search, Lock, Me
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ImpoMail — Smart Gmail Companion" },
-      { name: "description", content: "ImpoMail is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
-      { property: "og:title", content: "ImpoMail — Smart Gmail Companion" },
-      { property: "og:description", content: "ImpoMail organizes your Gmail into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
+      { title: "IMPOMAIL — Smart Gmail Companion" },
+      { name: "description", content: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
+      { property: "og:title", content: "IMPOMAIL — Smart Gmail Companion" },
+      { property: "og:description", content: "IMPOMAIL organizes your Gmail into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://impomail.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -25,14 +25,14 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: "ImpoMail",
+          name: "IMPOMAIL",
           url: "https://impomail.lovable.app/",
-          description: "ImpoMail is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls.",
+          description: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls.",
           applicationCategory: "EmailApplication",
           operatingSystem: "Web",
           author: {
             "@type": "Organization",
-            name: "ImpoMail",
+            name: "IMPOMAIL",
           },
         }),
       },
@@ -73,7 +73,7 @@ function LandingPage() {
         <Link to="/" className="flex items-center gap-3">
           <BrandLogo className="h-10 w-10 rounded-xl" />
           <span className="font-display text-xl font-semibold tracking-tight">
-            Impo<span className="text-primary">Mail</span>
+            IMPOMAIL
           </span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
@@ -104,10 +104,10 @@ function LandingPage() {
                 <Sparkles className="h-3.5 w-3.5 text-primary" /> Smart Gmail companion
               </div>
               <h1 className="font-display text-5xl font-light leading-[1.05] tracking-tight lg:text-7xl">
-                ImpoMail: only the mail that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matters</span>
+                IMPOMAIL: only the mail that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matters</span>
               </h1>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                <strong className="text-foreground">ImpoMail is a smart Gmail companion app.</strong> It connects to your Gmail account, reads your messages, and automatically sorts them into the categories that matter most — payments, jobs, internships, OTPs, recharges, personal, promotions, and updates — so you can focus on what is important without digging through a noisy inbox.
+                <strong className="text-foreground">IMPOMAIL is a smart Gmail companion app.</strong> It connects to your Gmail account, reads your messages, and automatically sorts them into the categories that matter most — payments, jobs, internships, OTPs, recharges, personal, promotions, and updates — so you can focus on what is important without digging through a noisy inbox.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 {session === true ? (
@@ -195,16 +195,16 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* What is ImpoMail? */}
+        {/* What is IMPOMAIL? */}
         <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
           <div className="rounded-3xl border border-border/60 p-8 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">What is ImpoMail?</p>
+              <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">What is IMPOMAIL?</p>
               <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">
                 A Gmail companion built for clarity
               </h2>
               <p className="mt-5 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                ImpoMail is a web application that helps Gmail users organize their inbox by automatically categorizing messages into meaningful sections: <strong className="text-foreground">payments, jobs, internships, OTPs, recharges, personal conversations, promotions, and updates.</strong> It also includes an AI assistant named Impo who can read, search, summarize, and compose messages on your behalf using voice or text commands.
+                IMPOMAIL is a web application that helps Gmail users organize their inbox by automatically categorizing messages into meaningful sections: <strong className="text-foreground">payments, jobs, internships, OTPs, recharges, personal conversations, promotions, and updates.</strong> It also includes an AI assistant named Impo who can read, search, summarize, and compose messages on your behalf using voice or text commands.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">
                 The app is built for professionals, students, and anyone who receives a high volume of transactional email and wants to find what matters in seconds.
@@ -278,7 +278,7 @@ function LandingPage() {
       <footer className="relative z-10 border-t border-border/60 bg-card/30 px-5 py-8 lg:px-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:text-left">
           <p>
-            ImpoMail · Founder: Saravanavel · Support Founder: Vishnuvardhan
+            IMPOMAIL · Founder: Saravanavel · Support Founder: Vishnuvardhan
           </p>
           <div className="flex items-center gap-5">
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
