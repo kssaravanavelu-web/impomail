@@ -234,7 +234,6 @@ function CardChat() {
     );
   }
 
-  let lastDay = "";
   const memberLimit = card.kind === "group" ? MAX_GROUP_MEMBERS : MAX_PERSONAL_CARD_EMAILS;
   const atMemberLimit = emails.length >= memberLimit;
 
@@ -409,18 +408,8 @@ function CardChat() {
           {ordered.map((m) => {
             const senderEmail = emailFromHeader(m.from);
             const mine = Boolean(myEmail) && senderEmail === myEmail;
-            const day = dayLabel(m.date);
-            const showDay = day !== lastDay;
-            lastDay = day;
             return (
               <div key={m.id}>
-                {showDay && (
-                  <div className="my-4 flex justify-center">
-                    <span className="rounded-full border border-primary/15 bg-primary/[0.06] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {day}
-                    </span>
-                  </div>
-                )}
                 <div className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
                   {!mine && <Avatar seed={senderEmail} label={nameFromHeader(m.from)} className="h-7 w-7 text-[11px]" />}
                   <Link
