@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, Check } from "lucide-react";
+import { Bell, Check, BellRing } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,6 +7,12 @@ import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functio
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  ensureNotificationWorker,
+  notificationPermission,
+  requestNotificationPermission,
+  showMailNotification,
+} from "@/lib/push-notify";
 
 const SEEN_KEY = "impo-seen-notifications";
 
@@ -33,8 +39,22 @@ export function NotificationBell() {
   const announced = useRef<Set<string>>(new Set());
   const firstLoad = useRef(true);
   const list = useServerFn(listGmailMessages);
+  const [permission, setPermission] = useState<string>("default");
 
   useEffect(() => setSeen(readSeen()), []);
+
+  // System notifications (home / lock screen) via the notification service worker.
+  useEffect(() => {
+    setPermission(notificationPermission());
+    if (notificationPermission() === "granted") void ensureNotificationWorker();
+  }, []);
+
+  const enableSystemNotifications = async () => {
+    const result = await requestNotificationPermission();
+    setPermission(result);
+    if (result === "granted") toast.success("Device notifications enabled");
+    else if (result === "denied") toast.error("Notifications are blocked in your browser settings");
+  };
 
   const { data } = useQuery({
     queryKey: ["notifications"],
@@ -58,6 +78,12 @@ export function NotificationBell() {
     fresh.slice(0, 3).forEach((m) => {
       announced.current.add(m.id);
       toast(`New mail — ${m.category}`, { description: `${m.from}: ${m.subject}` });
+      void showMailNotification({
+        title: m.from || "New mail",
+        body: m.subject || m.snippet,
+        tag: m.id,
+        url: `/message/${m.id}`,
+      });
     });
     items.forEach((m) => announced.current.add(m.id));
   }, [items, seen]);
@@ -125,6 +151,15 @@ export function NotificationBell() {
               </button>
             )}
           </div>
+          {permission !== "granted" && permission !== "unsupported" && (
+            <button
+              onClick={enableSystemNotifications}
+              className="flex w-full items-center gap-2 border-b border-border/60 bg-primary/5 px-4 py-3 text-left text-xs text-primary transition hover:bg-primary/10"
+            >
+              <BellRing className="h-3.5 w-3.5 shrink-0" />
+              Turn on device alerts to get new mail on your home & lock screen
+            </button>
+          )}
           <div className="max-h-80 overflow-y-auto">
             {items.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-muted-foreground">You're all caught up.</p>
