@@ -33,6 +33,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedMessageIdRouteImport } from './routes/_authenticated/message.$id'
 import { Route as AuthenticatedCategorySlugRouteImport } from './routes/_authenticated/category.$slug'
+import { Route as AuthenticatedCardIdRouteImport } from './routes/_authenticated/card.$id'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -160,6 +161,11 @@ const AuthenticatedCategorySlugRoute =
     path: '/category/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCardIdRoute = AuthenticatedCardIdRouteImport.update({
+  id: '/card/$id',
+  path: '/card/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/trash': typeof AuthenticatedTrashRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/card/$id': typeof AuthenticatedCardIdRoute
   '/category/$slug': typeof AuthenticatedCategorySlugRoute
   '/message/$id': typeof AuthenticatedMessageIdRoute
 }
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/trash': typeof AuthenticatedTrashRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/card/$id': typeof AuthenticatedCardIdRoute
   '/category/$slug': typeof AuthenticatedCategorySlugRoute
   '/message/$id': typeof AuthenticatedMessageIdRoute
 }
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/trash': typeof AuthenticatedTrashRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/card/$id': typeof AuthenticatedCardIdRoute
   '/_authenticated/category/$slug': typeof AuthenticatedCategorySlugRoute
   '/_authenticated/message/$id': typeof AuthenticatedMessageIdRoute
 }
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/card/$id'
     | '/category/$slug'
     | '/message/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/card/$id'
     | '/category/$slug'
     | '/message/$id'
   id:
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/trash'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/card/$id'
     | '/_authenticated/category/$slug'
     | '/_authenticated/message/$id'
   fileRoutesById: FileRoutesById
@@ -523,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCategorySlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/card/$id': {
+      id: '/_authenticated/card/$id'
+      path: '/card/$id'
+      fullPath: '/card/$id'
+      preLoaderRoute: typeof AuthenticatedCardIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -555,6 +574,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSentRoute: typeof AuthenticatedSentRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTrashRoute: typeof AuthenticatedTrashRoute
+  AuthenticatedCardIdRoute: typeof AuthenticatedCardIdRoute
   AuthenticatedCategorySlugRoute: typeof AuthenticatedCategorySlugRoute
   AuthenticatedMessageIdRoute: typeof AuthenticatedMessageIdRoute
 }
@@ -574,6 +594,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSentRoute: AuthenticatedSentRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTrashRoute: AuthenticatedTrashRoute,
+  AuthenticatedCardIdRoute: AuthenticatedCardIdRoute,
   AuthenticatedCategorySlugRoute: AuthenticatedCategorySlugRoute,
   AuthenticatedMessageIdRoute: AuthenticatedMessageIdRoute,
 }
