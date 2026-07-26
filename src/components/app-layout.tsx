@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, Sparkles, LogOut, Menu, Home, User, Bot } from "lucide-react";
+import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot } from "lucide-react";
 import { HeaderSearch } from "@/components/header-search";
+import { NotificationBell } from "@/components/notification-bell";
 import { ChatWidget } from "@/components/chat-widget";
 import { VoiceCommandProvider } from "@/lib/voice-command";
 import { useEffect, useState } from "react";
@@ -32,7 +33,7 @@ const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/assistant", label: "Impo", icon: Bot },
   { to: "/compose", label: "Compose", icon: PenSquare },
-  { to: "/ai-search", label: "AI", icon: Sparkles },
+  { to: "/inbox", label: "Inbox", icon: Inbox },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -152,13 +153,8 @@ export function AppLayout() {
             <HeaderSearch />
           </div>
           <div className="flex items-center gap-1">
-            <Link
-              to="/ai-search"
-              className="ml-2 hidden items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary sm:inline-flex"
-            >
-              <Sparkles className="h-3.5 w-3.5" /> AI Search
-            </Link>
-            <Button variant="ghost" size="icon" asChild className="ml-2" aria-label="Settings">
+            <NotificationBell />
+            <Button variant="ghost" size="icon" asChild aria-label="Settings">
               <Link to="/settings">
                 <Settings className="h-5 w-5" />
               </Link>
