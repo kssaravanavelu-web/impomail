@@ -83,7 +83,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "IMPOMAIL — Smart Gmail Companion" },
       { name: "description", content: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
       { name: "author", content: "IMPOMAIL" },
-      { name: "google-site-verification", content: "REPLACE_WITH_GOOGLE_SEARCH_CONSOLE_TOKEN" },
       { property: "og:title", content: "IMPOMAIL — Smart Gmail Companion" },
       { property: "og:description", content: "IMPOMAIL organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
       { property: "og:type", content: "website" },
