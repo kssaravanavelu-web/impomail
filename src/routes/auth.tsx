@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandLogo } from "@/components/brand-logo";
+import { markConsentPending } from "@/lib/consent";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -40,6 +41,8 @@ function AuthPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
+        const meta = data.session.user.user_metadata as Record<string, unknown> | null;
+        if (!meta?.terms_accepted_version) return; // stay here until consent is given
         if (safeNext) window.location.assign(safeNext);
         else navigate({ to: "/connect-gmail", replace: true });
       }
@@ -52,6 +55,7 @@ function AuthPage() {
       return;
     }
     setGoogleLoading(true);
+    markConsentPending();
     const redirectUri = safeNext
       ? `${window.location.origin}${safeNext}`
       : window.location.origin;
@@ -75,6 +79,7 @@ function AuthPage() {
       return;
     }
     setLoading(true);
+    markConsentPending();
     try {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
