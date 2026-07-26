@@ -239,6 +239,8 @@ function CardChat() {
   }
 
   let lastDay = "";
+  const memberLimit = card.kind === "group" ? MAX_GROUP_MEMBERS : MAX_PERSONAL_CARD_EMAILS;
+  const atMemberLimit = emails.length >= memberLimit;
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-6rem)] max-w-3xl flex-col px-2 py-3 sm:px-4 lg:py-6">
