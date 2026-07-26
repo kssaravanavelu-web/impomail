@@ -1,5 +1,5 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot } from "lucide-react";
+import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot, IdCard } from "lucide-react";
 import { HeaderSearch } from "@/components/header-search";
 import { NotificationBell } from "@/components/notification-bell";
 import { ChatWidget } from "@/components/chat-widget";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 
 type SidebarItem = {
-  to: "/compose" | "/home" | "/inbox" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
+  to: "/compose" | "/home" | "/inbox" | "/cards" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
@@ -21,6 +21,7 @@ const sidebarItems: SidebarItem[] = [
   { to: "/compose", label: "Compose", icon: PenSquare, accent: true },
   { to: "/home", label: "Home", icon: Home },
   { to: "/inbox", label: "Inbox", icon: Inbox },
+  { to: "/cards", label: "Cards & Groups", icon: IdCard },
   { to: "/sent", label: "Sent", icon: Send },
   { to: "/drafts", label: "Drafts", icon: FileText },
   { to: "/trash", label: "Trash", icon: Trash2 },
@@ -34,7 +35,7 @@ const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/assistant", label: "Impo", icon: Bot },
   { to: "/compose", label: "Compose", icon: PenSquare },
-  { to: "/inbox", label: "Inbox", icon: Inbox },
+  { to: "/cards", label: "Cards", icon: IdCard },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

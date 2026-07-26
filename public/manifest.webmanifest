@@ -1,0 +1,13 @@
+{
+  "name": "IMPOMAIL",
+  "short_name": "IMPOMAIL",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#08080a",
+  "theme_color": "#08080a",
+  "icons": [
+    { "src": "/impo-mail-logo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "/impo-mail-logo.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" }
+  ]
+}

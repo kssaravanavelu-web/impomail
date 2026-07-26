@@ -65,6 +65,71 @@ export type Database = {
         }
         Relationships: []
       }
+      mail_card_addresses: {
+        Row: {
+          card_id: string
+          created_at: string
+          email: string
+          id: string
+          label: string | null
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          email: string
+          id?: string
+          label?: string | null
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          label?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mail_card_addresses_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "mail_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mail_cards: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

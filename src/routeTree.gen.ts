@@ -26,12 +26,14 @@ import { Route as AuthenticatedGmailStatusRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDraftsRouteImport } from './routes/_authenticated/drafts'
 import { Route as AuthenticatedConnectGmailRouteImport } from './routes/_authenticated/connect-gmail'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
+import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
 import { Route as AuthenticatedAssistantRouteImport } from './routes/_authenticated/assistant'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedMessageIdRouteImport } from './routes/_authenticated/message.$id'
 import { Route as AuthenticatedCategorySlugRouteImport } from './routes/_authenticated/category.$slug'
+import { Route as AuthenticatedCardIdRouteImport } from './routes/_authenticated/card.$id'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -121,6 +123,11 @@ const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   path: '/compose',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCardsRoute = AuthenticatedCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAssistantRoute = AuthenticatedAssistantRouteImport.update({
   id: '/assistant',
   path: '/assistant',
@@ -154,6 +161,11 @@ const AuthenticatedCategorySlugRoute =
     path: '/category/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCardIdRoute = AuthenticatedCardIdRouteImport.update({
+  id: '/card/$id',
+  path: '/card/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -176,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/assistant': typeof AuthenticatedAssistantRoute
+  '/cards': typeof AuthenticatedCardsRoute
   '/compose': typeof AuthenticatedComposeRoute
   '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
@@ -189,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/trash': typeof AuthenticatedTrashRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/card/$id': typeof AuthenticatedCardIdRoute
   '/category/$slug': typeof AuthenticatedCategorySlugRoute
   '/message/$id': typeof AuthenticatedMessageIdRoute
 }
@@ -202,6 +216,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/assistant': typeof AuthenticatedAssistantRoute
+  '/cards': typeof AuthenticatedCardsRoute
   '/compose': typeof AuthenticatedComposeRoute
   '/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/drafts': typeof AuthenticatedDraftsRoute
@@ -215,6 +230,7 @@ export interface FileRoutesByTo {
   '/trash': typeof AuthenticatedTrashRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/card/$id': typeof AuthenticatedCardIdRoute
   '/category/$slug': typeof AuthenticatedCategorySlugRoute
   '/message/$id': typeof AuthenticatedMessageIdRoute
 }
@@ -230,6 +246,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
+  '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/connect-gmail': typeof AuthenticatedConnectGmailRoute
   '/_authenticated/drafts': typeof AuthenticatedDraftsRoute
@@ -243,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/trash': typeof AuthenticatedTrashRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/card/$id': typeof AuthenticatedCardIdRoute
   '/_authenticated/category/$slug': typeof AuthenticatedCategorySlugRoute
   '/_authenticated/message/$id': typeof AuthenticatedMessageIdRoute
 }
@@ -258,6 +276,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/archive'
     | '/assistant'
+    | '/cards'
     | '/compose'
     | '/connect-gmail'
     | '/drafts'
@@ -271,6 +290,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/card/$id'
     | '/category/$slug'
     | '/message/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -284,6 +304,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/archive'
     | '/assistant'
+    | '/cards'
     | '/compose'
     | '/connect-gmail'
     | '/drafts'
@@ -297,6 +318,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/card/$id'
     | '/category/$slug'
     | '/message/$id'
   id:
@@ -311,6 +333,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/archive'
     | '/_authenticated/assistant'
+    | '/_authenticated/cards'
     | '/_authenticated/compose'
     | '/_authenticated/connect-gmail'
     | '/_authenticated/drafts'
@@ -324,6 +347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/trash'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/card/$id'
     | '/_authenticated/category/$slug'
     | '/_authenticated/message/$id'
   fileRoutesById: FileRoutesById
@@ -462,6 +486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cards': {
+      id: '/_authenticated/cards'
+      path: '/cards'
+      fullPath: '/cards'
+      preLoaderRoute: typeof AuthenticatedCardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/assistant': {
       id: '/_authenticated/assistant'
       path: '/assistant'
@@ -504,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCategorySlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/card/$id': {
+      id: '/_authenticated/card/$id'
+      path: '/card/$id'
+      fullPath: '/card/$id'
+      preLoaderRoute: typeof AuthenticatedCardIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -524,6 +562,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
   AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRoute
+  AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedConnectGmailRoute: typeof AuthenticatedConnectGmailRoute
   AuthenticatedDraftsRoute: typeof AuthenticatedDraftsRoute
@@ -535,6 +574,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSentRoute: typeof AuthenticatedSentRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTrashRoute: typeof AuthenticatedTrashRoute
+  AuthenticatedCardIdRoute: typeof AuthenticatedCardIdRoute
   AuthenticatedCategorySlugRoute: typeof AuthenticatedCategorySlugRoute
   AuthenticatedMessageIdRoute: typeof AuthenticatedMessageIdRoute
 }
@@ -542,6 +582,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
   AuthenticatedAssistantRoute: AuthenticatedAssistantRoute,
+  AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedConnectGmailRoute: AuthenticatedConnectGmailRoute,
   AuthenticatedDraftsRoute: AuthenticatedDraftsRoute,
@@ -553,6 +594,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSentRoute: AuthenticatedSentRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTrashRoute: AuthenticatedTrashRoute,
+  AuthenticatedCardIdRoute: AuthenticatedCardIdRoute,
   AuthenticatedCategorySlugRoute: AuthenticatedCategorySlugRoute,
   AuthenticatedMessageIdRoute: AuthenticatedMessageIdRoute,
 }
