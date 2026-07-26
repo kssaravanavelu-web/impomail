@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/brand-logo";
+import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
 import { Inbox, Sparkles, Shield, Zap, Mail, ArrowRight, Check, Search, Lock, MessageCircle } from "lucide-react";
 
