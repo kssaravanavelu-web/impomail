@@ -1,15 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, X, Send, Paperclip, FileIcon, Users, IdCard, ArrowLeft } from "lucide-react";
+import { Loader2, Plus, X, Send, Paperclip, FileIcon, Users, IdCard, ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/message-list";
 import { GmailList } from "@/components/gmail-list";
-import { listMailCards, addCardAddress, removeCardAddress } from "@/lib/cards.functions";
+import { listMailCards, addCardAddress, removeCardAddress, deleteMailCard } from "@/lib/cards.functions";
 import { listGmailMessages, sendGmailMessage } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
@@ -27,10 +27,12 @@ export const Route = createFileRoute("/_authenticated/card/$id")({
 
 function CardDetail() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const list = useServerFn(listMailCards);
   const addAddr = useServerFn(addCardAddress);
   const delAddr = useServerFn(removeCardAddress);
+  const removeCard = useServerFn(deleteMailCard);
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
 
@@ -40,6 +42,7 @@ function CardDetail() {
   const [attachments, setAttachments] = useState<
     { filename: string; mimeType: string; dataBase64: string; size: number }[]
   >([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: cards, isLoading: cardsLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
@@ -66,6 +69,16 @@ function CardDetail() {
   const delMut = useMutation({
     mutationFn: (addressId: string) => delAddr({ data: { id: addressId } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["mail-cards"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteCardMut = useMutation({
+    mutationFn: () => removeCard({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mail-cards"] });
+      toast.success("Card deleted");
+      navigate({ to: "/cards" });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -128,10 +141,40 @@ function CardDetail() {
       <Link to="/cards" className="mb-4 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
         <ArrowLeft className="h-3.5 w-3.5" /> All cards
       </Link>
-      <PageHeader
-        title={card.name}
-        subtitle={`${card.kind === "group" ? "Group" : "Personal card"} · you are the host of ${emails.length} address${emails.length === 1 ? "" : "es"}`}
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <PageHeader
+          title={card.name}
+          subtitle={`${card.kind === "group" ? "Group" : "Personal card"} · you are the host of ${emails.length} address${emails.length === 1 ? "" : "es"}`}
+        />
+        {confirmDelete ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Delete this {card.kind}?</span>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => deleteCardMut.mutate()}
+              disabled={deleteCardMut.isPending}
+              className="h-8"
+            >
+              {deleteCardMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              <span className="ml-1.5">Yes, delete</span>
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(false)} className="h-8" disabled={deleteCardMut.isPending}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setConfirmDelete(true)}
+            className="h-8 text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="ml-1.5">Delete {card.kind}</span>
+          </Button>
+        )}
+      </div>
 
       {/* Host controls */}
       <div className="glass-card mb-8 rounded-3xl p-5">
