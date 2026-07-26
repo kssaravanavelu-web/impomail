@@ -384,7 +384,6 @@ function CardChat() {
                     {!mine && card.kind === "group" && (
                       <p className="mb-0.5 text-[11px] font-semibold text-primary">{nameFromHeader(m.from)}</p>
                     )}
-                    {m.subject && <p className="font-medium leading-snug">{m.subject}</p>}
                     <p className={`leading-snug ${mine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
                       {m.snippet}
                     </p>
@@ -416,12 +415,6 @@ function CardChat() {
             ))}
           </div>
         )}
-        <Input
-          placeholder="Subject (optional)"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="mb-2 h-9 rounded-full border-primary/15 bg-primary/[0.04] text-xs"
-        />
         <div className="flex items-end gap-2">
           <input ref={fileRef} type="file" multiple hidden onChange={(e) => onFiles(e.target.files)} />
           <Button
