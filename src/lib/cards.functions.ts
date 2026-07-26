@@ -43,11 +43,14 @@ export const createMailCard = createServerFn({ method: "POST" })
     const name = input.name.trim();
     if (!name) throw new Error("Card name is required");
     if (name.length > 60) throw new Error("Card name must be under 60 characters");
-    return {
-      name,
-      kind: input.kind === "group" ? ("group" as const) : ("card" as const),
-      emails: input.emails.map((e) => e.trim().toLowerCase()).filter(Boolean).slice(0, 100),
-    };
+    const kind = input.kind === "group" ? ("group" as const) : ("card" as const);
+    const emails = input.emails.map((e) => e.trim().toLowerCase()).filter(Boolean);
+    const MAX_PERSONAL_CARD_EMAILS = 5;
+    if (kind === "card" && emails.length > MAX_PERSONAL_CARD_EMAILS) {
+      throw new Error(`Personal cards can hold up to ${MAX_PERSONAL_CARD_EMAILS} email addresses`);
+    }
+    if (emails.length > 100) throw new Error("Groups can hold up to 100 email addresses");
+    return { name, kind, emails };
   })
   .handler(async ({ data, context }) => {
     const { data: card, error } = await context.supabase
