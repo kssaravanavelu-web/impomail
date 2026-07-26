@@ -32,7 +32,9 @@ import {
   addCardAddress,
   removeCardAddress,
   deleteMailCard,
+  updateMailCard,
 } from "@/lib/cards.functions";
+import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
 import { listGmailMessages, sendGmailMessage, getGmailStatus } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
@@ -101,18 +103,19 @@ function CardChat() {
   const addAddr = useServerFn(addCardAddress);
   const delAddr = useServerFn(removeCardAddress);
   const removeCard = useServerFn(deleteMailCard);
+  const renameCard = useServerFn(updateMailCard);
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
   const status = useServerFn(getGmailStatus);
 
   const [newEmail, setNewEmail] = useState("");
-  const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<
     { filename: string; mimeType: string; dataBase64: string; size: number }[]
   >([]);
   const [membersOpen, setMembersOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editingName, setEditingName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -130,13 +133,16 @@ function CardChat() {
     enabled: Boolean(query),
   });
 
-  const ordered = useMemo(
-    () =>
-      [...(messages ?? [])].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      ),
-    [messages],
-  );
+  // Only messages authored by a member of this card/group (or by the host) are shown.
+  const ordered = useMemo(() => {
+    const allowed = new Set(emails);
+    return [...(messages ?? [])]
+      .filter((m) => {
+        const sender = emailFromHeader(m.from);
+        return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [messages, emails, myEmail]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -168,6 +174,16 @@ function CardChat() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const renameMut = useMutation({
+    mutationFn: (name: string) => renameCard({ data: { id, name } }),
+    onSuccess: () => {
+      setEditingName(null);
+      qc.invalidateQueries({ queryKey: ["mail-cards"] });
+      toast.success("Profile updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const onFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     const MAX_TOTAL = 20 * 1024 * 1024;
@@ -193,13 +209,12 @@ function CardChat() {
       send({
         data: {
           to: emails.join(", "),
-          subject: subject.trim() || (card?.name ? `${card.name}` : "Message"),
+          subject: card?.name ? `${card.name}` : "Message",
           body,
           attachments: attachments.map(({ filename, mimeType, dataBase64 }) => ({ filename, mimeType, dataBase64 })),
         },
       }),
     onSuccess: () => {
-      setSubject("");
       setBody("");
       setAttachments([]);
       toast.success(`Sent to ${emails.length} member${emails.length === 1 ? "" : "s"}`);
