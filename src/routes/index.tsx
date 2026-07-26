@@ -73,7 +73,7 @@ function LandingPage() {
         <Link to="/" className="flex items-center gap-3">
           <BrandLogo className="h-10 w-10 rounded-xl" />
           <span className="font-display text-xl font-semibold tracking-tight">
-            <span className="text-primary">IMPO</span>MAIL
+            IMPOMAIL
           </span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
