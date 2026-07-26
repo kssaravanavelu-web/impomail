@@ -104,8 +104,11 @@ function LandingPage() {
                 <Sparkles className="h-3.5 w-3.5 text-primary" /> Smart Gmail companion
               </div>
               <h1 className="font-display text-5xl font-light leading-[1.05] tracking-tight lg:text-7xl">
-                IMPOMAIL: only the mail that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matters</span>
+                IMPOMAIL
               </h1>
+              <p className="mt-4 font-display text-2xl font-light leading-snug text-foreground/80 lg:text-4xl">
+                Only the Gmail messages that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matter</span>.
+              </p>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground lg:text-lg">
                 <strong className="text-foreground">IMPOMAIL is a smart Gmail companion app.</strong> It connects to your Gmail account, reads your messages, and automatically sorts them into the categories that matter most — payments, jobs, internships, OTPs, recharges, personal, promotions, and updates — so you can focus on what is important without digging through a noisy inbox.
               </p>
@@ -168,7 +171,7 @@ function LandingPage() {
         {/* Features */}
         <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
           <div className="mb-10 text-center">
-            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Why ImpoMail</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Why IMPOMAIL</p>
             <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">Your inbox, finally organized</h2>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -224,13 +227,13 @@ function LandingPage() {
               step="1"
               icon={Mail}
               title="Sign in with Gmail"
-              desc="Create an ImpoMail account and securely connect your Gmail inbox with encrypted OAuth tokens."
+              desc="Create an IMPOMAIL account and securely connect your Gmail inbox with encrypted OAuth tokens."
             />
             <StepCard
               step="2"
               icon={Search}
               title="Auto-organize"
-              desc="ImpoMail reads your messages and places them into smart categories so you can browse by purpose."
+              desc="IMPOMAIL reads your messages and places them into smart categories so you can browse by purpose."
             />
             <StepCard
               step="3"
