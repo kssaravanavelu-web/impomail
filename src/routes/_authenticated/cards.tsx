@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/message-list";
 import { listMailCards, createMailCard, deleteMailCard } from "@/lib/cards.functions";
+import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
 
 export const Route = createFileRoute("/_authenticated/cards")({
   head: () => ({
@@ -23,7 +24,6 @@ export const Route = createFileRoute("/_authenticated/cards")({
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAX_PERSONAL_CARD_EMAILS = 5;
 
 function CardsPage() {
   const qc = useQueryClient();
@@ -38,7 +38,7 @@ function CardsPage() {
 
   const { data, isLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
 
-  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : undefined;
+  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : MAX_GROUP_MEMBERS;
   const atLimit = maxEmails !== undefined && emails.length >= maxEmails;
 
   const addEmail = () => {
@@ -53,7 +53,11 @@ function CardsPage() {
       return;
     }
     if (maxEmails !== undefined && emails.length >= maxEmails) {
-      toast.error(`Personal cards can hold up to ${maxEmails} emails`);
+      toast.error(
+        kind === "card"
+          ? "A personal card can hold only one email address"
+          : `Groups can hold up to ${MAX_GROUP_MEMBERS} members`,
+      );
       return;
     }
     setEmails((p) => [...p, email]);
@@ -125,7 +129,13 @@ function CardsPage() {
               ))}
               <Input
                 className="min-w-[140px] flex-1 border-0 bg-transparent px-1 py-1 text-sm focus-visible:ring-0"
-                placeholder={emails.length ? "Add another email" : "Type email and press enter / add"}
+              placeholder={
+                atLimit
+                  ? "Limit reached"
+                  : emails.length
+                    ? "Add another email"
+                    : "Type email and press enter / add"
+              }
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -154,7 +164,8 @@ function CardsPage() {
         </div>
         {maxEmails !== undefined && (
           <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            {kind === "card" ? "Personal card" : "Group"}: {emails.length}/{maxEmails} emails
+            {kind === "card" ? "Personal card" : "Group"}: {emails.length}/{maxEmails}{" "}
+            {kind === "card" ? "email" : "members"} · you are the host
           </p>
         )}
       </div>

@@ -32,7 +32,9 @@ import {
   addCardAddress,
   removeCardAddress,
   deleteMailCard,
+  updateMailCard,
 } from "@/lib/cards.functions";
+import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
 import { listGmailMessages, sendGmailMessage, getGmailStatus } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
@@ -101,18 +103,19 @@ function CardChat() {
   const addAddr = useServerFn(addCardAddress);
   const delAddr = useServerFn(removeCardAddress);
   const removeCard = useServerFn(deleteMailCard);
+  const renameCard = useServerFn(updateMailCard);
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
   const status = useServerFn(getGmailStatus);
 
   const [newEmail, setNewEmail] = useState("");
-  const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<
     { filename: string; mimeType: string; dataBase64: string; size: number }[]
   >([]);
   const [membersOpen, setMembersOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editingName, setEditingName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -130,13 +133,16 @@ function CardChat() {
     enabled: Boolean(query),
   });
 
-  const ordered = useMemo(
-    () =>
-      [...(messages ?? [])].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      ),
-    [messages],
-  );
+  // Only messages authored by a member of this card/group (or by the host) are shown.
+  const ordered = useMemo(() => {
+    const allowed = new Set(emails);
+    return [...(messages ?? [])]
+      .filter((m) => {
+        const sender = emailFromHeader(m.from);
+        return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [messages, emails, myEmail]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -168,6 +174,16 @@ function CardChat() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const renameMut = useMutation({
+    mutationFn: (name: string) => renameCard({ data: { id, name } }),
+    onSuccess: () => {
+      setEditingName(null);
+      qc.invalidateQueries({ queryKey: ["mail-cards"] });
+      toast.success("Profile updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const onFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     const MAX_TOTAL = 20 * 1024 * 1024;
@@ -193,13 +209,12 @@ function CardChat() {
       send({
         data: {
           to: emails.join(", "),
-          subject: subject.trim() || (card?.name ? `${card.name}` : "Message"),
+          subject: card?.name ? `${card.name}` : "Message",
           body,
           attachments: attachments.map(({ filename, mimeType, dataBase64 }) => ({ filename, mimeType, dataBase64 })),
         },
       }),
     onSuccess: () => {
-      setSubject("");
       setBody("");
       setAttachments([]);
       toast.success(`Sent to ${emails.length} member${emails.length === 1 ? "" : "s"}`);
@@ -224,6 +239,8 @@ function CardChat() {
   }
 
   let lastDay = "";
+  const memberLimit = card.kind === "group" ? MAX_GROUP_MEMBERS : MAX_PERSONAL_CARD_EMAILS;
+  const atMemberLimit = emails.length >= memberLimit;
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-6rem)] max-w-3xl flex-col px-2 py-3 sm:px-4 lg:py-6">
@@ -255,10 +272,45 @@ function CardChat() {
           <SheetContent side="right" className="w-full max-w-sm overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{card.kind === "group" ? "Group members" : "Card addresses"}</SheetTitle>
-              <SheetDescription>You are the host — add or remove addresses anytime.</SheetDescription>
+              <SheetDescription>
+                {card.is_host
+                  ? `You are the host — ${card.kind === "group" ? `up to ${MAX_GROUP_MEMBERS} members` : "one email address only"}.`
+                  : "Only a host can change this."}
+              </SheetDescription>
             </SheetHeader>
 
+            {card.is_host && (
+              <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/[0.04] p-3">
+                <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {card.kind === "group" ? "Group profile" : "Card profile"}
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    value={editingName ?? card.name}
+                    maxLength={60}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && editingName?.trim()) renameMut.mutate(editingName.trim());
+                    }}
+                  />
+                  <Button
+                    onClick={() => editingName?.trim() && renameMut.mutate(editingName.trim())}
+                    disabled={!editingName?.trim() || editingName.trim() === card.name || renameMut.isPending}
+                  >
+                    {renameMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="mt-5 space-y-2">
+              <div className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.08] px-3 py-2">
+                <Avatar seed={myEmail || card.id} label={myEmail || "H"} className="h-9 w-9 text-xs" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{myEmail || "You"}</p>
+                  <p className="truncate text-xs text-muted-foreground">Host · created this {card.kind}</p>
+                </div>
+              </div>
               {card.addresses.length === 0 && (
                 <p className="text-sm text-muted-foreground">No members yet — add one below.</p>
               )}
@@ -272,6 +324,7 @@ function CardChat() {
                   <button
                     onClick={() => delMut.mutate(a.id)}
                     aria-label={`Remove ${a.email}`}
+                    disabled={!card.is_host}
                     className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -280,19 +333,34 @@ function CardChat() {
               ))}
             </div>
 
-            <div className="mt-5 flex gap-2">
-              <Input
-                placeholder="name@example.com"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && newEmail && addMut.mutate()}
-              />
-              <Button onClick={() => addMut.mutate()} disabled={!newEmail || addMut.isPending}>
-                {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              </Button>
-            </div>
+            {card.is_host && (
+              <>
+                <div className="mt-5 flex gap-2">
+                  <Input
+                    placeholder="name@example.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    disabled={atMemberLimit}
+                    onKeyDown={(e) => e.key === "Enter" && newEmail && !atMemberLimit && addMut.mutate()}
+                  />
+                  <Button onClick={() => addMut.mutate()} disabled={!newEmail || addMut.isPending || atMemberLimit}>
+                    {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {emails.length}/{memberLimit} {card.kind === "group" ? "members" : "email"}
+                </p>
+              </>
+            )}
 
             <div className="mt-8 border-t border-border/60 pt-5">
+              {!card.is_host && (
+                <p className="text-xs text-muted-foreground">
+                  Only the host who created this {card.kind} can delete it.
+                </p>
+              )}
+              {card.is_host && (
+                <>
               {confirmDelete ? (
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="destructive" onClick={() => deleteCardMut.mutate()} disabled={deleteCardMut.isPending}>
@@ -308,6 +376,8 @@ function CardChat() {
                   <Trash2 className="h-3.5 w-3.5" />
                   <span className="ml-1.5">Delete {card.kind}</span>
                 </Button>
+              )}
+                </>
               )}
             </div>
           </SheetContent>
@@ -369,7 +439,6 @@ function CardChat() {
                     {!mine && card.kind === "group" && (
                       <p className="mb-0.5 text-[11px] font-semibold text-primary">{nameFromHeader(m.from)}</p>
                     )}
-                    {m.subject && <p className="font-medium leading-snug">{m.subject}</p>}
                     <p className={`leading-snug ${mine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
                       {m.snippet}
                     </p>
@@ -401,12 +470,6 @@ function CardChat() {
             ))}
           </div>
         )}
-        <Input
-          placeholder="Subject (optional)"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="mb-2 h-9 rounded-full border-primary/15 bg-primary/[0.04] text-xs"
-        />
         <div className="flex items-end gap-2">
           <input ref={fileRef} type="file" multiple hidden onChange={(e) => onFiles(e.target.files)} />
           <Button
