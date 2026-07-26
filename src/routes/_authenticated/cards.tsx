@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Trash2, Users, IdCard, ChevronRight } from "lucide-react";
+import { Loader2, Plus, Trash2, Users, IdCard, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,9 @@ export const Route = createFileRoute("/_authenticated/cards")({
   errorComponent: ({ error }) => <div className="p-8 text-center text-destructive">{error.message}</div>,
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_PERSONAL_CARD_EMAILS = 5;
+
 function CardsPage() {
   const qc = useQueryClient();
   const list = useServerFn(listMailCards);
@@ -29,17 +32,42 @@ function CardsPage() {
   const remove = useServerFn(deleteMailCard);
 
   const [name, setName] = useState("");
-  const [emails, setEmails] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  const [emails, setEmails] = useState<string[]>([]);
   const [kind, setKind] = useState<"card" | "group">("card");
 
   const { data, isLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
 
+  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : undefined;
+  const atLimit = maxEmails !== undefined && emails.length >= maxEmails;
+
+  const addEmail = () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!email) return;
+    if (!EMAIL_RE.test(email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    if (emails.includes(email)) {
+      toast.error("That email is already added");
+      return;
+    }
+    if (maxEmails !== undefined && emails.length >= maxEmails) {
+      toast.error(`Personal cards can hold up to ${maxEmails} emails`);
+      return;
+    }
+    setEmails((p) => [...p, email]);
+    setEmailInput("");
+  };
+
+  const removeEmail = (email: string) => setEmails((p) => p.filter((e) => e !== email));
+
   const createMut = useMutation({
-    mutationFn: () =>
-      create({ data: { name, kind, emails: emails.split(/[\s,;]+/).filter(Boolean) } }),
+    mutationFn: () => create({ data: { name, kind, emails } }),
     onSuccess: () => {
       setName("");
-      setEmails("");
+      setEmailInput("");
+      setEmails([]);
       qc.invalidateQueries({ queryKey: ["mail-cards"] });
       toast.success("Card created");
     },
