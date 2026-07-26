@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "./cards.constants";
 
 export type MailCard = {
   id: string;
@@ -7,6 +8,7 @@ export type MailCard = {
   kind: "card" | "group";
   color: string;
   created_at: string;
+  is_host: boolean;
   addresses: { id: string; email: string; label: string | null }[];
 };
 
@@ -31,6 +33,7 @@ export const listMailCards = createServerFn({ method: "GET" })
       kind: (c.kind === "group" ? "group" : "card") as "card" | "group",
       color: c.color,
       created_at: c.created_at,
+      is_host: true,
       addresses: (addrs ?? [])
         .filter((a) => a.card_id === c.id)
         .map((a) => ({ id: a.id, email: a.email, label: a.label })),
@@ -45,11 +48,10 @@ export const createMailCard = createServerFn({ method: "POST" })
     if (name.length > 60) throw new Error("Card name must be under 60 characters");
     const kind = input.kind === "group" ? ("group" as const) : ("card" as const);
     const emails = input.emails.map((e) => e.trim().toLowerCase()).filter(Boolean);
-    const MAX_PERSONAL_CARD_EMAILS = 5;
     if (kind === "card" && emails.length > MAX_PERSONAL_CARD_EMAILS) {
-      throw new Error(`Personal cards can hold up to ${MAX_PERSONAL_CARD_EMAILS} email addresses`);
+      throw new Error("A personal card can hold only one email address");
     }
-    if (emails.length > 100) throw new Error("Groups can hold up to 100 email addresses");
+    if (emails.length > MAX_GROUP_MEMBERS) throw new Error(`Groups can hold up to ${MAX_GROUP_MEMBERS} members`);
     return { name, kind, emails };
   })
   .handler(async ({ data, context }) => {
@@ -72,7 +74,37 @@ export const deleteMailCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("mail_cards").delete().eq("id", data.id);
+    const { data: card, error: cerr } = await context.supabase
+      .from("mail_cards")
+      .select("id, user_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (cerr) throw new Error(cerr.message);
+    if (!card) throw new Error("Card not found");
+    if (card.user_id !== context.userId) throw new Error("Only the host who created this can delete it");
+    const { error } = await context.supabase
+      .from("mail_cards")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const updateMailCard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string; name: string }) => {
+    const name = input.name.trim();
+    if (!name) throw new Error("Name is required");
+    if (name.length > 60) throw new Error("Name must be under 60 characters");
+    return { id: input.id, name };
+  })
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("mail_cards")
+      .update({ name: data.name })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -85,6 +117,26 @@ export const addCardAddress = createServerFn({ method: "POST" })
     return { cardId: input.cardId, email, label: input.label?.trim().slice(0, 60) || null };
   })
   .handler(async ({ data, context }) => {
+    const { data: card, error: cerr } = await context.supabase
+      .from("mail_cards")
+      .select("id, kind, user_id")
+      .eq("id", data.cardId)
+      .maybeSingle();
+    if (cerr) throw new Error(cerr.message);
+    if (!card) throw new Error("Card not found");
+    if (card.user_id !== context.userId) throw new Error("Only a host can add members");
+    const { count } = await context.supabase
+      .from("mail_card_addresses")
+      .select("id", { count: "exact", head: true })
+      .eq("card_id", data.cardId);
+    const limit = card.kind === "group" ? MAX_GROUP_MEMBERS : MAX_PERSONAL_CARD_EMAILS;
+    if ((count ?? 0) >= limit) {
+      throw new Error(
+        card.kind === "group"
+          ? `Groups can hold up to ${MAX_GROUP_MEMBERS} members`
+          : "A personal card can hold only one email address",
+      );
+    }
     const { error } = await context.supabase.from("mail_card_addresses").insert({
       card_id: data.cardId,
       user_id: context.userId,

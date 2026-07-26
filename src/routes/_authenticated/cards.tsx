@@ -7,13 +7,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/message-list";
-import {
-  listMailCards,
-  createMailCard,
-  deleteMailCard,
-  MAX_PERSONAL_CARD_EMAILS,
-  MAX_GROUP_MEMBERS,
-} from "@/lib/cards.functions";
+import { listMailCards, createMailCard, deleteMailCard } from "@/lib/cards.functions";
+import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
 
 export const Route = createFileRoute("/_authenticated/cards")({
   head: () => ({
