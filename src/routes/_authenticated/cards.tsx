@@ -58,7 +58,7 @@ function CardsPage() {
     <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8 lg:py-10">
       <PageHeader title="Cards & Groups" subtitle="Collect mail from chosen senders — and message whole groups at once." />
 
-      <div className="glass-card mb-8 rounded-3xl p-5">
+      <div className="glass-card aura-glow mb-8 rounded-3xl p-5">
         <div className="mb-4 flex gap-2">
           {(["card", "group"] as const).map((k) => (
             <button
@@ -96,7 +96,7 @@ function CardsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         {cards.map((c) => (
-          <div key={c.id} className="glass-card gold-hairline group relative overflow-hidden rounded-3xl p-5">
+          <div key={c.id} className="glass-card aura-glow gold-hairline group relative overflow-hidden rounded-3xl p-5">
             <Link to="/card/$id" params={{ id: c.id }} className="block">
               <div className="flex items-start justify-between">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
