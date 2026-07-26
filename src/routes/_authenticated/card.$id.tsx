@@ -270,10 +270,45 @@ function CardChat() {
           <SheetContent side="right" className="w-full max-w-sm overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{card.kind === "group" ? "Group members" : "Card addresses"}</SheetTitle>
-              <SheetDescription>You are the host — add or remove addresses anytime.</SheetDescription>
+              <SheetDescription>
+                {card.is_host
+                  ? `You are the host — ${card.kind === "group" ? `up to ${MAX_GROUP_MEMBERS} members` : "one email address only"}.`
+                  : "Only a host can change this."}
+              </SheetDescription>
             </SheetHeader>
 
+            {card.is_host && (
+              <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/[0.04] p-3">
+                <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {card.kind === "group" ? "Group profile" : "Card profile"}
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    value={editingName ?? card.name}
+                    maxLength={60}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && editingName?.trim()) renameMut.mutate(editingName.trim());
+                    }}
+                  />
+                  <Button
+                    onClick={() => editingName?.trim() && renameMut.mutate(editingName.trim())}
+                    disabled={!editingName?.trim() || editingName.trim() === card.name || renameMut.isPending}
+                  >
+                    {renameMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="mt-5 space-y-2">
+              <div className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.08] px-3 py-2">
+                <Avatar seed={myEmail || card.id} label={myEmail || "H"} className="h-9 w-9 text-xs" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{myEmail || "You"}</p>
+                  <p className="truncate text-xs text-muted-foreground">Host · created this {card.kind}</p>
+                </div>
+              </div>
               {card.addresses.length === 0 && (
                 <p className="text-sm text-muted-foreground">No members yet — add one below.</p>
               )}
@@ -287,6 +322,7 @@ function CardChat() {
                   <button
                     onClick={() => delMut.mutate(a.id)}
                     aria-label={`Remove ${a.email}`}
+                    disabled={!card.is_host}
                     className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -295,19 +331,34 @@ function CardChat() {
               ))}
             </div>
 
-            <div className="mt-5 flex gap-2">
-              <Input
-                placeholder="name@example.com"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && newEmail && addMut.mutate()}
-              />
-              <Button onClick={() => addMut.mutate()} disabled={!newEmail || addMut.isPending}>
-                {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              </Button>
-            </div>
+            {card.is_host && (
+              <>
+                <div className="mt-5 flex gap-2">
+                  <Input
+                    placeholder="name@example.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    disabled={atMemberLimit}
+                    onKeyDown={(e) => e.key === "Enter" && newEmail && !atMemberLimit && addMut.mutate()}
+                  />
+                  <Button onClick={() => addMut.mutate()} disabled={!newEmail || addMut.isPending || atMemberLimit}>
+                    {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {emails.length}/{memberLimit} {card.kind === "group" ? "members" : "email"}
+                </p>
+              </>
+            )}
 
             <div className="mt-8 border-t border-border/60 pt-5">
+              {!card.is_host && (
+                <p className="text-xs text-muted-foreground">
+                  Only the host who created this {card.kind} can delete it.
+                </p>
+              )}
+              {card.is_host && (
+                <>
               {confirmDelete ? (
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="destructive" onClick={() => deleteCardMut.mutate()} disabled={deleteCardMut.isPending}>
@@ -323,6 +374,8 @@ function CardChat() {
                   <Trash2 className="h-3.5 w-3.5" />
                   <span className="ml-1.5">Delete {card.kind}</span>
                 </Button>
+              )}
+                </>
               )}
             </div>
           </SheetContent>
