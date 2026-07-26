@@ -127,16 +127,18 @@ function CardChat() {
     enabled: Boolean(query),
   });
 
-  // Only messages authored by a member of this card/group (or by the host) are shown.
+  // Only messages posted through this card/group chat (tagged) and authored by a member (or host).
+  const chatTag = `[impo:${id.slice(0, 8)}]`;
   const ordered = useMemo(() => {
     const allowed = new Set(emails);
     return [...(messages ?? [])]
       .filter((m) => {
+        if (!(m.subject ?? "").includes(chatTag)) return false;
         const sender = emailFromHeader(m.from);
         return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [messages, emails, myEmail]);
+  }, [messages, emails, myEmail, chatTag]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -203,7 +205,7 @@ function CardChat() {
       send({
         data: {
           to: emails.join(", "),
-          subject: card?.name ? `${card.name}` : "Message",
+          subject: `${card?.name ?? "Message"} ${chatTag}`,
           body,
           attachments: attachments.map(({ filename, mimeType, dataBase64 }) => ({ filename, mimeType, dataBase64 })),
         },
