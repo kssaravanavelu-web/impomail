@@ -3,6 +3,7 @@ import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Me
 import { HeaderSearch } from "@/components/header-search";
 import { NotificationBell } from "@/components/notification-bell";
 import { ChatWidget } from "@/components/chat-widget";
+import { CustomisePanel } from "@/components/customise-panel";
 import { VoiceCommandProvider } from "@/lib/voice-command";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,20 +140,21 @@ export function AppLayout() {
 
       {/* Main */}
       <div>
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur lg:px-8">
+        <header className="lux-bar sticky top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 lg:px-8">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
           <Link to="/home" className="hidden shrink-0 items-center gap-2 transition-opacity hover:opacity-80 lg:flex">
             <BrandLogo className="h-9 w-9 rounded-xl" />
-            <span className="text-lg font-bold tracking-tight">
+            <span className="lux-wordmark text-lg font-bold tracking-tight">
               Impo<span className="text-primary">Mail</span>
             </span>
           </Link>
           <div className="flex flex-1 items-center gap-2 lg:max-w-sm lg:justify-start">
             <HeaderSearch />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            <CustomisePanel />
             <NotificationBell />
             <Button variant="ghost" size="icon" asChild aria-label="Settings">
               <Link to="/settings">
@@ -179,7 +181,7 @@ export function AppLayout() {
         </header>
 
         {/* Top nav (desktop) */}
-        <nav className="sticky top-16 z-10 hidden border-b border-border/60 bg-background/70 backdrop-blur lg:block">
+        <nav className="lux-bar sticky top-16 z-10 hidden lg:block">
           <div className="flex items-center gap-1 overflow-x-auto px-8 py-2">
             {sidebarItems.map((item) => {
               const active = pathname === item.to;
