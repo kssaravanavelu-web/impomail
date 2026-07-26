@@ -42,6 +42,7 @@ function CardDetail() {
   const [attachments, setAttachments] = useState<
     { filename: string; mimeType: string; dataBase64: string; size: number }[]
   >([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: cards, isLoading: cardsLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
