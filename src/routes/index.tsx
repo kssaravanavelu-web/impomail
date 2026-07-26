@@ -72,13 +72,14 @@ function LandingPage() {
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 lg:px-10">
         <Link to="/" className="flex items-center gap-3">
           <BrandLogo className="h-10 w-10 rounded-xl" />
-          <span className="font-display text-xl font-semibold tracking-tight">
+          <span className="lux-wordmark font-display text-xl font-semibold tracking-tight">
             IMPOMAIL
           </span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
-          <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
-          <Link to="/terms" className="hover:text-foreground">Terms</Link>
+        <nav className="flex items-center gap-4 text-sm text-muted-foreground sm:gap-6">
+          <Link to="/privacy" className="hidden hover:text-foreground sm:inline">Privacy</Link>
+          <Link to="/terms" className="hidden hover:text-foreground sm:inline">Terms</Link>
+          <CustomisePanel />
           {session === true ? (
             <Link to="/home">
               <Button className="gap-2 font-medium text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
