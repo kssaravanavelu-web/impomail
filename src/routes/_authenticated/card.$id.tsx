@@ -61,16 +61,10 @@ function emailFromHeader(from: string): string {
 function chatTime(date: string): string {
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-}
-function dayLabel(date: string): string {
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return "Earlier";
-  const now = new Date();
-  const diff = Math.floor((now.setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000);
-  if (diff === 0) return "Today";
-  if (diff === 1) return "Yesterday";
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return `${d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })} · ${d.toLocaleTimeString(
+    undefined,
+    { hour: "numeric", minute: "2-digit" },
+  )}`;
 }
 const AVATAR_TONES = [
   "from-primary/70 to-primary/30",
@@ -133,16 +127,18 @@ function CardChat() {
     enabled: Boolean(query),
   });
 
-  // Only messages authored by a member of this card/group (or by the host) are shown.
+  // Only messages posted through this card/group chat (tagged) and authored by a member (or host).
+  const chatTag = `[impo:${id.slice(0, 8)}]`;
   const ordered = useMemo(() => {
     const allowed = new Set(emails);
     return [...(messages ?? [])]
       .filter((m) => {
+        if (!(m.subject ?? "").includes(chatTag)) return false;
         const sender = emailFromHeader(m.from);
         return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [messages, emails, myEmail]);
+  }, [messages, emails, myEmail, chatTag]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -209,7 +205,7 @@ function CardChat() {
       send({
         data: {
           to: emails.join(", "),
-          subject: card?.name ? `${card.name}` : "Message",
+          subject: `${card?.name ?? "Message"} ${chatTag}`,
           body,
           attachments: attachments.map(({ filename, mimeType, dataBase64 }) => ({ filename, mimeType, dataBase64 })),
         },
@@ -238,7 +234,6 @@ function CardChat() {
     );
   }
 
-  let lastDay = "";
   const memberLimit = card.kind === "group" ? MAX_GROUP_MEMBERS : MAX_PERSONAL_CARD_EMAILS;
   const atMemberLimit = emails.length >= memberLimit;
 
@@ -413,18 +408,8 @@ function CardChat() {
           {ordered.map((m) => {
             const senderEmail = emailFromHeader(m.from);
             const mine = Boolean(myEmail) && senderEmail === myEmail;
-            const day = dayLabel(m.date);
-            const showDay = day !== lastDay;
-            lastDay = day;
             return (
               <div key={m.id}>
-                {showDay && (
-                  <div className="my-4 flex justify-center">
-                    <span className="rounded-full border border-primary/15 bg-primary/[0.06] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {day}
-                    </span>
-                  </div>
-                )}
                 <div className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
                   {!mine && <Avatar seed={senderEmail} label={nameFromHeader(m.from)} className="h-7 w-7 text-[11px]" />}
                   <Link
