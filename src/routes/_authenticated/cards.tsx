@@ -73,7 +73,7 @@ function CardsPage() {
           ))}
         </div>
         <div className="grid gap-3 sm:grid-cols-[1fr_1.4fr_auto]">
-          <Input placeholder={kind === "card" ? "Card name (e.g. Bank)" : "Group name (e.g. Team"} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
+          <Input placeholder={kind === "card" ? "Card name (e.g. Bank)" : "Group name (e.g. Team)"} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
           <Input placeholder="Email addresses, comma separated" value={emails} onChange={(e) => setEmails(e.target.value)} />
           <Button onClick={() => createMut.mutate()} disabled={!name.trim() || createMut.isPending}>
             {createMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
