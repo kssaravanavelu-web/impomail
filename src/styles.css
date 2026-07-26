@@ -338,7 +338,6 @@ html { scroll-behavior: smooth; }
     var(--foreground) 62%,
     var(--foreground) 100%);
   background-size: 240% 100%;
-  -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: lux-sheen 7s linear infinite;
