@@ -1,31 +1,99 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, X, Send, Paperclip, FileIcon, Users, IdCard, ArrowLeft, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  X,
+  Send,
+  Paperclip,
+  FileIcon,
+  Users,
+  IdCard,
+  ArrowLeft,
+  Trash2,
+  MessagesSquare,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PageHeader } from "@/components/message-list";
-import { GmailList } from "@/components/gmail-list";
-import { listMailCards, addCardAddress, removeCardAddress, deleteMailCard } from "@/lib/cards.functions";
-import { listGmailMessages, sendGmailMessage } from "@/lib/gmail.functions";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  listMailCards,
+  addCardAddress,
+  removeCardAddress,
+  deleteMailCard,
+} from "@/lib/cards.functions";
+import { listGmailMessages, sendGmailMessage, getGmailStatus } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
   head: () => ({
     meta: [
-      { title: "Card — ImpoMail" },
-      { name: "description", content: "Mail collected from the addresses in this card." },
-      { property: "og:title", content: "Card — ImpoMail" },
-      { property: "og:description", content: "Mail collected from the addresses in this card." },
+      { title: "Card chat — ImpoMail" },
+      { name: "description", content: "Chat-style view of mail from the addresses in this card." },
+      { property: "og:title", content: "Card chat — ImpoMail" },
+      { property: "og:description", content: "Chat-style view of mail from the addresses in this card." },
     ],
   }),
-  component: CardDetail,
+  component: CardChat,
   errorComponent: ({ error }) => <div className="p-8 text-center text-destructive">{error.message}</div>,
 });
 
-function CardDetail() {
+function nameFromHeader(from: string): string {
+  const m = from.match(/^"?([^"<]+?)"?\s*<[^>]+>/);
+  return (m ? m[1] : from.split("@")[0] ?? from).trim() || from;
+}
+function emailFromHeader(from: string): string {
+  const m = from.match(/<([^>]+)>/);
+  return (m ? m[1] : from).trim().toLowerCase();
+}
+function chatTime(date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+function dayLabel(date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "Earlier";
+  const now = new Date();
+  const diff = Math.floor((now.setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+const AVATAR_TONES = [
+  "from-primary/70 to-primary/30",
+  "from-fuchsia-500/60 to-primary/30",
+  "from-amber-400/60 to-primary/30",
+  "from-emerald-400/60 to-primary/30",
+  "from-sky-400/60 to-primary/30",
+];
+function toneFor(seed: string) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 997;
+  return AVATAR_TONES[h % AVATAR_TONES.length];
+}
+
+function Avatar({ seed, label, className = "" }: { seed: string; label: string; className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center justify-center rounded-full bg-gradient-to-br ${toneFor(seed)} font-semibold text-background ring-1 ring-primary/30 ${className}`}
+    >
+      {label.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+function CardChat() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -35,6 +103,7 @@ function CardDetail() {
   const removeCard = useServerFn(deleteMailCard);
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
+  const status = useServerFn(getGmailStatus);
 
   const [newEmail, setNewEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -42,13 +111,18 @@ function CardDetail() {
   const [attachments, setAttachments] = useState<
     { filename: string; mimeType: string; dataBase64: string; size: number }[]
   >([]);
+  const [membersOpen, setMembersOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
 
   const { data: cards, isLoading: cardsLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
+  const { data: me } = useQuery({ queryKey: ["gmail-status"], queryFn: () => status() });
+  const myEmail = (me && "email" in me ? me.email : null)?.toLowerCase() ?? "";
+
   const card = cards?.find((c) => c.id === id);
-  const emails = card?.addresses.map((a) => a.email) ?? [];
-  const query = emails.length ? `from:(${emails.join(" OR ")})` : "";
+  const emails = useMemo(() => card?.addresses.map((a) => a.email) ?? [], [card]);
+  const query = emails.length ? `(from:(${emails.join(" OR ")}) OR to:(${emails.join(" OR ")}))` : "";
 
   const { data: messages, isLoading: mailLoading, error } = useQuery({
     queryKey: ["card-mail", id, query],
@@ -56,12 +130,24 @@ function CardDetail() {
     enabled: Boolean(query),
   });
 
+  const ordered = useMemo(
+    () =>
+      [...(messages ?? [])].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      ),
+    [messages],
+  );
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [ordered.length]);
+
   const addMut = useMutation({
     mutationFn: () => addAddr({ data: { cardId: id, email: newEmail } }),
     onSuccess: () => {
       setNewEmail("");
       qc.invalidateQueries({ queryKey: ["mail-cards"] });
-      toast.success("Address added");
+      toast.success("Member added");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -76,7 +162,7 @@ function CardDetail() {
     mutationFn: () => removeCard({ data: { id } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["mail-cards"] });
-      toast.success("Card deleted");
+      toast.success("Deleted");
       navigate({ to: "/cards" });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -107,7 +193,7 @@ function CardDetail() {
       send({
         data: {
           to: emails.join(", "),
-          subject,
+          subject: subject.trim() || (card?.name ? `${card.name}` : "Message"),
           body,
           attachments: attachments.map(({ filename, mimeType, dataBase64 }) => ({ filename, mimeType, dataBase64 })),
         },
@@ -116,7 +202,8 @@ function CardDetail() {
       setSubject("");
       setBody("");
       setAttachments([]);
-      toast.success(`Sent to ${emails.length} recipient${emails.length === 1 ? "" : "s"}`);
+      toast.success(`Sent to ${emails.length} member${emails.length === 1 ? "" : "s"}`);
+      qc.invalidateQueries({ queryKey: ["card-mail", id] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -124,7 +211,7 @@ function CardDetail() {
   if (cardsLoading) {
     return (
       <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 px-4 py-20 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading card…
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading chat…
       </div>
     );
   }
@@ -136,121 +223,225 @@ function CardDetail() {
     );
   }
 
+  let lastDay = "";
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8 lg:py-10">
-      <Link to="/cards" className="mb-4 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
-        <ArrowLeft className="h-3.5 w-3.5" /> All cards
-      </Link>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <PageHeader
-          title={card.name}
-          subtitle={`${card.kind === "group" ? "Group" : "Personal card"} · you are the host of ${emails.length} address${emails.length === 1 ? "" : "es"}`}
-        />
-        {confirmDelete ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Delete this {card.kind}?</span>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => deleteCardMut.mutate()}
-              disabled={deleteCardMut.isPending}
-              className="h-8"
-            >
-              {deleteCardMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-              <span className="ml-1.5">Yes, delete</span>
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(false)} className="h-8" disabled={deleteCardMut.isPending}>
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setConfirmDelete(true)}
-            className="h-8 text-muted-foreground hover:text-destructive"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span className="ml-1.5">Delete {card.kind}</span>
-          </Button>
-        )}
-      </div>
+    <div className="mx-auto flex h-[calc(100dvh-6rem)] max-w-3xl flex-col px-2 py-3 sm:px-4 lg:py-6">
+      {/* Chat header */}
+      <header className="glass-card flex items-center gap-3 rounded-t-3xl border-b border-primary/10 px-3 py-2.5 sm:px-4">
+        <Link to="/cards" className="rounded-full p-1.5 text-muted-foreground hover:bg-primary/10 hover:text-primary" aria-label="Back to cards">
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+        <Avatar seed={card.id} label={card.name} className="h-10 w-10 text-sm" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold leading-tight">{card.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {card.kind === "group" ? "Group" : "Personal card"} ·{" "}
+            {emails.length ? emails.slice(0, 3).map((e) => e.split("@")[0]).join(", ") : "no members yet"}
+            {emails.length > 3 ? ` +${emails.length - 3}` : ""}
+          </p>
+        </div>
 
-      {/* Host controls */}
-      <div className="glass-card mb-8 rounded-3xl p-5">
-        <div className="mb-4 flex items-center gap-2 text-sm font-medium">
-          {card.kind === "group" ? <Users className="h-4 w-4 text-primary" /> : <IdCard className="h-4 w-4 text-primary" />}
-          Addresses in this {card.kind}
-        </div>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {card.addresses.length === 0 && <p className="text-sm text-muted-foreground">No addresses yet — add one below.</p>}
-          {card.addresses.map((a) => (
-            <span key={a.id} className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs">
-              {a.email}
-              <button onClick={() => delMut.mutate(a.id)} aria-label={`Remove ${a.email}`} className="text-muted-foreground hover:text-destructive">
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <Input
-            placeholder="name@example.com"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && newEmail && addMut.mutate()}
-          />
-          <Button onClick={() => addMut.mutate()} disabled={!newEmail || addMut.isPending}>
-            {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
+        <Sheet open={membersOpen} onOpenChange={setMembersOpen}>
+          <SheetTrigger asChild>
+            <Button size="sm" variant="ghost" className="h-9 gap-1.5 rounded-full border border-primary/20 px-3 text-xs">
+              {card.kind === "group" ? <Users className="h-3.5 w-3.5" /> : <IdCard className="h-3.5 w-3.5" />}
+              <span className="hidden sm:inline">Members</span>
+              <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                {emails.length}
+              </span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full max-w-sm overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>{card.kind === "group" ? "Group members" : "Card addresses"}</SheetTitle>
+              <SheetDescription>You are the host — add or remove addresses anytime.</SheetDescription>
+            </SheetHeader>
 
-      {/* Group send */}
-      {card.kind === "group" && (
-        <div className="glass-card mb-8 rounded-3xl p-5">
-          <p className="mb-4 text-sm font-medium">Send to everyone in this group</p>
-          <div className="space-y-3">
-            <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
-            <Textarea rows={5} placeholder="Write your message…" value={body} onChange={(e) => setBody(e.target.value)} />
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((a, i) => (
-                  <span key={`${a.filename}-${i}`} className="inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs">
-                    <FileIcon className="h-3 w-3" /> {a.filename}
-                    <button onClick={() => setAttachments((p) => p.filter((_, j) => j !== i))} aria-label={`Remove ${a.filename}`}>
-                      <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-            <div className="flex items-center justify-between">
-              <div>
-                <input ref={fileRef} type="file" multiple hidden onChange={(e) => onFiles(e.target.files)} />
-                <Button variant="ghost" onClick={() => fileRef.current?.click()}>
-                  <Paperclip className="h-4 w-4" /> <span className="ml-1.5">Attach</span>
-                </Button>
-              </div>
-              <Button
-                onClick={() => sendMut.mutate()}
-                disabled={!emails.length || !subject || sendMut.isPending}
-              >
-                {sendMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                <span className="ml-1.5">Send to group</span>
+            <div className="mt-5 space-y-2">
+              {card.addresses.length === 0 && (
+                <p className="text-sm text-muted-foreground">No members yet — add one below.</p>
+              )}
+              {card.addresses.map((a) => (
+                <div key={a.id} className="flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/[0.04] px-3 py-2">
+                  <Avatar seed={a.email} label={a.email} className="h-9 w-9 text-xs" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{a.label || a.email.split("@")[0]}</p>
+                    <p className="truncate text-xs text-muted-foreground">{a.email}</p>
+                  </div>
+                  <button
+                    onClick={() => delMut.mutate(a.id)}
+                    aria-label={`Remove ${a.email}`}
+                    className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <Input
+                placeholder="name@example.com"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && newEmail && addMut.mutate()}
+              />
+              <Button onClick={() => addMut.mutate()} disabled={!newEmail || addMut.isPending}>
+                {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               </Button>
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Collected mail */}
-      <GmailList
-        items={messages ?? []}
-        loading={Boolean(query) && mailLoading}
-        error={error ? (error as Error).message : null}
-        emptyText={query ? "No mail from these addresses yet." : "Add an address to start collecting mail here."}
-      />
+            <div className="mt-8 border-t border-border/60 pt-5">
+              {confirmDelete ? (
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="destructive" onClick={() => deleteCardMut.mutate()} disabled={deleteCardMut.isPending}>
+                    {deleteCardMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    <span className="ml-1.5">Yes, delete</span>
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(false)} disabled={deleteCardMut.isPending}>
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="ghost" onClick={() => setConfirmDelete(true)} className="text-muted-foreground hover:text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span className="ml-1.5">Delete {card.kind}</span>
+                </Button>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </header>
+
+      {/* Chat stream */}
+      <div className="glass-card flex-1 overflow-y-auto rounded-none border-y-0 px-3 py-4 sm:px-5">
+        {!query && (
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <MessagesSquare className="h-6 w-6 opacity-60" />
+            Add a member to start this conversation.
+          </div>
+        )}
+        {query && mailLoading && (
+          <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading conversation…
+          </div>
+        )}
+        {error && (
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+            {(error as Error).message}
+          </div>
+        )}
+        {query && !mailLoading && !error && ordered.length === 0 && (
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <MessagesSquare className="h-6 w-6 opacity-60" />
+            No messages with these members yet. Say hello below.
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          {ordered.map((m) => {
+            const senderEmail = emailFromHeader(m.from);
+            const mine = Boolean(myEmail) && senderEmail === myEmail;
+            const day = dayLabel(m.date);
+            const showDay = day !== lastDay;
+            lastDay = day;
+            return (
+              <div key={m.id}>
+                {showDay && (
+                  <div className="my-4 flex justify-center">
+                    <span className="rounded-full border border-primary/15 bg-primary/[0.06] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      {day}
+                    </span>
+                  </div>
+                )}
+                <div className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
+                  {!mine && <Avatar seed={senderEmail} label={nameFromHeader(m.from)} className="h-7 w-7 text-[11px]" />}
+                  <Link
+                    to="/message/$id"
+                    params={{ id: m.id }}
+                    className={`group max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm transition-transform hover:-translate-y-0.5 ${
+                      mine
+                        ? "rounded-br-md bg-primary text-primary-foreground"
+                        : "rounded-bl-md border border-primary/15 bg-primary/[0.06] text-foreground"
+                    }`}
+                  >
+                    {!mine && card.kind === "group" && (
+                      <p className="mb-0.5 text-[11px] font-semibold text-primary">{nameFromHeader(m.from)}</p>
+                    )}
+                    {m.subject && <p className="font-medium leading-snug">{m.subject}</p>}
+                    <p className={`leading-snug ${mine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+                      {m.snippet}
+                    </p>
+                    <p
+                      className={`mt-1 text-right text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                    >
+                      {chatTime(m.date)}
+                    </p>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+          <div ref={endRef} />
+        </div>
+      </div>
+
+      {/* Composer */}
+      <div className="glass-card rounded-b-3xl border-t border-primary/10 px-3 py-3 sm:px-4">
+        {attachments.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {attachments.map((a, i) => (
+              <span key={`${a.filename}-${i}`} className="inline-flex items-center gap-2 rounded-full border border-border/60 px-3 py-1 text-xs">
+                <FileIcon className="h-3 w-3" /> {a.filename}
+                <button onClick={() => setAttachments((p) => p.filter((_, j) => j !== i))} aria-label={`Remove ${a.filename}`}>
+                  <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <Input
+          placeholder="Subject (optional)"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          className="mb-2 h-9 rounded-full border-primary/15 bg-primary/[0.04] text-xs"
+        />
+        <div className="flex items-end gap-2">
+          <input ref={fileRef} type="file" multiple hidden onChange={(e) => onFiles(e.target.files)} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 shrink-0 rounded-full text-muted-foreground hover:text-primary"
+            onClick={() => fileRef.current?.click()}
+            aria-label="Attach files"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Textarea
+            rows={1}
+            placeholder={emails.length ? `Message ${card.name}…` : "Add a member first"}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (emails.length && body.trim() && !sendMut.isPending) sendMut.mutate();
+              }
+            }}
+            className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border-primary/15 bg-primary/[0.04] py-2.5"
+          />
+          <Button
+            size="icon"
+            className="h-10 w-10 shrink-0 rounded-full"
+            onClick={() => sendMut.mutate()}
+            disabled={!emails.length || !body.trim() || sendMut.isPending}
+            aria-label="Send message"
+          >
+            {sendMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
