@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight } from "lucide-react";
+import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
+import { listMailCards } from "@/lib/cards.functions";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
@@ -42,6 +43,12 @@ function Home() {
     queryFn: () => fetchFn({ data: { labelIds: ["INBOX"], maxResults: 50 } }),
   });
   const inbox: GmailMessageSummary[] = data ?? [];
+  const listCards = useServerFn(listMailCards);
+  const { data: cardsData, isLoading: cardsLoading } = useQuery({
+    queryKey: ["mail-cards"],
+    queryFn: () => listCards(),
+  });
+  const myCards = cardsData ?? [];
   const unreadTotal = inbox.filter((m) => m.unread).length;
   const dynamicMetrics = (["payment", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
     key: cat,
@@ -141,6 +148,57 @@ function Home() {
             );
           })}
         </div>
+      </div>
+
+      {/* Cards & Groups */}
+      <div className="silk-rise mb-14">
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Yours</p>
+            <h2 className="mt-2 font-display text-3xl tracking-tight">Cards &amp; Groups</h2>
+          </div>
+          <Link to="/cards" className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em] text-primary hover:opacity-80">
+            Manage <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </Link>
+        </div>
+        {cardsLoading ? (
+          <div className="glass-card flex items-center justify-center gap-3 rounded-2xl p-8 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading your cards…
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {myCards.map((c) => (
+              <Link
+                key={c.id}
+                to="/card/$id"
+                params={{ id: c.id }}
+                className="silk-hover glass-card aura-glow group relative flex flex-col justify-between overflow-hidden rounded-3xl p-5"
+              >
+                <div className="flex items-start justify-between">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+                    {c.kind === "group" ? <Users className="h-5 w-5" strokeWidth={1.5} /> : <IdCard className="h-5 w-5" strokeWidth={1.5} />}
+                  </span>
+                  <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
+                </div>
+                <p className="mt-6 font-display text-2xl tracking-tight">{c.name}</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {c.kind === "group" ? "Group" : "Card"} · {c.addresses.length} address{c.addresses.length === 1 ? "" : "es"}
+                </p>
+              </Link>
+            ))}
+            <Link
+              to="/cards"
+              className="silk-hover glass-card aura-glow flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-3xl p-5 text-center"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+                <Plus className="h-5 w-5" strokeWidth={1.5} />
+              </span>
+              <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                {myCards.length === 0 ? "Create your first card" : "New card or group"}
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Sector mail */}
