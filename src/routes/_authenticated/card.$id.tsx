@@ -61,16 +61,10 @@ function emailFromHeader(from: string): string {
 function chatTime(date: string): string {
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-}
-function dayLabel(date: string): string {
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return "Earlier";
-  const now = new Date();
-  const diff = Math.floor((now.setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000);
-  if (diff === 0) return "Today";
-  if (diff === 1) return "Yesterday";
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return `${d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })} · ${d.toLocaleTimeString(
+    undefined,
+    { hour: "numeric", minute: "2-digit" },
+  )}`;
 }
 const AVATAR_TONES = [
   "from-primary/70 to-primary/30",
