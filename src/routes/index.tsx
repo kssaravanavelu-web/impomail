@@ -278,7 +278,7 @@ function LandingPage() {
       <footer className="relative z-10 border-t border-border/60 bg-card/30 px-5 py-8 lg:px-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:text-left">
           <p>
-            ImpoMail · Founder: Saravanavel · Support Founder: Vishnuvardhan
+            IMPOMAIL · Founder: Saravanavel · Support Founder: Vishnuvardhan
           </p>
           <div className="flex items-center gap-5">
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
