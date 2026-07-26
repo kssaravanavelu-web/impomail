@@ -72,6 +72,16 @@ function CardDetail() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deleteCardMut = useMutation({
+    mutationFn: () => removeCard({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mail-cards"] });
+      toast.success("Card deleted");
+      navigate({ to: "/cards" });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const onFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     const MAX_TOTAL = 20 * 1024 * 1024;
