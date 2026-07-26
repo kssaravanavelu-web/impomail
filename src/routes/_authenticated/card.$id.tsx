@@ -27,10 +27,12 @@ export const Route = createFileRoute("/_authenticated/card/$id")({
 
 function CardDetail() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const list = useServerFn(listMailCards);
   const addAddr = useServerFn(addCardAddress);
   const delAddr = useServerFn(removeCardAddress);
+  const removeCard = useServerFn(deleteMailCard);
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
 
