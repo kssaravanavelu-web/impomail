@@ -8,10 +8,10 @@ import { Inbox, Sparkles, Shield, Zap, Mail, ArrowRight, Check, Search, Lock, Me
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ImpoMail — Smart Gmail Companion" },
-      { name: "description", content: "ImpoMail is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
-      { property: "og:title", content: "ImpoMail — Smart Gmail Companion" },
-      { property: "og:description", content: "ImpoMail organizes your Gmail into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
+      { title: "IMPOMAIL — Smart Gmail Companion" },
+      { name: "description", content: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
+      { property: "og:title", content: "IMPOMAIL — Smart Gmail Companion" },
+      { property: "og:description", content: "IMPOMAIL organizes your Gmail into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://impomail.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
