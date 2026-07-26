@@ -104,10 +104,10 @@ function LandingPage() {
                 <Sparkles className="h-3.5 w-3.5 text-primary" /> Smart Gmail companion
               </div>
               <h1 className="font-display text-5xl font-light leading-[1.05] tracking-tight lg:text-7xl">
-                ImpoMail: only the mail that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matters</span>
+                IMPOMAIL: only the mail that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matters</span>
               </h1>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                <strong className="text-foreground">ImpoMail is a smart Gmail companion app.</strong> It connects to your Gmail account, reads your messages, and automatically sorts them into the categories that matter most — payments, jobs, internships, OTPs, recharges, personal, promotions, and updates — so you can focus on what is important without digging through a noisy inbox.
+                <strong className="text-foreground">IMPOMAIL is a smart Gmail companion app.</strong> It connects to your Gmail account, reads your messages, and automatically sorts them into the categories that matter most — payments, jobs, internships, OTPs, recharges, personal, promotions, and updates — so you can focus on what is important without digging through a noisy inbox.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 {session === true ? (
