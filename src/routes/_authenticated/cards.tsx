@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Trash2, Users, IdCard, ChevronRight } from "lucide-react";
+import { Loader2, Plus, Trash2, Users, IdCard, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,9 @@ export const Route = createFileRoute("/_authenticated/cards")({
   errorComponent: ({ error }) => <div className="p-8 text-center text-destructive">{error.message}</div>,
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_PERSONAL_CARD_EMAILS = 5;
+
 function CardsPage() {
   const qc = useQueryClient();
   const list = useServerFn(listMailCards);
@@ -29,17 +32,42 @@ function CardsPage() {
   const remove = useServerFn(deleteMailCard);
 
   const [name, setName] = useState("");
-  const [emails, setEmails] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  const [emails, setEmails] = useState<string[]>([]);
   const [kind, setKind] = useState<"card" | "group">("card");
 
   const { data, isLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
 
+  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : undefined;
+  const atLimit = maxEmails !== undefined && emails.length >= maxEmails;
+
+  const addEmail = () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!email) return;
+    if (!EMAIL_RE.test(email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    if (emails.includes(email)) {
+      toast.error("That email is already added");
+      return;
+    }
+    if (maxEmails !== undefined && emails.length >= maxEmails) {
+      toast.error(`Personal cards can hold up to ${maxEmails} emails`);
+      return;
+    }
+    setEmails((p) => [...p, email]);
+    setEmailInput("");
+  };
+
+  const removeEmail = (email: string) => setEmails((p) => p.filter((e) => e !== email));
+
   const createMut = useMutation({
-    mutationFn: () =>
-      create({ data: { name, kind, emails: emails.split(/[\s,;]+/).filter(Boolean) } }),
+    mutationFn: () => create({ data: { name, kind, emails } }),
     onSuccess: () => {
       setName("");
-      setEmails("");
+      setEmailInput("");
+      setEmails([]);
       qc.invalidateQueries({ queryKey: ["mail-cards"] });
       toast.success("Card created");
     },
@@ -72,14 +100,63 @@ function CardsPage() {
             </button>
           ))}
         </div>
-        <div className="grid gap-3 sm:grid-cols-[1fr_1.4fr_auto]">
-          <Input placeholder={kind === "card" ? "Card name (e.g. Bank)" : "Group name (e.g. Team)"} value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
-          <Input placeholder="Email addresses, comma separated" value={emails} onChange={(e) => setEmails(e.target.value)} />
-          <Button onClick={() => createMut.mutate()} disabled={!name.trim() || createMut.isPending}>
+        <div className="grid gap-4 sm:grid-cols-[1fr_1.6fr_auto]">
+          <div className="aura-glow rounded-xl p-[1.5px]">
+            <Input
+              className="h-11 rounded-xl border-0 bg-card/80 px-4 focus-visible:ring-0"
+              placeholder={kind === "card" ? "Card name (e.g. Bank)" : "Group name (e.g. Team)"}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={60}
+            />
+          </div>
+          <div className="aura-glow rounded-xl p-[1.5px]">
+            <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-xl bg-card/80 px-3 py-2">
+              {emails.map((email) => (
+                <span
+                  key={email}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary"
+                >
+                  {email}
+                  <button onClick={() => removeEmail(email)} aria-label={`Remove ${email}`} className="hover:text-destructive">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+              <Input
+                className="min-w-[140px] flex-1 border-0 bg-transparent px-1 py-1 text-sm focus-visible:ring-0"
+                placeholder={emails.length ? "Add another email" : "Type email and press enter / add"}
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addEmail();
+                  }
+                }}
+                disabled={atLimit}
+              />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="shrink-0 rounded-full text-primary hover:bg-primary/10"
+                onClick={addEmail}
+                disabled={!emailInput.trim() || atLimit}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <Button onClick={() => createMut.mutate()} disabled={!name.trim() || createMut.isPending} className="h-11">
             {createMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             <span className="ml-1.5">Create</span>
           </Button>
         </div>
+        {maxEmails !== undefined && (
+          <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {kind === "card" ? "Personal card" : "Group"}: {emails.length}/{maxEmails} emails
+          </p>
+        )}
       </div>
 
       {isLoading && (
