@@ -1,15 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, X, Send, Paperclip, FileIcon, Users, IdCard, ArrowLeft } from "lucide-react";
+import { Loader2, Plus, X, Send, Paperclip, FileIcon, Users, IdCard, ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/message-list";
 import { GmailList } from "@/components/gmail-list";
-import { listMailCards, addCardAddress, removeCardAddress } from "@/lib/cards.functions";
+import { listMailCards, addCardAddress, removeCardAddress, deleteMailCard } from "@/lib/cards.functions";
 import { listGmailMessages, sendGmailMessage } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
