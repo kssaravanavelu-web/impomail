@@ -474,7 +474,7 @@ function CardChat() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if (emails.length && body.trim() && !sendMut.isPending) sendMut.mutate();
+                if (emails.length && (body.trim() || attachments.length) && !sendMut.isPending) sendMut.mutate();
               }
             }}
             className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border-primary/15 bg-primary/[0.04] py-2.5"
@@ -483,7 +483,7 @@ function CardChat() {
             size="icon"
             className="h-10 w-10 shrink-0 rounded-full"
             onClick={() => sendMut.mutate()}
-            disabled={!emails.length || !body.trim() || sendMut.isPending}
+            disabled={!emails.length || (!body.trim() && attachments.length === 0) || sendMut.isPending}
             aria-label="Send message"
           >
             {sendMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
