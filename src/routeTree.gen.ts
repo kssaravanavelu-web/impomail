@@ -28,7 +28,6 @@ import { Route as AuthenticatedConnectGmailRouteImport } from './routes/_authent
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedAssistantRouteImport } from './routes/_authenticated/assistant'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
-import { Route as AuthenticatedAiSearchRouteImport } from './routes/_authenticated/ai-search'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedMessageIdRouteImport } from './routes/_authenticated/message.$id'
@@ -132,11 +131,6 @@ const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   path: '/archive',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAiSearchRoute = AuthenticatedAiSearchRouteImport.update({
-  id: '/ai-search',
-  path: '/ai-search',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -180,7 +174,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/ai-search': typeof AuthenticatedAiSearchRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/assistant': typeof AuthenticatedAssistantRoute
   '/compose': typeof AuthenticatedComposeRoute
@@ -207,7 +200,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/ai-search': typeof AuthenticatedAiSearchRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/assistant': typeof AuthenticatedAssistantRoute
   '/compose': typeof AuthenticatedComposeRoute
@@ -236,7 +228,6 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/_authenticated/ai-search': typeof AuthenticatedAiSearchRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
@@ -265,7 +256,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/ai-search'
     | '/archive'
     | '/assistant'
     | '/compose'
@@ -292,7 +282,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/ai-search'
     | '/archive'
     | '/assistant'
     | '/compose'
@@ -320,7 +309,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/_authenticated/ai-search'
     | '/_authenticated/archive'
     | '/_authenticated/assistant'
     | '/_authenticated/compose'
@@ -488,13 +476,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArchiveRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ai-search': {
-      id: '/_authenticated/ai-search'
-      path: '/ai-search'
-      fullPath: '/ai-search'
-      preLoaderRoute: typeof AuthenticatedAiSearchRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -541,7 +522,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAiSearchRoute: typeof AuthenticatedAiSearchRoute
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
   AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRoute
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
@@ -560,7 +540,6 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAiSearchRoute: AuthenticatedAiSearchRoute,
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
   AuthenticatedAssistantRoute: AuthenticatedAssistantRoute,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,

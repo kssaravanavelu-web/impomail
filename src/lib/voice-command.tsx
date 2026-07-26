@@ -5,6 +5,7 @@ interface SpeechRecognitionLike extends EventTarget {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  maxAlternatives?: number;
   start: () => void;
   stop: () => void;
   abort: () => void;
@@ -132,13 +133,15 @@ export function VoiceCommandProvider({ children }: { children: ReactNode }) {
 
     const armIdle = () => {
       if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => sleep(), 1600);
+      // Longer window so slower / softer speakers aren't cut off mid-sentence.
+      idleTimer = setTimeout(() => sleep(), 3000);
     };
 
     const rec = new Ctor();
     rec.lang = "en-US";
     rec.continuous = true;
     rec.interimResults = true;
+    rec.maxAlternatives = 3;
     rec.onresult = (ev) => {
       let text = "";
       for (let i = ev.resultIndex ?? 0; i < ev.results.length; i++) {
@@ -172,19 +175,31 @@ export function VoiceCommandProvider({ children }: { children: ReactNode }) {
         armIdle();
       }
     };
-    rec.onerror = () => {};
+    rec.onerror = (ev) => {
+      // Permission problems are fatal; transient errors just restart via onend.
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") stopped = true;
+    };
     rec.onend = () => {
       if (stopped) return;
       setTimeout(() => {
         if (!stopped) {
           try { rec.start(); } catch { /* already started */ }
         }
-      }, 400);
+      }, 150);
     };
     try { rec.start(); } catch { /* ignore */ }
 
+    // Some browsers silently drop the stream when the tab is backgrounded.
+    const onVisible = () => {
+      if (!stopped && document.visibilityState === "visible") {
+        try { rec.start(); } catch { /* already running */ }
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       stopped = true;
+      document.removeEventListener("visibilitychange", onVisible);
       if (idleTimer) clearTimeout(idleTimer);
       modeRef.current = null;
       lastTextRef.current = "";

@@ -7,6 +7,7 @@ interface SpeechRecognitionLike extends EventTarget {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  maxAlternatives?: number;
   start: () => void;
   stop: () => void;
   abort: () => void;
@@ -53,6 +54,7 @@ export function useSpeechRecognition(opts: UseSpeechRecognitionOptions = {}) {
     rec.lang = lang;
     rec.continuous = continuous;
     rec.interimResults = true;
+    rec.maxAlternatives = 3;
     rec.onresult = (ev) => {
       let finalText = "";
       let interimText = "";

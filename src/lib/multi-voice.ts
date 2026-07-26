@@ -103,17 +103,17 @@ export function pickVoiceForRole(
   return pool[idx];
 }
 
-// Soft, unhurried delivery. Roles vary only slightly so everything stays gentle.
+// Soft but clearly audible delivery. Roles vary only slightly so everything stays gentle.
 export function voiceProfile(role: string): { rate: number; pitch: number } {
-  if (role === NARRATOR) return { rate: 0.92, pitch: 1.02 };
+  if (role === NARRATOR) return { rate: 0.97, pitch: 1.0 };
   const h = hashStr(role);
   const pitch = 0.96 + ((h % 16) / 100); // 0.96 – 1.11
-  const rate = 0.88 + (((h >> 3) % 8) / 100); // 0.88 – 0.95
+  const rate = 0.94 + (((h >> 3) % 8) / 100); // 0.94 – 1.01
   return { rate, pitch };
 }
 
-/** Soft playback volume so the assistant never feels loud. */
-export const SOFT_VOLUME = 0.82;
+/** Full-range playback volume so Impo stays clearly audible on laptop speakers. */
+export const SOFT_VOLUME = 1;
 
 export function stopSpeech() {
   if (typeof window !== "undefined" && "speechSynthesis" in window) {

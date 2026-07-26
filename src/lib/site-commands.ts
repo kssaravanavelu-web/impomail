@@ -11,7 +11,6 @@ export const SITE_ROUTES = [
   "/assistant",
   "/profile",
   "/settings",
-  "/ai-search",
   "/search",
   "/gmail-status",
   "/connect-gmail",
