@@ -536,7 +536,7 @@ function CardChat() {
                       className={`mb-1 shrink-0 rounded-full p-1.5 transition-all ${
                         confirmMsgId === m.id
                           ? "bg-destructive/15 text-destructive opacity-100"
-                          : "text-muted-foreground opacity-0 hover:text-destructive focus:opacity-100 group-hover:opacity-100 sm:opacity-0"
+                          : "text-muted-foreground/70 hover:text-destructive"
                       }`}
                     >
                       {deleteMsgMut.isPending && deleteMsgMut.variables === m.id ? (
