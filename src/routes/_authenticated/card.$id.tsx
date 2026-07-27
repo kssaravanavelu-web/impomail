@@ -97,7 +97,7 @@ function Avatar({ seed, label, className = "" }: { seed: string; label: string; 
   );
 }
 
-function MessageMedia({ messageId }: { messageId: string }) {
+function MessageMedia({ messageId, mine }: { messageId: string; mine?: boolean }) {
   const fetchMedia = useServerFn(getGmailMessageMedia);
   const { data, isLoading } = useQuery({
     queryKey: ["card-mail-media", messageId],
