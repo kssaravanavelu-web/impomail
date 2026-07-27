@@ -129,7 +129,7 @@ function MessageMedia({ messageId, mine }: { messageId: string; mine?: boolean }
               key={`${a.filename}-${i}`}
               src={src}
               filename={a.filename}
-              mine={false}
+              mine={mine}
             />
           );
         }
