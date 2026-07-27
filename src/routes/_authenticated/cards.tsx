@@ -2,13 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Trash2, Users, IdCard, ChevronRight, X } from "lucide-react";
+import { Loader2, Plus, Users, IdCard, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/message-list";
 import { listMailCards, createMailCard, deleteMailCard } from "@/lib/cards.functions";
 import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
+import { CardTile } from "@/components/card-tile";
+import { listGmailMessages } from "@/lib/gmail.functions";
+import { messageBelongsToCard } from "@/lib/card-filter";
 
 export const Route = createFileRoute("/_authenticated/cards")({
   head: () => ({
@@ -37,6 +40,13 @@ function CardsPage() {
   const [kind, setKind] = useState<"card" | "group">("card");
 
   const { data, isLoading } = useQuery({ queryKey: ["mail-cards"], queryFn: () => list() });
+  const fetchMail = useServerFn(listGmailMessages);
+  const { data: inboxData } = useQuery({
+    queryKey: ["gmail", "inbox-all"],
+    queryFn: () => fetchMail({ data: { labelIds: ["INBOX"], maxResults: 50 } }),
+  });
+  const inbox = inboxData ?? [];
+  const [filter, setFilter] = useState<"all" | "card" | "group">("all");
 
   const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : MAX_GROUP_MEMBERS;
   const atLimit = maxEmails !== undefined && emails.length >= maxEmails;
@@ -85,9 +95,39 @@ function CardsPage() {
   });
 
   const cards = data ?? [];
+  const visible = cards.filter((c) => filter === "all" || c.kind === filter);
+  const groups = visible.filter((c) => c.kind === "group");
+  const personal = visible.filter((c) => c.kind === "card");
+  const statsFor = (c: (typeof cards)[number]) => {
+    const mine = inbox.filter((m) => messageBelongsToCard(m, c));
+    return { total: mine.length, unread: mine.filter((m) => m.unread).length };
+  };
+  const section = (title: string, Icon: typeof Users, items: typeof cards) =>
+    items.length === 0 ? null : (
+      <section className="mb-10">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="grid h-8 w-8 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" strokeWidth={1.5} />
+          </span>
+          <h2 className="font-display text-xl tracking-tight">{title}</h2>
+          <span className="rounded-full border border-border/60 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {items.length}
+          </span>
+          <span className="h-px flex-1 bg-gradient-to-r from-primary/25 to-transparent" />
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {items.map((c) => {
+            const s = statsFor(c);
+            return (
+              <CardTile key={c.id} card={c} total={s.total} unread={s.unread} onDelete={() => deleteMut.mutate(c.id)} />
+            );
+          })}
+        </div>
+      </section>
+    );
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8 lg:py-10">
+    <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-10">
       <PageHeader title="Cards & Groups" subtitle="Collect mail from chosen senders — and message whole groups at once." />
 
       <div className="glass-card aura-glow mb-8 rounded-3xl p-5">
@@ -182,31 +222,29 @@ function CardsPage() {
         </p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {cards.map((c) => (
-          <div key={c.id} className="glass-card aura-glow gold-hairline group relative overflow-hidden rounded-3xl p-5">
-            <Link to="/card/$id" params={{ id: c.id }} className="block">
-              <div className="flex items-start justify-between">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
-                  {c.kind === "group" ? <Users className="h-5 w-5" strokeWidth={1.5} /> : <IdCard className="h-5 w-5" strokeWidth={1.5} />}
-                </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/60 transition group-hover:text-primary" />
-              </div>
-              <p className="mt-5 font-display text-2xl tracking-tight">{c.name}</p>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                {c.kind === "group" ? "Group" : "Card"} · {c.addresses.length} address{c.addresses.length === 1 ? "" : "es"}
-              </p>
-            </Link>
-            <button
-              onClick={() => deleteMut.mutate(c.id)}
-              aria-label={`Delete ${c.name}`}
-              className="absolute bottom-4 right-4 rounded-full p-2 text-muted-foreground/60 transition hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+      {!isLoading && cards.length > 0 && (
+        <>
+          <div className="mb-6 inline-flex rounded-full border border-border/60 bg-card/50 p-1 backdrop-blur">
+            {([
+              ["all", `All · ${cards.length}`],
+              ["group", `Groups · ${cards.filter((c) => c.kind === "group").length}`],
+              ["card", `Personal · ${cards.filter((c) => c.kind === "card").length}`],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`rounded-full px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] transition ${
+                  filter === key ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-        ))}
-      </div>
+          {section("Groups", Users, groups)}
+          {section("Personal cards", IdCard, personal)}
+        </>
+      )}
     </div>
   );
 }
