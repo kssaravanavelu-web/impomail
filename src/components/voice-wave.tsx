@@ -112,7 +112,6 @@ export function VoiceWave({
         className,
       )}
     >
-      <audio src={src} preload="metadata" className="hidden" />
       <button
         type="button"
         onClick={toggle}
