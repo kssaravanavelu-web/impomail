@@ -125,12 +125,11 @@ function MessageMedia({ messageId }: { messageId: string }) {
         }
         if (a.mimeType.startsWith("audio/")) {
           return (
-            <audio
+            <VoiceWave
               key={`${a.filename}-${i}`}
-              controls
               src={src}
-              className="h-9 w-full max-w-[240px]"
-              onClick={(e) => e.preventDefault()}
+              filename={a.filename}
+              mine={false}
             />
           );
         }
