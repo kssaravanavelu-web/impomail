@@ -466,7 +466,7 @@ function CardChat() {
           </div>
         )}
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {ordered.map((m) => {
             const senderEmail = emailFromHeader(m.from);
             const mine = Boolean(myEmail) && senderEmail === myEmail;
@@ -474,30 +474,36 @@ function CardChat() {
               <div key={m.id}>
                 <div className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
                   {!mine && <Avatar seed={senderEmail} label={nameFromHeader(m.from)} className="h-7 w-7 text-[11px]" />}
-                  <Link
-                    to="/message/$id"
-                    params={{ id: m.id }}
-                    className={`group max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm transition-transform hover:-translate-y-0.5 ${
+                  <div
+                    className={`group max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm ring-1 backdrop-blur-sm transition-shadow hover:shadow-md ${
                       mine
-                        ? "rounded-br-md bg-primary text-primary-foreground"
-                        : "rounded-bl-md border border-primary/15 bg-primary/[0.06] text-foreground"
+                        ? "rounded-br-md bg-primary text-primary-foreground ring-primary/30"
+                        : "rounded-bl-md bg-primary/[0.06] text-foreground ring-primary/15"
                     }`}
                   >
                     {!mine && card.kind === "group" && (
                       <p className="mb-0.5 text-[11px] font-semibold text-primary">{nameFromHeader(m.from)}</p>
                     )}
-                    <p className={`leading-snug ${mine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-                      {m.snippet}
-                    </p>
-                    <div onClick={(e) => e.stopPropagation()}>
+                    {m.snippet ? (
+                      <Link
+                        to="/message/$id"
+                        params={{ id: m.id }}
+                        className={`block whitespace-pre-wrap break-words leading-relaxed ${
+                          mine ? "text-primary-foreground/90" : "text-foreground/85"
+                        }`}
+                      >
+                        {m.snippet}
+                      </Link>
+                    ) : null}
+                    <div>
                       <MessageMedia messageId={m.id} mine={mine} />
                     </div>
                     <p
-                      className={`mt-1 text-right text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                      className={`mt-1 text-right text-[10px] tabular-nums ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}
                     >
                       {chatTime(m.date)}
                     </p>
-                  </Link>
+                  </div>
                 </div>
               </div>
             );
