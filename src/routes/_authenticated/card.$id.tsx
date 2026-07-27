@@ -490,7 +490,7 @@ function CardChat() {
                       {m.snippet}
                     </p>
                     <div onClick={(e) => e.stopPropagation()}>
-                      <MessageMedia messageId={m.id} />
+                      <MessageMedia messageId={m.id} mine={mine} />
                     </div>
                     <p
                       className={`mt-1 text-right text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}
