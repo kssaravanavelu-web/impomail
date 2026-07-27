@@ -1,14 +1,56 @@
-export type Category = "payment" | "jobs" | "internships" | "otp" | "recharges" | "personal" | "promotions" | "updates";
+export type Category =
+  | "payment"
+  | "banking"
+  | "bills"
+  | "shopping"
+  | "shipping"
+  | "jobs"
+  | "internships"
+  | "education"
+  | "otp"
+  | "security"
+  | "recharges"
+  | "travel"
+  | "social"
+  | "entertainment"
+  | "food"
+  | "health"
+  | "insurance"
+  | "government"
+  | "events"
+  | "support"
+  | "subscriptions"
+  | "newsletters"
+  | "promotions"
+  | "updates"
+  | "personal";
 
 export const categoryMeta: Record<Category, { label: string; color: string; bg: string }> = {
-  payment:     { label: "Payment",     color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
-  jobs:        { label: "Jobs",        color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
-  internships: { label: "Internships", color: "text-violet-300",  bg: "bg-violet-500/15 border-violet-500/30" },
-  otp:         { label: "OTP",         color: "text-amber-300",   bg: "bg-amber-500/15 border-amber-500/30" },
-  recharges:   { label: "Recharges",   color: "text-pink-300",    bg: "bg-pink-500/15 border-pink-500/30" },
-  personal:    { label: "Personal",    color: "text-cyan-300",    bg: "bg-cyan-500/15 border-cyan-500/30" },
-  promotions:  { label: "Promotions",  color: "text-rose-300",    bg: "bg-rose-500/15 border-rose-500/30" },
-  updates:     { label: "Updates",     color: "text-sky-300",     bg: "bg-sky-500/15 border-sky-500/30" },
+  payment:       { label: "Payment",       color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
+  banking:       { label: "Banking",       color: "text-indigo-300",  bg: "bg-indigo-500/15 border-indigo-500/30" },
+  bills:         { label: "Bills",         color: "text-orange-300",  bg: "bg-orange-500/15 border-orange-500/30" },
+  shopping:      { label: "Shopping",      color: "text-fuchsia-300", bg: "bg-fuchsia-500/15 border-fuchsia-500/30" },
+  shipping:      { label: "Shipping",      color: "text-teal-300",    bg: "bg-teal-500/15 border-teal-500/30" },
+  jobs:          { label: "Jobs",          color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
+  internships:   { label: "Internships",   color: "text-violet-300",  bg: "bg-violet-500/15 border-violet-500/30" },
+  education:     { label: "Education",     color: "text-lime-300",    bg: "bg-lime-500/15 border-lime-500/30" },
+  otp:           { label: "OTP",           color: "text-amber-300",   bg: "bg-amber-500/15 border-amber-500/30" },
+  security:      { label: "Security",      color: "text-red-300",     bg: "bg-red-500/15 border-red-500/30" },
+  recharges:     { label: "Recharges",     color: "text-pink-300",    bg: "bg-pink-500/15 border-pink-500/30" },
+  travel:        { label: "Travel",        color: "text-sky-300",     bg: "bg-sky-500/15 border-sky-500/30" },
+  social:        { label: "Social",        color: "text-purple-300",  bg: "bg-purple-500/15 border-purple-500/30" },
+  entertainment: { label: "Entertainment", color: "text-rose-300",    bg: "bg-rose-500/15 border-rose-500/30" },
+  food:          { label: "Food",          color: "text-yellow-300",  bg: "bg-yellow-500/15 border-yellow-500/30" },
+  health:        { label: "Health",        color: "text-green-300",   bg: "bg-green-500/15 border-green-500/30" },
+  insurance:     { label: "Insurance",     color: "text-cyan-300",    bg: "bg-cyan-500/15 border-cyan-500/30" },
+  government:    { label: "Government",    color: "text-stone-300",   bg: "bg-stone-500/15 border-stone-500/30" },
+  events:        { label: "Events",        color: "text-amber-200",   bg: "bg-amber-400/15 border-amber-400/30" },
+  support:       { label: "Support",       color: "text-slate-300",   bg: "bg-slate-500/15 border-slate-500/30" },
+  subscriptions: { label: "Subscriptions", color: "text-violet-200",  bg: "bg-violet-400/15 border-violet-400/30" },
+  newsletters:   { label: "Newsletters",   color: "text-emerald-200", bg: "bg-emerald-400/15 border-emerald-400/30" },
+  promotions:    { label: "Promotions",    color: "text-rose-200",    bg: "bg-rose-400/15 border-rose-400/30" },
+  updates:       { label: "Updates",       color: "text-sky-200",     bg: "bg-sky-400/15 border-sky-400/30" },
+  personal:      { label: "Personal",      color: "text-cyan-200",    bg: "bg-cyan-400/15 border-cyan-400/30" },
 };
 
 export type Folder = "inbox" | "sent" | "drafts" | "trash" | "archive";
