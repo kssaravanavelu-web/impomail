@@ -162,6 +162,7 @@ function CardChat() {
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
   const status = useServerFn(getGmailStatus);
+  const trashMsg = useServerFn(trashGmailMessage);
 
   const [newEmail, setNewEmail] = useState("");
   const [body, setBody] = useState("");
@@ -171,6 +172,8 @@ function CardChat() {
   const [membersOpen, setMembersOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editingName, setEditingName] = useState<string | null>(null);
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [confirmMsgId, setConfirmMsgId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
