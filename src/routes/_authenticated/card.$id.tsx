@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ImageIcon } from "lucide-react";
 import { VoiceRecorderButton } from "@/components/voice-recorder-button";
+import { VoiceWave } from "@/components/voice-wave";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
