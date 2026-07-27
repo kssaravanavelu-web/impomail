@@ -37,7 +37,12 @@ import {
   updateMailCard,
 } from "@/lib/cards.functions";
 import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
-import { listGmailMessages, sendGmailMessage, getGmailStatus } from "@/lib/gmail.functions";
+import {
+  listGmailMessages,
+  sendGmailMessage,
+  getGmailStatus,
+  getGmailMessageMedia,
+} from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
   head: () => ({
@@ -88,6 +93,59 @@ function Avatar({ seed, label, className = "" }: { seed: string; label: string; 
     >
       {label.charAt(0).toUpperCase()}
     </span>
+  );
+}
+
+function MessageMedia({ messageId }: { messageId: string }) {
+  const fetchMedia = useServerFn(getGmailMessageMedia);
+  const { data, isLoading } = useQuery({
+    queryKey: ["card-mail-media", messageId],
+    queryFn: () => fetchMedia({ data: { id: messageId } }),
+    staleTime: 5 * 60 * 1000,
+  });
+  if (isLoading) {
+    return <Loader2 className="mt-1.5 h-3.5 w-3.5 animate-spin opacity-60" />;
+  }
+  if (!data?.length) return null;
+  return (
+    <div className="mt-2 space-y-2">
+      {data.map((a, i) => {
+        const src = `data:${a.mimeType};base64,${a.dataBase64}`;
+        if (a.mimeType.startsWith("image/")) {
+          return (
+            <img
+              key={`${a.filename}-${i}`}
+              src={src}
+              alt={a.filename}
+              loading="lazy"
+              className="max-h-64 w-full rounded-xl border border-border/40 object-cover"
+            />
+          );
+        }
+        if (a.mimeType.startsWith("audio/")) {
+          return (
+            <audio
+              key={`${a.filename}-${i}`}
+              controls
+              src={src}
+              className="h-9 w-full max-w-[240px]"
+              onClick={(e) => e.preventDefault()}
+            />
+          );
+        }
+        return (
+          <a
+            key={`${a.filename}-${i}`}
+            href={src}
+            download={a.filename}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/50 px-2.5 py-1 text-[11px] underline-offset-2 hover:underline"
+          >
+            <FileIcon className="h-3 w-3" /> {a.filename}
+          </a>
+        );
+      })}
+    </div>
   );
 }
 
@@ -431,6 +489,9 @@ function CardChat() {
                     <p className={`leading-snug ${mine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
                       {m.snippet}
                     </p>
+                    <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                      <MessageMedia messageId={m.id} />
+                    </div>
                     <p
                       className={`mt-1 text-right text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}
                     >
