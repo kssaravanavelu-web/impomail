@@ -78,12 +78,10 @@ export function AppLayout() {
   return (
     <VoiceCommandProvider>
     <div className="app-shell min-h-screen bg-background text-foreground">
-      <span className="aurora-field" aria-hidden />
-      <span className="mesh-floor" aria-hidden />
       {/* Drawer (mobile) */}
       <aside
         className={cn(
-          "holo-pane fixed inset-y-0 left-0 z-40 w-64 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
+          "fixed inset-y-0 left-0 z-40 w-64 border-r border-primary/10 bg-card/60 backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -121,8 +119,8 @@ export function AppLayout() {
                 to={item.to}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "edge-lit flex items-center gap-3 rounded-xl border border-transparent px-4 py-2.5 text-sm",
-                  active ? "nav-capsule" : "text-muted-foreground hover:text-foreground",
+                  "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors",
+                  active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" /> {item.label}
@@ -143,7 +141,7 @@ export function AppLayout() {
 
       {/* Main */}
       <div>
-        <header className="lux-bar neon-rail sticky top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 lg:px-8">
+        <header className="lux-bar sticky top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 lg:px-8">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
@@ -184,7 +182,7 @@ export function AppLayout() {
         </header>
 
         {/* Top nav (desktop) */}
-        <nav className="lux-bar neon-rail sticky top-16 z-10 hidden lg:block">
+        <nav className="lux-bar sticky top-16 z-10 hidden lg:block">
           <div className="flex items-center gap-1 overflow-x-auto px-8 py-2">
             {sidebarItems.map((item) => {
               const active = pathname === item.to;
@@ -206,8 +204,8 @@ export function AppLayout() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "edge-lit flex shrink-0 items-center gap-2 rounded-full border border-transparent px-3.5 py-2 text-sm",
-                    active ? "nav-capsule" : "text-muted-foreground hover:text-foreground",
+                    "flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors",
+                    active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                   )}
                 >
                   <Icon className="h-4 w-4" /> {item.label}
@@ -228,7 +226,8 @@ export function AppLayout() {
       {/* Bottom nav (mobile) — floating pill */}
       <nav className="fixed inset-x-0 bottom-4 z-30 flex justify-center px-4 lg:hidden">
         <div
-          className="holo-pane relative flex items-center gap-1 rounded-full px-2 py-2"
+          className="relative flex items-center gap-1 rounded-full border border-primary/20 bg-card/80 px-2 py-2 backdrop-blur-xl"
+          style={{ boxShadow: "0 20px 50px -20px oklch(0 0 0 / 0.65), 0 0 0 1px oklch(0.85 var(--accent-chroma) var(--accent-hue) / 0.06)" }}
         >
           {bottomItems.map((item) => {
             const active = pathname === item.to;
@@ -255,7 +254,7 @@ export function AppLayout() {
                 className={cn(
                   "relative flex h-11 w-11 items-center justify-center rounded-full transition-all",
                   active
-                    ? "nav-capsule text-primary"
+                    ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
