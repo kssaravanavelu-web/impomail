@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ImageIcon } from "lucide-react";
 import { VoiceRecorderButton } from "@/components/voice-recorder-button";
+import { VoiceWave } from "@/components/voice-wave";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,7 +97,7 @@ function Avatar({ seed, label, className = "" }: { seed: string; label: string; 
   );
 }
 
-function MessageMedia({ messageId }: { messageId: string }) {
+function MessageMedia({ messageId, mine }: { messageId: string; mine?: boolean }) {
   const fetchMedia = useServerFn(getGmailMessageMedia);
   const { data, isLoading } = useQuery({
     queryKey: ["card-mail-media", messageId],
@@ -124,12 +125,11 @@ function MessageMedia({ messageId }: { messageId: string }) {
         }
         if (a.mimeType.startsWith("audio/")) {
           return (
-            <audio
+            <VoiceWave
               key={`${a.filename}-${i}`}
-              controls
               src={src}
-              className="h-9 w-full max-w-[240px]"
-              onClick={(e) => e.preventDefault()}
+              filename={a.filename}
+              mine={mine}
             />
           );
         }
@@ -490,7 +490,7 @@ function CardChat() {
                       {m.snippet}
                     </p>
                     <div onClick={(e) => e.stopPropagation()}>
-                      <MessageMedia messageId={m.id} />
+                      <MessageMedia messageId={m.id} mine={mine} />
                     </div>
                     <p
                       className={`mt-1 text-right text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}
@@ -535,11 +535,8 @@ function CardChat() {
               }
               if (a.mimeType.startsWith("audio/")) {
                 return (
-                  <span
-                    key={`${a.filename}-${i}`}
-                    className="relative inline-flex items-center gap-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-3 py-2"
-                  >
-                    <audio controls src={src} className="h-8 max-w-[200px]" />
+                  <span key={`${a.filename}-${i}`} className="relative inline-block">
+                    <VoiceWave src={src} filename={a.filename} mine />
                     {remove}
                   </span>
                 );
