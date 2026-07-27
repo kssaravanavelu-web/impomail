@@ -535,11 +535,8 @@ function CardChat() {
               }
               if (a.mimeType.startsWith("audio/")) {
                 return (
-                  <span
-                    key={`${a.filename}-${i}`}
-                    className="relative inline-flex items-center gap-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-3 py-2"
-                  >
-                    <audio controls src={src} className="h-8 max-w-[200px]" />
+                  <span key={`${a.filename}-${i}`} className="relative inline-block">
+                    <VoiceWave src={src} filename={a.filename} mine />
                     {remove}
                   </span>
                 );
