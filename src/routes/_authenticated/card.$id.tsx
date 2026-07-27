@@ -43,6 +43,7 @@ import {
   sendGmailMessage,
   getGmailStatus,
   getGmailMessageMedia,
+  trashGmailMessage,
 } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
