@@ -173,6 +173,8 @@ export type GmailMessageSummary = {
   threadId: string;
   snippet: string;
   from: string;
+  to: string;
+  cc: string;
   subject: string;
   date: string;
   unread: boolean;
@@ -213,7 +215,7 @@ export const listGmailMessages = createServerFn({ method: "GET" })
           gatewayBaseUrl: GATEWAY_BASE_URL,
           connectionAPIKey: key,
           connectorId: CONNECTOR_ID,
-          path: `/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`,
+          path: `/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject&metadataHeaders=Date`,
         });
         if (!r.ok) return null;
         const msg = (await r.json()) as {
@@ -233,6 +235,8 @@ export const listGmailMessages = createServerFn({ method: "GET" })
           threadId: msg.threadId,
           snippet: msg.snippet ?? "",
           from,
+          to: h("To"),
+          cc: h("Cc"),
           subject,
           date: h("Date") || (msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : ""),
           unread: (msg.labelIds ?? []).includes("UNREAD"),

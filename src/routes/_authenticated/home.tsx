@@ -5,6 +5,7 @@ import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, 
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 import { listMailCards } from "@/lib/cards.functions";
+import { messageBelongsToCard } from "@/lib/card-filter";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
@@ -49,6 +50,13 @@ function Home() {
     queryFn: () => listCards(),
   });
   const myCards = cardsData ?? [];
+  const myEmail = user.email ?? undefined;
+  const cardCounts = new Map(
+    myCards.map((c) => {
+      const mine = inbox.filter((m) => messageBelongsToCard(m, c, myEmail));
+      return [c.id, { total: mine.length, unread: mine.filter((m) => m.unread).length }];
+    }),
+  );
   const unreadTotal = inbox.filter((m) => m.unread).length;
   const dynamicMetrics = (["payment", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
     key: cat,
@@ -178,11 +186,18 @@ function Home() {
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
                     {c.kind === "group" ? <Users className="h-5 w-5" strokeWidth={1.5} /> : <IdCard className="h-5 w-5" strokeWidth={1.5} />}
                   </span>
-                  <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
+                  <span className="flex items-center gap-2">
+                    {(cardCounts.get(c.id)?.unread ?? 0) > 0 && (
+                      <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                        {cardCounts.get(c.id)?.unread} new
+                      </span>
+                    )}
+                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
+                  </span>
                 </div>
                 <p className="mt-6 font-display text-2xl tracking-tight">{c.name}</p>
                 <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {c.kind === "group" ? "Group" : "Card"} · {c.addresses.length} address{c.addresses.length === 1 ? "" : "es"}
+                  {c.kind === "group" ? "Group" : "Card"} · {cardCounts.get(c.id)?.total ?? 0} mail
                 </p>
               </Link>
             ))}
