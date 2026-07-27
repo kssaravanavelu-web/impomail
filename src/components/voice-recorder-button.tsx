@@ -3,6 +3,7 @@ import { Mic, Square, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { VoiceRecorderWave } from "./voice-wave";
 
 export type RecordedVoice = {
   filename: string;
