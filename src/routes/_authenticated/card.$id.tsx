@@ -38,6 +38,7 @@ import {
   updateMailCard,
 } from "@/lib/cards.functions";
 import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
+import { cardTag, messageBelongsToCard } from "@/lib/card-filter";
 import {
   listGmailMessages,
   sendGmailMessage,
@@ -184,7 +185,12 @@ function CardChat() {
 
   const card = cards?.find((c) => c.id === id);
   const emails = useMemo(() => card?.addresses.map((a) => a.email) ?? [], [card]);
-  const query = emails.length ? `(from:(${emails.join(" OR ")}) OR to:(${emails.join(" OR ")}))` : "";
+  const tagQuery = `subject:"[impo:${id.slice(0, 8)}]"`;
+  const query = emails.length
+    ? card?.kind === "group"
+      ? tagQuery
+      : `(from:(${emails.join(" OR ")}) OR to:(${emails.join(" OR ")}) OR ${tagQuery})`
+    : "";
 
   const { data: messages, isLoading: mailLoading, error } = useQuery({
     queryKey: ["card-mail", id, query],
@@ -192,19 +198,15 @@ function CardChat() {
     enabled: Boolean(query),
   });
 
-  // Only messages posted through this card/group chat (tagged) and authored by a member (or host).
-  const chatTag = `[impo:${id.slice(0, 8)}]`;
+  // Strict routing: tagged chat messages stay in their own card; a personal card
+  // additionally shows every real Gmail conversation with its address.
+  const chatTag = cardTag(id);
   const ordered = useMemo(() => {
-    const allowed = new Set(emails);
+    if (!card) return [];
     return [...(messages ?? [])]
-      .filter((m) => {
-        if (removedIds.includes(m.id)) return false;
-        if (!(m.subject ?? "").includes(chatTag)) return false;
-        const sender = emailFromHeader(m.from);
-        return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
-      })
+      .filter((m) => !removedIds.includes(m.id) && messageBelongsToCard(m, card, myEmail))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [messages, emails, myEmail, chatTag, removedIds]);
+  }, [messages, card, myEmail, removedIds]);
 
   const deleteMsgMut = useMutation({
     mutationFn: (messageId: string) => trashMsg({ data: { id: messageId } }),
