@@ -43,6 +43,7 @@ import {
   sendGmailMessage,
   getGmailStatus,
   getGmailMessageMedia,
+  trashGmailMessage,
 } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/card/$id")({
@@ -161,6 +162,7 @@ function CardChat() {
   const listMail = useServerFn(listGmailMessages);
   const send = useServerFn(sendGmailMessage);
   const status = useServerFn(getGmailStatus);
+  const trashMsg = useServerFn(trashGmailMessage);
 
   const [newEmail, setNewEmail] = useState("");
   const [body, setBody] = useState("");
@@ -170,6 +172,8 @@ function CardChat() {
   const [membersOpen, setMembersOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editingName, setEditingName] = useState<string | null>(null);
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [confirmMsgId, setConfirmMsgId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -194,12 +198,24 @@ function CardChat() {
     const allowed = new Set(emails);
     return [...(messages ?? [])]
       .filter((m) => {
+        if (removedIds.includes(m.id)) return false;
         if (!(m.subject ?? "").includes(chatTag)) return false;
         const sender = emailFromHeader(m.from);
         return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [messages, emails, myEmail, chatTag]);
+  }, [messages, emails, myEmail, chatTag, removedIds]);
+
+  const deleteMsgMut = useMutation({
+    mutationFn: (messageId: string) => trashMsg({ data: { id: messageId } }),
+    onSuccess: (_r, messageId) => {
+      setRemovedIds((p) => [...p, messageId]);
+      setConfirmMsgId(null);
+      qc.invalidateQueries({ queryKey: ["card-mail", id] });
+      toast.success("Message deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -504,6 +520,32 @@ function CardChat() {
                       {chatTime(m.date)}
                     </p>
                   </div>
+                  {mine && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (confirmMsgId === m.id) deleteMsgMut.mutate(m.id);
+                        else setConfirmMsgId(m.id);
+                      }}
+                      onBlur={() => setConfirmMsgId((c) => (c === m.id ? null : c))}
+                      disabled={deleteMsgMut.isPending && deleteMsgMut.variables === m.id}
+                      aria-label={confirmMsgId === m.id ? "Confirm delete message" : "Delete message"}
+                      title={confirmMsgId === m.id ? "Tap again to delete" : "Delete message"}
+                      className={`mb-1 shrink-0 rounded-full p-1.5 transition-all ${
+                        confirmMsgId === m.id
+                          ? "bg-destructive/15 text-destructive opacity-100"
+                          : "text-muted-foreground/70 hover:text-destructive"
+                      }`}
+                    >
+                      {deleteMsgMut.isPending && deleteMsgMut.variables === m.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             );

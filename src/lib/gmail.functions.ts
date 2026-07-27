@@ -432,6 +432,28 @@ export type GmailMediaAttachment = {
   dataBase64: string;
 };
 
+export const trashGmailMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    if (!key) throw new Error("Gmail is not connected");
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey: key,
+      connectorId: CONNECTOR_ID,
+      path: `/gmail/v1/users/me/messages/${data.id}/trash`,
+      init: { method: "POST" },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Delete failed [${res.status}]: ${body.slice(0, 200)}`);
+    }
+    return { ok: true as const };
+  });
+
 export const getGmailMessageMedia = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
