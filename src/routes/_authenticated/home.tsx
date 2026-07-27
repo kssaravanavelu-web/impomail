@@ -6,6 +6,7 @@ import { categoryMeta, type Category } from "@/lib/mock-data";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 import { listMailCards } from "@/lib/cards.functions";
 import { messageBelongsToCard } from "@/lib/card-filter";
+import { CardTile } from "@/components/card-tile";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
@@ -176,34 +177,16 @@ function Home() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {myCards.map((c) => (
-              <Link
+              <CardTile
                 key={c.id}
-                to="/card/$id"
-                params={{ id: c.id }}
-                className="silk-hover glass-card aura-glow group relative flex flex-col justify-between overflow-hidden rounded-3xl p-5"
-              >
-                <div className="flex items-start justify-between">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
-                    {c.kind === "group" ? <Users className="h-5 w-5" strokeWidth={1.5} /> : <IdCard className="h-5 w-5" strokeWidth={1.5} />}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    {(cardCounts.get(c.id)?.unread ?? 0) > 0 && (
-                      <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
-                        {cardCounts.get(c.id)?.unread} new
-                      </span>
-                    )}
-                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
-                  </span>
-                </div>
-                <p className="mt-6 font-display text-2xl tracking-tight">{c.name}</p>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {c.kind === "group" ? "Group" : "Card"} · {cardCounts.get(c.id)?.total ?? 0} mail
-                </p>
-              </Link>
+                card={c}
+                total={cardCounts.get(c.id)?.total}
+                unread={cardCounts.get(c.id)?.unread}
+              />
             ))}
             <Link
               to="/cards"
-              className="silk-hover glass-card aura-glow flex min-h-[150px] flex-col items-center justify-center gap-3 rounded-3xl p-5 text-center"
+              className="silk-hover glass-card flex min-h-[190px] flex-col items-center justify-center gap-3 rounded-[1.75rem] border-dashed p-5 text-center transition hover:-translate-y-1"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
                 <Plus className="h-5 w-5" strokeWidth={1.5} />
