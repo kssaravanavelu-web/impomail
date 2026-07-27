@@ -83,28 +83,34 @@ export function VoiceRecorderButton({ onRecorded }: { onRecorded: (v: RecordedVo
   useEffect(() => () => recRef.current?.stream?.getTracks().forEach((t) => t.stop()), []);
 
   return (
-    <Button
-      type="button"
-      variant={recording ? "default" : "ghost"}
-      size={recording ? "sm" : "icon"}
-      onClick={() => (recording ? stop() : start())}
-      aria-label={recording ? "Stop recording and attach voice mail" : "Record voice mail"}
-      title={recording ? "Stop and attach" : "Record voice mail"}
-      className={cn("shrink-0 rounded-full", recording ? "h-10 gap-2 px-3 animate-pulse" : "h-10 w-10 text-muted-foreground hover:text-primary")}
-      disabled={busy}
-    >
-      {busy ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : recording ? (
-        <>
-          <Square className="h-3.5 w-3.5" />
-          <span className="text-xs tabular-nums">
-            {String(Math.floor(seconds / 60)).padStart(2, "0")}:{String(seconds % 60).padStart(2, "0")}
+    <div className="flex items-center">
+      {recording ? (
+        <button
+          type="button"
+          onClick={stop}
+          aria-label="Stop recording and attach voice mail"
+          title="Stop and attach"
+          className="flex items-center gap-2 rounded-full bg-primary px-1.5 py-1.5 text-primary-foreground shadow-sm transition-transform hover:scale-105 active:scale-95"
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-foreground/20">
+            <Square className="h-3.5 w-3.5 fill-current" />
           </span>
-        </>
+          <VoiceRecorderWave seconds={seconds} />
+        </button>
       ) : (
-        <Mic className="h-4 w-4" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={start}
+          aria-label="Record voice mail"
+          title="Record voice mail"
+          className="h-10 w-10 shrink-0 rounded-full text-muted-foreground hover:text-primary"
+          disabled={busy}
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
+        </Button>
       )}
-    </Button>
+    </div>
   );
 }
