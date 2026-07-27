@@ -5,6 +5,7 @@ import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, 
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 import { listMailCards } from "@/lib/cards.functions";
+import { messageBelongsToCard } from "@/lib/card-filter";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
@@ -49,6 +50,13 @@ function Home() {
     queryFn: () => listCards(),
   });
   const myCards = cardsData ?? [];
+  const myEmail = user.email ?? undefined;
+  const cardCounts = new Map(
+    myCards.map((c) => {
+      const mine = inbox.filter((m) => messageBelongsToCard(m, c, myEmail));
+      return [c.id, { total: mine.length, unread: mine.filter((m) => m.unread).length }];
+    }),
+  );
   const unreadTotal = inbox.filter((m) => m.unread).length;
   const dynamicMetrics = (["payment", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
     key: cat,
