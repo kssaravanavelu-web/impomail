@@ -198,12 +198,24 @@ function CardChat() {
     const allowed = new Set(emails);
     return [...(messages ?? [])]
       .filter((m) => {
+        if (removedIds.includes(m.id)) return false;
         if (!(m.subject ?? "").includes(chatTag)) return false;
         const sender = emailFromHeader(m.from);
         return allowed.has(sender) || (Boolean(myEmail) && sender === myEmail);
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [messages, emails, myEmail, chatTag]);
+  }, [messages, emails, myEmail, chatTag, removedIds]);
+
+  const deleteMsgMut = useMutation({
+    mutationFn: (messageId: string) => trashMsg({ data: { id: messageId } }),
+    onSuccess: (_r, messageId) => {
+      setRemovedIds((p) => [...p, messageId]);
+      setConfirmMsgId(null);
+      qc.invalidateQueries({ queryKey: ["card-mail", id] });
+      toast.success("Message deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
