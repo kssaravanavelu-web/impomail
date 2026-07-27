@@ -1,34 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus, Landmark, ReceiptText, ShoppingBag, Truck, BookOpen, ShieldCheck, Plane, MessageCircle, Clapperboard, UtensilsCrossed, HeartPulse, Umbrella, Building2, CalendarDays, LifeBuoy, RefreshCw, Newspaper } from "lucide-react";
+import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 import { listMailCards } from "@/lib/cards.functions";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
-  banking: Landmark,
-  bills: ReceiptText,
-  shopping: ShoppingBag,
-  shipping: Truck,
   jobs: Briefcase,
   internships: GraduationCap,
-  education: BookOpen,
   otp: KeyRound,
-  security: ShieldCheck,
   recharges: Smartphone,
-  travel: Plane,
-  social: MessageCircle,
-  entertainment: Clapperboard,
-  food: UtensilsCrossed,
-  health: HeartPulse,
-  insurance: Umbrella,
-  government: Building2,
-  events: CalendarDays,
-  support: LifeBuoy,
-  subscriptions: RefreshCw,
-  newsletters: Newspaper,
   personal: User,
   promotions: Tag,
   updates: Bell,
