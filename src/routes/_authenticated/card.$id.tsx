@@ -489,7 +489,7 @@ function CardChat() {
                     <p className={`leading-snug ${mine ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
                       {m.snippet}
                     </p>
-                    <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                    <div onClick={(e) => e.stopPropagation()}>
                       <MessageMedia messageId={m.id} />
                     </div>
                     <p
