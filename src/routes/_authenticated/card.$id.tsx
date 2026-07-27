@@ -520,6 +520,32 @@ function CardChat() {
                       {chatTime(m.date)}
                     </p>
                   </div>
+                  {mine && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (confirmMsgId === m.id) deleteMsgMut.mutate(m.id);
+                        else setConfirmMsgId(m.id);
+                      }}
+                      onBlur={() => setConfirmMsgId((c) => (c === m.id ? null : c))}
+                      disabled={deleteMsgMut.isPending && deleteMsgMut.variables === m.id}
+                      aria-label={confirmMsgId === m.id ? "Confirm delete message" : "Delete message"}
+                      title={confirmMsgId === m.id ? "Tap again to delete" : "Delete message"}
+                      className={`mb-1 shrink-0 rounded-full p-1.5 transition-all ${
+                        confirmMsgId === m.id
+                          ? "bg-destructive/15 text-destructive opacity-100"
+                          : "text-muted-foreground opacity-0 hover:text-destructive focus:opacity-100 group-hover:opacity-100 sm:opacity-0"
+                      }`}
+                    >
+                      {deleteMsgMut.isPending && deleteMsgMut.variables === m.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             );
