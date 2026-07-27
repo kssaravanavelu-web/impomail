@@ -426,3 +426,70 @@ export const sendGmailMessage = createServerFn({ method: "POST" })
     }
     return { ok: true as const };
   });
+export type GmailMediaAttachment = {
+  filename: string;
+  mimeType: string;
+  dataBase64: string;
+};
+
+export const getGmailMessageMedia = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }): Promise<GmailMediaAttachment[]> => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    if (!key) return [];
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey: key,
+      connectorId: CONNECTOR_ID,
+      path: `/gmail/v1/users/me/messages/${data.id}?format=full`,
+    });
+    if (!res.ok) return [];
+    const msg = (await res.json()) as {
+      payload?: {
+        filename?: string;
+        mimeType?: string;
+        body?: { data?: string; size?: number; attachmentId?: string };
+        parts?: unknown[];
+      };
+    };
+    type P = {
+      filename?: string;
+      mimeType?: string;
+      body?: { data?: string; size?: number; attachmentId?: string };
+      parts?: P[];
+    };
+    const flat: P[] = [];
+    const walk = (p?: P) => {
+      if (!p) return;
+      if (p.filename) flat.push(p);
+      for (const c of p.parts ?? []) walk(c);
+    };
+    walk(msg.payload as P | undefined);
+    const MAX = 8 * 1024 * 1024;
+    const out: GmailMediaAttachment[] = [];
+    for (const p of flat.slice(0, 10)) {
+      const size = p.body?.size ?? 0;
+      if (size > MAX) continue;
+      let b64 = p.body?.data ?? "";
+      if (!b64 && p.body?.attachmentId) {
+        const ar = await callAsAppUser({
+          gatewayBaseUrl: GATEWAY_BASE_URL,
+          connectionAPIKey: key,
+          connectorId: CONNECTOR_ID,
+          path: `/gmail/v1/users/me/messages/${data.id}/attachments/${p.body.attachmentId}`,
+        });
+        if (!ar.ok) continue;
+        b64 = ((await ar.json()) as { data?: string }).data ?? "";
+      }
+      if (!b64) continue;
+      out.push({
+        filename: p.filename ?? "attachment",
+        mimeType: p.mimeType ?? "application/octet-stream",
+        dataBase64: b64.replace(/-/g, "+").replace(/_/g, "/"),
+      });
+    }
+    return out;
+  });
