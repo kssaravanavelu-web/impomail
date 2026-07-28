@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Activity } from "lucide-react";
+import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Activity, Wallet, Trash2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
+import { deleteAllFinanceData } from "@/lib/finance.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -16,6 +19,23 @@ export const Route = createFileRoute("/_authenticated/settings")({
 function Settings() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const purgeFinance = useServerFn(deleteAllFinanceData);
+  const [purging, setPurging] = useState(false);
+
+  const wipeFinance = async () => {
+    if (!window.confirm("Delete every transaction, budget, bill and subscription ImpoMail extracted from your mail? This cannot be undone.")) return;
+    setPurging(true);
+    try {
+      await purgeFinance();
+      await queryClient.invalidateQueries({ queryKey: ["finance"] });
+      toast.success("All financial data deleted");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not delete financial data");
+    } finally {
+      setPurging(false);
+    }
+  };
   const [notifications, setNotifications] = useState(true);
   const [aiCategorize, setAiCategorize] = useState(true);
   const [otpVault, setOtpVault] = useState(true);

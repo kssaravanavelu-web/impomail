@@ -41,6 +41,84 @@ export type Database = {
         }
         Relationships: []
       }
+      bills: {
+        Row: {
+          amount: number
+          bill_type: string
+          biller: string
+          created_at: string
+          currency: string
+          due_date: string | null
+          gmail_message_id: string | null
+          id: string
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          bill_type?: string
+          biller: string
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          gmail_message_id?: string | null
+          id?: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          bill_type?: string
+          biller?: string
+          created_at?: string
+          currency?: string
+          due_date?: string | null
+          gmail_message_id?: string | null
+          id?: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      budgets: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          currency: string
+          id: string
+          period: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          currency?: string
+          id?: string
+          period?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          period?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -61,6 +139,36 @@ export type Database = {
           created_at?: string
           id?: string
           role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      finance_insights: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          severity: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          severity?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          severity?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -130,6 +238,42 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_summary: {
+        Row: {
+          by_category: Json
+          created_at: string
+          expense: number
+          id: string
+          income: number
+          month: string
+          savings: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          by_category?: Json
+          created_at?: string
+          expense?: number
+          id?: string
+          income?: number
+          month: string
+          savings?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          by_category?: Json
+          created_at?: string
+          expense?: number
+          id?: string
+          income?: number
+          month?: string
+          savings?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -177,6 +321,138 @@ export type Database = {
           created_at?: string
           id?: string
           pattern?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number
+          cadence: string
+          created_at: string
+          currency: string
+          id: string
+          last_charged_at: string | null
+          merchant: string | null
+          name: string
+          next_renewal_at: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          cadence?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_charged_at?: string | null
+          merchant?: string | null
+          name: string
+          next_renewal_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          cadence?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_charged_at?: string | null
+          merchant?: string | null
+          name?: string
+          next_renewal_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          account_hint: string | null
+          amount: number
+          category: string
+          category_locked: boolean
+          confidence: number
+          counterparty: string | null
+          created_at: string
+          currency: string
+          direction: string
+          gmail_message_id: string | null
+          gmail_thread_id: string | null
+          has_invoice: boolean
+          id: string
+          merchant: string | null
+          notes: string | null
+          occurred_at: string
+          payment_method: string | null
+          raw: Json
+          sender: string | null
+          source: string
+          source_ref: string | null
+          txn_ref: string | null
+          updated_at: string
+          upi_ref: string | null
+          user_id: string
+        }
+        Insert: {
+          account_hint?: string | null
+          amount?: number
+          category?: string
+          category_locked?: boolean
+          confidence?: number
+          counterparty?: string | null
+          created_at?: string
+          currency?: string
+          direction?: string
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          has_invoice?: boolean
+          id?: string
+          merchant?: string | null
+          notes?: string | null
+          occurred_at?: string
+          payment_method?: string | null
+          raw?: Json
+          sender?: string | null
+          source?: string
+          source_ref?: string | null
+          txn_ref?: string | null
+          updated_at?: string
+          upi_ref?: string | null
+          user_id: string
+        }
+        Update: {
+          account_hint?: string | null
+          amount?: number
+          category?: string
+          category_locked?: boolean
+          confidence?: number
+          counterparty?: string | null
+          created_at?: string
+          currency?: string
+          direction?: string
+          gmail_message_id?: string | null
+          gmail_thread_id?: string | null
+          has_invoice?: boolean
+          id?: string
+          merchant?: string | null
+          notes?: string | null
+          occurred_at?: string
+          payment_method?: string | null
+          raw?: Json
+          sender?: string | null
+          source?: string
+          source_ref?: string | null
+          txn_ref?: string | null
+          updated_at?: string
+          upi_ref?: string | null
           user_id?: string
         }
         Relationships: []
