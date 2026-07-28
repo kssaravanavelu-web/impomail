@@ -9,9 +9,10 @@ import {
   Lock, CreditCard, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
 } from "lucide-react";
 
-const TITLE = "IMPOMAIL | Smart Gmail Management & Expense Tracking";
+const TITLE = "IMPOMAIL | Smart Gmail Management & Organisation";
 const DESC =
-  "IMPOMAIL helps users organise Gmail, manage emails efficiently, detect payment notifications for personal expense tracking, and securely connect with Google using OAuth.";
+  "IMPOMAIL helps users organise Gmail, manage emails efficiently, categorise conversations, search quickly, and securely connect with Google using OAuth.";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,11 +51,12 @@ export const Route = createFileRoute("/")({
 const FEATURES = [
   { emoji: "📧", icon: Inbox, title: "Smart Email Management", desc: "Organise Gmail efficiently." },
   { emoji: "🔍", icon: Search, title: "Powerful Search", desc: "Find important emails instantly." },
-  { emoji: "💳", icon: CreditCard, title: "Expense Tracking", desc: "Automatically identify payment notifications and generate personal expense summaries." },
-  { emoji: "🏷", icon: Tags, title: "Smart Categories", desc: "Sort emails into categories." },
+  { emoji: "🏷", icon: Tags, title: "Smart Categories", desc: "Sort emails into useful categories." },
   { emoji: "⭐", icon: Star, title: "Important Mail Detection", desc: "Highlight important conversations." },
+  { emoji: "🎙", icon: Sparkles, title: "Voice Assistant", desc: "Control the app and chat hands-free with Impo." },
   { emoji: "🔒", icon: Shield, title: "Secure Google Sign-In", desc: "Uses Google's secure OAuth authentication." },
 ];
+
 
 const PERMISSIONS = [
   { icon: Inbox, text: "Read emails for organisation and categorisation" },
