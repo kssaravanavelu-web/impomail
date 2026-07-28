@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bot, X, Send, Loader2, Maximize2, Volume2, VolumeX } from "lucide-react";
+import { Bot, X, Send, Loader2, Maximize2, Volume2, VolumeX, Crown, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listChatHistory, sendChatMessage } from "@/lib/assistant.functions";
+import { getCurrentUsage } from "@/lib/tier.functions";
+import { TIERS } from "@/lib/tier";
 import { MicButton } from "@/components/mic-button";
 import { useVoiceCommand, useVoiceMode } from "@/lib/voice-command";
 import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
