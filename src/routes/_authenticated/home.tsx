@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus } from "lucide-react";
+import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus, Sparkles } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
+import { categoryGroups } from "@/lib/category-groups";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
 import { listMailCards } from "@/lib/cards.functions";
 import { messageBelongsToCard } from "@/lib/card-filter";
@@ -17,6 +18,15 @@ const iconFor: Record<Category, typeof Briefcase> = {
   personal: User,
   promotions: Tag,
   updates: Bell,
+};
+
+const groupIcon: Record<string, typeof Briefcase> = {
+  payment: CreditCard,
+  career: Briefcase,
+  otp: KeyRound,
+  recharges: Smartphone,
+  personal: User,
+  others: Sparkles,
 };
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -59,11 +69,12 @@ function Home() {
     }),
   );
   const unreadTotal = inbox.filter((m) => m.unread).length;
-  const dynamicMetrics = (["payment", "jobs", "internships", "otp", "recharges"] as Category[]).map((cat) => ({
-    key: cat,
-    label: categoryMeta[cat].label,
-    category: cat,
-    count: inbox.filter((m) => m.category === cat).length,
+  const dynamicMetrics = categoryGroups.map((g) => ({
+    key: g.slug,
+    label: g.label,
+    slug: g.slug,
+    meta: categoryMeta[g.cats[0]],
+    count: inbox.filter((m) => g.cats.includes(m.category as Category)).length,
   }));
   const sectors = (Object.keys(categoryMeta) as Category[])
     .map((cat) => ({ cat, items: inbox.filter((m) => m.category === cat) }))
@@ -134,13 +145,13 @@ function Home() {
           style={{ scrollPaddingLeft: "1.25rem" }}
         >
           {dynamicMetrics.map((m, i) => {
-            const Icon = iconFor[m.category];
-            const meta = categoryMeta[m.category];
+            const Icon = groupIcon[m.slug] ?? Tag;
+            const meta = m.meta;
             return (
               <Link
                 key={m.key}
                 to="/category/$slug"
-                params={{ slug: m.category }}
+                params={{ slug: m.slug }}
                 className={`silk-hover glass-card gold-hairline group relative flex min-w-[180px] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl p-5 rise-${Math.min(6, i + 1)} sm:min-w-[210px]`}
               >
                 <div className="flex items-start justify-between">
