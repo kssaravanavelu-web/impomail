@@ -129,26 +129,6 @@ export function AppLayout() {
               </Link>
             );
           })}
-          <p className="mt-4 px-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
-            Personal Finance
-          </p>
-          {financeItems.map((item) => {
-            const active = pathname === item.to;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors",
-                  active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                )}
-              >
-                <Icon className="h-4 w-4" /> {item.label}
-              </Link>
-            );
-          })}
         </nav>
         <div className="absolute inset-x-3 bottom-3">
           <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start gap-2 text-muted-foreground">
@@ -234,22 +214,6 @@ export function AppLayout() {
                 </Link>
               );
             })}
-            <span className="mx-2 h-5 w-px shrink-0 bg-border/70" />
-            {financeItems.map((item) => {
-              const active = pathname === item.to;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors",
-                    active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                  )}
-                >
-                  <Icon className="h-4 w-4" /> {item.label}
-                </Link>
-              );
             })}
             <Button variant="ghost" size="sm" onClick={signOut} className="ml-auto shrink-0 gap-2 text-muted-foreground">
               <LogOut className="h-4 w-4" /> Sign out
