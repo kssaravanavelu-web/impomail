@@ -110,7 +110,7 @@ export function ChatWidget() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const text = input.trim();
-    if (!text || mutation.isPending) return;
+    if (!text || mutation.isPending || aiLimited) return;
     setInput("");
     mutation.mutate(text);
   };
