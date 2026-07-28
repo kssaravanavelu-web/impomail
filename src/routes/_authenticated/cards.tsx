@@ -207,17 +207,27 @@ function CardsPage() {
               </Button>
             </div>
           </div>
-          <Button onClick={() => createMut.mutate()} disabled={!name.trim() || createMut.isPending} className="h-11">
+          <Button
+            onClick={() => createMut.mutate()}
+            disabled={!name.trim() || createMut.isPending || atKindLimit}
+            className="h-11"
+          >
             {createMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            <span className="ml-1.5">Create</span>
+            <span className="ml-1.5">{atKindLimit ? "Limit reached" : "Create"}</span>
           </Button>
         </div>
-        {maxEmails !== undefined && (
+        {atKindLimit ? (
+          <Link to="/pricing" className="mt-2 flex items-center gap-1.5 text-xs text-primary hover:underline">
+            <Crown className="h-3.5 w-3.5" />
+            Your {usage?.tier ? TIERS[usage.tier].name : "Free"} plan is at the {kind === "card" ? "personal card" : "group"} limit. Upgrade to create more.
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        ) : maxEmails !== undefined ? (
           <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             {kind === "card" ? "Personal card" : "Group"}: {emails.length}/{maxEmails}{" "}
             {kind === "card" ? "email" : "members"} · you are the host
           </p>
-        )}
+        ) : null}
       </div>
 
       {isLoading && (
