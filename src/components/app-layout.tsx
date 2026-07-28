@@ -1,7 +1,5 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot, IdCard, Wallet, Receipt, TrendingUp, Target, PieChart, FileClock, RefreshCcw } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { syncFinance } from "@/lib/finance.functions";
+import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot, IdCard } from "lucide-react";
 import { HeaderSearch } from "@/components/header-search";
 import { NotificationBell } from "@/components/notification-bell";
 import { ChatWidget } from "@/components/chat-widget";
@@ -16,8 +14,7 @@ import { BrandLogo } from "@/components/brand-logo";
 type SidebarItem = {
   to:
     | "/compose" | "/home" | "/inbox" | "/cards" | "/sent" | "/drafts" | "/trash" | "/archive"
-    | "/settings" | "/profile" | "/assistant"
-    | "/finance" | "/expenses" | "/income" | "/budgets" | "/analytics" | "/bills" | "/subscriptions";
+    | "/settings" | "/profile" | "/assistant";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
@@ -36,16 +33,6 @@ const sidebarItems: SidebarItem[] = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-const financeItems: SidebarItem[] = [
-  { to: "/finance", label: "Personal Finance", icon: Wallet },
-  { to: "/expenses", label: "Expense Tracker", icon: Receipt },
-  { to: "/income", label: "Income", icon: TrendingUp },
-  { to: "/budgets", label: "Budgets", icon: Target },
-  { to: "/analytics", label: "Analytics", icon: PieChart },
-  { to: "/bills", label: "Bills", icon: FileClock },
-  { to: "/subscriptions", label: "Subscriptions", icon: RefreshCcw },
-];
-
 const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/assistant", label: "Impo", icon: Bot },
@@ -60,19 +47,6 @@ export function AppLayout() {
   const [open, setOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [initial, setInitial] = useState<string>("?");
-  const runFinanceSync = useServerFn(syncFinance);
-
-  // Keep the expense tracker current: quietly re-scan money mail at most
-  // once every 15 minutes while the app is open.
-  useEffect(() => {
-    const KEY = "impomail:finance-sync-at";
-    const last = Number(localStorage.getItem(KEY) ?? 0);
-    if (Date.now() - last < 15 * 60 * 1000) return;
-    localStorage.setItem(KEY, String(Date.now()));
-    runFinanceSync({ data: {} }).catch(() => {
-      /* background sync is best-effort */
-    });
-  }, [runFinanceSync]);
 
   useEffect(() => {
     let ignore = false;
