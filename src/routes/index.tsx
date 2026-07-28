@@ -6,14 +6,15 @@ import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Sparkles, Shield, Mail, ArrowRight, Check, Search,
-  Lock, CreditCard, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
+  Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
 } from "lucide-react";
 
-const TITLE = "IMPOMAIL | Smart Gmail Management & Expense Tracking";
+const TITLE = "IMPOMAIL | Smart Gmail Management & Organisation";
 const DESC =
-  "IMPOMAIL helps users organise Gmail, manage emails efficiently, detect payment notifications for personal expense tracking, and securely connect with Google using OAuth.";
+  "IMPOMAIL helps users organise Gmail, manage emails efficiently, categorise conversations, search quickly, and securely connect with Google using OAuth.";
 
 export const Route = createFileRoute("/")({
+
   head: () => ({
     meta: [
       { title: TITLE },
@@ -50,9 +51,9 @@ export const Route = createFileRoute("/")({
 const FEATURES = [
   { emoji: "📧", icon: Inbox, title: "Smart Email Management", desc: "Organise Gmail efficiently." },
   { emoji: "🔍", icon: Search, title: "Powerful Search", desc: "Find important emails instantly." },
-  { emoji: "💳", icon: CreditCard, title: "Expense Tracking", desc: "Automatically identify payment notifications and generate personal expense summaries." },
-  { emoji: "🏷", icon: Tags, title: "Smart Categories", desc: "Sort emails into categories." },
+  { emoji: "🏷", icon: Tags, title: "Smart Categories", desc: "Sort emails into useful categories." },
   { emoji: "⭐", icon: Star, title: "Important Mail Detection", desc: "Highlight important conversations." },
+  { emoji: "🎙", icon: Sparkles, title: "Voice Assistant", desc: "Control the app and chat hands-free with Impo." },
   { emoji: "🔒", icon: Shield, title: "Secure Google Sign-In", desc: "Uses Google's secure OAuth authentication." },
 ];
 
@@ -61,10 +62,11 @@ const PERMISSIONS = [
   { icon: Send, text: "Send emails on behalf of the user when requested" },
   { icon: FileEdit, text: "Create and save draft emails" },
   { icon: Archive, text: "Modify labels and archive emails" },
-  { icon: CreditCard, text: "Detect payment notifications for expense tracking" },
+  { icon: Search, text: "Search and retrieve relevant email threads" },
 ];
 
 const PRIVACY_POINTS = [
+
   { icon: Lock, title: "User data belongs to the user", desc: "You own your Gmail content. IMPOMAIL only processes it to deliver the features you use." },
   { icon: Shield, title: "OAuth authentication is provided by Google", desc: "IMPOMAIL never sees or stores your Google password." },
   { icon: Globe, title: "Data is transmitted securely using HTTPS", desc: "All traffic between your browser, IMPOMAIL and Google APIs is encrypted in transit." },
@@ -132,10 +134,11 @@ function LandingPage() {
                 </span>
               </h1>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                IMPOMAIL is an intelligent email management platform that helps users organise emails,
-                track personal expenses from payment notifications, categorise messages, search quickly,
-                and improve productivity using Gmail integration.
+                IMPOMAIL is an intelligent email management platform that securely connects to your Google account
+                (with your permission) to help organise your Gmail, categorise messages, search quickly,
+                and control your inbox using a built-in voice assistant.
               </p>
+
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link to={connectHref}>
                   <Button
@@ -167,20 +170,22 @@ function LandingPage() {
                 </div>
                 <div className="space-y-3">
                   <PreviewRow icon={Inbox} label="Unread mail" value="12" />
-                  <PreviewRow icon={CreditCard} label="Payments and Bills" value="3" />
+                  <PreviewRow icon={Tags} label="Payments and Bills" value="3" />
                   <PreviewRow icon={Shield} label="OTP and Security" value="2" />
                   <PreviewRow icon={Mail} label="Jobs and Internships" value="5" />
                 </div>
+
                 <div className="mt-6 rounded-2xl border border-border/60 bg-background/30 p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <CreditCard className="h-4 w-4" />
+                      <Sparkles className="h-4 w-4" />
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Payment notifications become a clear personal expense summary.
+                      Use voice commands or the chat assistant to manage your inbox hands-free.
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -194,9 +199,10 @@ function LandingPage() {
               <p className="mt-5 text-base leading-relaxed text-muted-foreground lg:text-lg">
                 IMPOMAIL is a productivity platform built to simplify Gmail management. It securely connects to
                 your Google account (with your permission) to help organise emails, categorise messages, search
-                efficiently, and analyse important information such as payment notifications for personal expense
-                tracking. IMPOMAIL never accesses your Gmail without your explicit authorisation.
+                efficiently, and manage your inbox with a smart voice assistant. IMPOMAIL never accesses your
+                Gmail without your explicit authorisation.
               </p>
+
             </div>
           </div>
         </section>
