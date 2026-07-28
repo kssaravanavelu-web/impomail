@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/message-list";
 import { GmailList } from "@/components/gmail-list";
+import { MailActions } from "@/components/mail-actions";
 import { listGmailMessages } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/trash")({
@@ -19,7 +20,7 @@ function TrashPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8 lg:py-10">
       <PageHeader title="Trash" subtitle="Messages are permanently deleted after 30 days." />
-      <GmailList items={data ?? []} loading={isLoading} error={error ? (error as Error).message : null} emptyText="Trash is empty." />
+      <GmailList items={data ?? []} loading={isLoading} error={error ? (error as Error).message : null} emptyText="Trash is empty." renderActions={(m) => <MailActions id={m.id} actions={["restore"]} />} />
     </div>
   );
 }
