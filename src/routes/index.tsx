@@ -9,13 +9,12 @@ import {
   Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
 } from "lucide-react";
 
-
 const TITLE = "IMPOMAIL | Smart Gmail Management & Organisation";
 const DESC =
   "IMPOMAIL helps users organise Gmail, manage emails efficiently, categorise conversations, search quickly, and securely connect with Google using OAuth.";
 
-
 export const Route = createFileRoute("/")({
+
   head: () => ({
     meta: [
       { title: TITLE },
