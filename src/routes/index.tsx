@@ -4,22 +4,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { BrandLogo } from "@/components/brand-logo";
 import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
-import { Inbox, Sparkles, Shield, Zap, Mail, ArrowRight, Check, Search, Lock, MessageCircle } from "lucide-react";
+import {
+  Inbox, Sparkles, Shield, Mail, ArrowRight, Check, Search,
+  Lock, CreditCard, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
+} from "lucide-react";
+
+const TITLE = "IMPOMAIL | Smart Gmail Management & Expense Tracking";
+const DESC =
+  "IMPOMAIL helps users organise Gmail, manage emails efficiently, detect payment notifications for personal expense tracking, and securely connect with Google using OAuth.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "IMPOMAIL — Smart Gmail Companion" },
-      { name: "description", content: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
-      { property: "og:title", content: "IMPOMAIL — Smart Gmail Companion" },
-      { property: "og:description", content: "IMPOMAIL organizes your Gmail into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls." },
+      { title: TITLE },
+      { name: "description", content: DESC },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESC },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "IMPOMAIL" },
       { property: "og:url", content: "https://impomail.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESC },
     ],
-    links: [
-      { rel: "canonical", href: "https://impomail.lovable.app/" },
-    ],
+    links: [{ rel: "canonical", href: "https://impomail.lovable.app/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -28,13 +36,10 @@ export const Route = createFileRoute("/")({
           "@type": "WebApplication",
           name: "IMPOMAIL",
           url: "https://impomail.lovable.app/",
-          description: "IMPOMAIL is a Gmail companion app that organizes your emails into smart categories — payments, jobs, OTPs, bills, and more — with an AI assistant and voice controls.",
+          description: DESC,
           applicationCategory: "EmailApplication",
           operatingSystem: "Web",
-          author: {
-            "@type": "Organization",
-            name: "IMPOMAIL",
-          },
+          author: { "@type": "Organization", name: "IMPOMAIL", email: "support@impomail.com" },
         }),
       },
     ],
@@ -42,13 +47,36 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
+const FEATURES = [
+  { emoji: "📧", icon: Inbox, title: "Smart Email Management", desc: "Organise Gmail efficiently." },
+  { emoji: "🔍", icon: Search, title: "Powerful Search", desc: "Find important emails instantly." },
+  { emoji: "💳", icon: CreditCard, title: "Expense Tracking", desc: "Automatically identify payment notifications and generate personal expense summaries." },
+  { emoji: "🏷", icon: Tags, title: "Smart Categories", desc: "Sort emails into categories." },
+  { emoji: "⭐", icon: Star, title: "Important Mail Detection", desc: "Highlight important conversations." },
+  { emoji: "🔒", icon: Shield, title: "Secure Google Sign-In", desc: "Uses Google's secure OAuth authentication." },
+];
+
+const PERMISSIONS = [
+  { icon: Inbox, text: "Read emails for organisation and categorisation" },
+  { icon: Send, text: "Send emails on behalf of the user when requested" },
+  { icon: FileEdit, text: "Create and save draft emails" },
+  { icon: Archive, text: "Modify labels and archive emails" },
+  { icon: CreditCard, text: "Detect payment notifications for expense tracking" },
+];
+
+const PRIVACY_POINTS = [
+  { icon: Lock, title: "User data belongs to the user", desc: "You own your Gmail content. IMPOMAIL only processes it to deliver the features you use." },
+  { icon: Shield, title: "OAuth authentication is provided by Google", desc: "IMPOMAIL never sees or stores your Google password." },
+  { icon: Globe, title: "Data is transmitted securely using HTTPS", desc: "All traffic between your browser, IMPOMAIL and Google APIs is encrypted in transit." },
+  { icon: KeyRound, title: "Disconnect at any time", desc: "You can revoke IMPOMAIL's access to your Google account whenever you choose." },
+  { icon: Check, title: "Google API Services User Data Policy", desc: "IMPOMAIL follows Google's API Services User Data Policy, including the Limited Use requirements." },
+];
+
 function LandingPage() {
   const [session, setSession] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(!!data.session);
-    });
+    supabase.auth.getSession().then(({ data }) => setSession(!!data.session));
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         supabase.auth.getSession().then(({ data: d }) => setSession(!!d.session));
@@ -57,112 +85,100 @@ function LandingPage() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  const connectHref = session === true ? "/connect-gmail" : "/auth";
+
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background text-foreground">
-      {/* Ambient background glows */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{ background: "radial-gradient(50% 40% at 50% 0%, oklch(0.35 0.14 260 / 0.45), transparent 70%)" }}
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{ background: "radial-gradient(60% 45% at 50% 0%, oklch(0.55 0.16 255 / 0.35), transparent 72%)" }}
       />
       <div
         className="pointer-events-none absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full opacity-30 blur-3xl"
-        style={{ background: "radial-gradient(circle, oklch(0.78 0.09 85 / 0.25), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, oklch(0.62 0.15 250 / 0.35), transparent 60%)" }}
       />
 
-      {/* Header */}
+      {/* Navbar */}
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 lg:px-10">
         <Link to="/" className="flex items-center gap-3">
           <BrandLogo className="h-10 w-10 rounded-xl" />
-          <span className="lux-wordmark font-display text-xl font-semibold tracking-tight">
-            IMPOMAIL
-          </span>
+          <span className="lux-wordmark font-display text-xl font-semibold tracking-tight">IMPOMAIL</span>
         </Link>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground sm:gap-6">
+          <a href="#about" className="hidden hover:text-foreground sm:inline">About</a>
+          <a href="#permissions" className="hidden hover:text-foreground md:inline">Permissions</a>
           <Link to="/privacy" className="hidden hover:text-foreground sm:inline">Privacy</Link>
-          <Link to="/terms" className="hidden hover:text-foreground sm:inline">Terms</Link>
           <CustomisePanel />
-          {session === true ? (
-            <Link to="/home">
-              <Button className="gap-2 font-medium text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
-                Dashboard <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          ) : (
-            <Link to="/auth">
-              <Button className="gap-2 font-medium text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
-                Sign in <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
+          <Link to={session === true ? "/home" : "/auth"}>
+            <Button className="gap-2 font-medium text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
+              {session === true ? "Dashboard" : "Sign in"} <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </nav>
       </header>
 
-      {/* Hero */}
       <main className="relative z-10 flex-1">
-        <section className="mx-auto max-w-6xl px-5 py-16 lg:px-10 lg:py-28">
+        {/* Hero */}
+        <section className="mx-auto max-w-6xl px-5 py-16 lg:px-10 lg:py-24">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div className="silk-rise max-w-xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Smart Gmail companion
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Gmail integration · Google OAuth
               </div>
-              <h1 className="font-display text-5xl font-light leading-[1.05] tracking-tight lg:text-7xl">
-                IMPOMAIL
+              <h1 className="font-display text-4xl font-light leading-[1.08] tracking-tight lg:text-6xl">
+                Manage Your Gmail Smarter with{" "}
+                <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>
+                  IMPOMAIL
+                </span>
               </h1>
-              <p className="mt-4 font-display text-2xl font-light leading-snug text-foreground/80 lg:text-4xl">
-                Only the Gmail messages that <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>matter</span>.
-              </p>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                <strong className="text-foreground">IMPOMAIL is a smart Gmail companion app.</strong> It connects to your Gmail account, reads your messages, and automatically sorts them into the categories that matter most — payments, jobs, internships, OTPs, recharges, personal, promotions, and updates — so you can focus on what is important without digging through a noisy inbox.
+                IMPOMAIL is an intelligent email management platform that helps users organise emails,
+                track personal expenses from payment notifications, categorise messages, search quickly,
+                and improve productivity using Gmail integration.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                {session === true ? (
-                  <Link to="/home">
-                    <Button size="lg" className="h-12 gap-2 px-7 text-base font-semibold text-primary-foreground" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
-                      Go to dashboard <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link to="/auth">
-                    <Button size="lg" className="h-12 gap-2 px-7 text-base font-semibold text-primary-foreground" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
-                      Get started free <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-                <Link to="/auth">
-                  <Button size="lg" variant="outline" className="h-12 gap-2 px-7 text-base border-border/60 hover:border-primary/40">
-                    <Mail className="h-4 w-4" /> Sign in with Gmail
+                <Link to={connectHref}>
+                  <Button
+                    size="lg"
+                    className="h-12 w-full gap-2 px-7 text-base font-semibold text-primary-foreground sm:w-auto"
+                    style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
+                  >
+                    <Mail className="h-4 w-4" /> Connect Gmail
                   </Button>
                 </Link>
+                <a href="#about">
+                  <Button size="lg" variant="outline" className="h-12 w-full gap-2 border-border/60 px-7 text-base hover:border-primary/40 sm:w-auto">
+                    Learn More <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </a>
               </div>
               <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Gmail native</span>
-                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> AES-256 encrypted tokens</span>
-                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> No ads or data selling</span>
+                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Explicit user consent required</span>
+                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Encrypted HTTPS transport</span>
+                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> No data selling</span>
               </div>
             </div>
 
-            {/* Feature preview card */}
             <div className="silk-rise rise-2">
-              <div
-                className="glass-card gold-hairline relative overflow-hidden rounded-3xl p-6 lg:p-8"
-                style={{ background: "var(--gradient-surface)" }}
-              >
+              <div className="glass-card gold-hairline relative overflow-hidden rounded-3xl p-6 lg:p-8" style={{ background: "var(--gradient-surface)" }}>
                 <div className="mb-6 flex items-center justify-between">
                   <span className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Preview</span>
                   <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-primary">Live categories</span>
                 </div>
                 <div className="space-y-3">
-                  <PreviewRow icon={Inbox} label="Unread mail" value="12" color="text-primary" />
-                  <PreviewRow icon={Zap} label="Payments & Bills" value="3" color="text-amber-400" />
-                  <PreviewRow icon={Shield} label="OTP & Security" value="2" color="text-emerald-400" />
-                  <PreviewRow icon={Mail} label="Jobs & Internships" value="5" color="text-sky-400" />
+                  <PreviewRow icon={Inbox} label="Unread mail" value="12" />
+                  <PreviewRow icon={CreditCard} label="Payments and Bills" value="3" />
+                  <PreviewRow icon={Shield} label="OTP and Security" value="2" />
+                  <PreviewRow icon={Mail} label="Jobs and Internships" value="5" />
                 </div>
                 <div className="mt-6 rounded-2xl border border-border/60 bg-background/30 p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Sparkles className="h-4 w-4" />
+                      <CreditCard className="h-4 w-4" />
                     </div>
-                    <div className="text-sm text-muted-foreground">AI assistant organizes and answers your mail in any language.</div>
+                    <div className="text-sm text-muted-foreground">
+                      Payment notifications become a clear personal expense summary.
+                    </div>
                   </div>
                 </div>
               </div>
@@ -170,111 +186,92 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
-          <div className="mb-10 text-center">
-            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Why IMPOMAIL</p>
-            <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">Your inbox, finally organized</h2>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <FeatureCard
-              icon={Inbox}
-              title="Auto-categorize"
-              desc="Gmail messages are sorted into Payments, Jobs, OTPs, Recharges, Personal, Promotions, and Updates."
-            />
-            <FeatureCard
-              icon={Zap}
-              title="Instant OTP vault"
-              desc="Extract and surface one-time passwords the moment they hit your inbox."
-            />
-            <FeatureCard
-              icon={Sparkles}
-              title="Voice + AI assistant"
-              desc="Ask Impo to search, read, compose, or navigate the app — hands-free."
-            />
-            <FeatureCard
-              icon={Shield}
-              title="Private by design"
-              desc="Your mail stays in Gmail. Tokens are encrypted and we never sell your data."
-            />
-          </div>
-        </section>
-
-        {/* What is IMPOMAIL? */}
-        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
-          <div className="rounded-3xl border border-border/60 p-8 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
+        {/* What is IMPOMAIL */}
+        <section id="about" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-20 lg:px-10 lg:pb-24">
+          <div className="glass-card rounded-3xl border border-border/60 p-8 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">What is IMPOMAIL?</p>
-              <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">
-                A Gmail companion built for clarity
-              </h2>
+              <h2 className="font-display text-3xl tracking-tight lg:text-4xl">What is IMPOMAIL?</h2>
               <p className="mt-5 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                IMPOMAIL is a web application that helps Gmail users organize their inbox by automatically categorizing messages into meaningful sections: <strong className="text-foreground">payments, jobs, internships, OTPs, recharges, personal conversations, promotions, and updates.</strong> It also includes an AI assistant named Impo who can read, search, summarize, and compose messages on your behalf using voice or text commands.
-              </p>
-              <p className="mt-4 text-sm text-muted-foreground">
-                The app is built for professionals, students, and anyone who receives a high volume of transactional email and wants to find what matters in seconds.
+                IMPOMAIL is a productivity platform built to simplify Gmail management. It securely connects to
+                your Google account (with your permission) to help organise emails, categorise messages, search
+                efficiently, and analyse important information such as payment notifications for personal expense
+                tracking. IMPOMAIL never accesses your Gmail without your explicit authorisation.
               </p>
             </div>
           </div>
         </section>
 
-        {/* How it works */}
-        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
+        {/* Features */}
+        <section id="features" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-20 lg:px-10 lg:pb-24">
           <div className="mb-10 text-center">
-            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">How it works</p>
-            <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">Three steps to a calm inbox</h2>
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Features</p>
+            <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">Everything IMPOMAIL does for your inbox</h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-3">
-            <StepCard
-              step="1"
-              icon={Mail}
-              title="Sign in with Gmail"
-              desc="Create an IMPOMAIL account and securely connect your Gmail inbox with encrypted OAuth tokens."
-            />
-            <StepCard
-              step="2"
-              icon={Search}
-              title="Auto-organize"
-              desc="IMPOMAIL reads your messages and places them into smart categories so you can browse by purpose."
-            />
-            <StepCard
-              step="3"
-              icon={MessageCircle}
-              title="Ask Impo"
-              desc="Use voice or text to search, read, compose, and manage your mail across any language."
-            />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <FeatureCard key={f.title} {...f} />
+            ))}
           </div>
         </section>
 
-        {/* Trust & contact */}
-        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-10 lg:pb-28">
-          <div className="grid items-center gap-8 rounded-3xl border border-border/60 p-8 lg:grid-cols-2 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
-            <div>
-              <h2 className="font-display text-2xl tracking-tight lg:text-3xl">Built with privacy in mind</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Your Gmail messages are processed through official Google APIs with encrypted tokens. We do not sell your data, serve ads, or train third-party models on your mail. You can disconnect your Gmail account at any time from the Settings page.
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/30 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Lock className="h-5 w-5" />
+        {/* Why permissions */}
+        <section id="permissions" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-20 lg:px-10 lg:pb-24">
+          <div className="glass-card rounded-3xl border border-border/60 p-8 lg:p-12" style={{ background: "var(--gradient-surface)" }}>
+            <h2 className="font-display text-3xl tracking-tight lg:text-4xl">Why does IMPOMAIL request Gmail access?</h2>
+            <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground">
+              IMPOMAIL requests Gmail permissions only after the user grants consent. These permissions allow the
+              application to:
+            </p>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              {PERMISSIONS.map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-start gap-3 rounded-2xl border border-border/60 bg-background/30 p-4">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" strokeWidth={1.6} />
+                  </div>
+                  <span className="text-sm leading-relaxed text-muted-foreground">{text}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-sm font-medium text-foreground">
+              IMPOMAIL does not sell user data or share personal Gmail content with third parties.
+            </p>
+          </div>
+        </section>
+
+        {/* Privacy & security */}
+        <section id="privacy" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-20 lg:px-10 lg:pb-24">
+          <div className="mb-10 text-center">
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Privacy &amp; Security</p>
+            <h2 className="mt-3 font-display text-3xl tracking-tight lg:text-4xl">Your data, under your control</h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {PRIVACY_POINTS.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="glass-card gold-hairline rounded-2xl p-5 transition hover:border-primary/30">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary">
+                  <Icon className="h-5 w-5" strokeWidth={1.5} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium">AES-256 encrypted tokens</p>
-                  <p className="text-xs text-muted-foreground">OAuth credentials are encrypted at rest.</p>
-                </div>
+                <h3 className="font-display text-lg font-medium tracking-tight">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
               </div>
-              <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/30 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Shield className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">No ads or data selling</p>
-                  <p className="text-xs text-muted-foreground">Your mail is never sold to advertisers.</p>
-                </div>
-              </div>
-            </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact */}
+        <section id="contact" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-20 lg:px-10 lg:pb-24">
+          <div className="glass-card flex flex-col items-center gap-4 rounded-3xl border border-border/60 p-8 text-center lg:p-12" style={{ background: "var(--gradient-surface)" }}>
+            <h2 className="font-display text-3xl tracking-tight lg:text-4xl">Contact Us</h2>
+            <p className="text-sm text-muted-foreground">
+              Website name: <strong className="text-foreground">IMPOMAIL</strong>
+            </p>
+            <a href="mailto:support@impomail.com" className="text-base font-medium text-primary hover:underline">
+              support@impomail.com
+            </a>
+            <Link to={connectHref} className="mt-2">
+              <Button size="lg" className="h-12 gap-2 px-7 text-base font-semibold text-primary-foreground" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
+                <Mail className="h-4 w-4" /> Connect Gmail
+              </Button>
+            </Link>
           </div>
         </section>
       </main>
@@ -282,13 +279,11 @@ function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-border/60 bg-card/30 px-5 py-8 lg:px-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:text-left">
-          <p>
-            IMPOMAIL · Founder: Saravanavel · Support Founder: Vishnuvardhan
-          </p>
-          <div className="flex items-center gap-5">
+          <p>© {new Date().getFullYear()} IMPOMAIL. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-5">
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
-            <a href="mailto:support@impomail.lovable.app" className="hover:text-foreground">Contact support</a>
+            <a href="mailto:support@impomail.com" className="hover:text-foreground">Contact Us</a>
           </div>
         </div>
       </footer>
@@ -296,26 +291,11 @@ function LandingPage() {
   );
 }
 
-function StepCard({ step, icon: Icon, title, desc }: { step: string; icon: typeof Inbox; title: string; desc: string }) {
-  return (
-    <div className="glass-card gold-hairline rounded-2xl p-6 transition hover:border-primary/30">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary font-display text-lg">
-        {step}
-      </div>
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary">
-        <Icon className="h-5 w-5" strokeWidth={1.5} />
-      </div>
-      <h3 className="font-display text-lg font-medium tracking-tight">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
-    </div>
-  );
-}
-
-function PreviewRow({ icon: Icon, label, value, color }: { icon: typeof Inbox; label: string; value: string; color: string }) {
+function PreviewRow({ icon: Icon, label, value }: { icon: typeof Inbox; label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/30 px-4 py-3">
       <div className="flex items-center gap-3">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 ${color}`}>
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary">
           <Icon className="h-4 w-4" />
         </div>
         <span className="text-sm font-medium">{label}</span>
@@ -325,11 +305,14 @@ function PreviewRow({ icon: Icon, label, value, color }: { icon: typeof Inbox; l
   );
 }
 
-function FeatureCard({ icon: Icon, title, desc }: { icon: typeof Inbox; title: string; desc: string }) {
+function FeatureCard({ emoji, icon: Icon, title, desc }: { emoji: string; icon: typeof Inbox; title: string; desc: string }) {
   return (
-    <div className="glass-card gold-hairline rounded-2xl p-5 transition hover:border-primary/30">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary">
-        <Icon className="h-5 w-5" strokeWidth={1.5} />
+    <div className="glass-card gold-hairline rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:border-primary/30">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/5 text-primary">
+          <Icon className="h-5 w-5" strokeWidth={1.5} />
+        </div>
+        <span aria-hidden className="text-lg">{emoji}</span>
       </div>
       <h3 className="font-display text-lg font-medium tracking-tight">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
