@@ -78,7 +78,6 @@ function LandingPage() {
           </span>
         </Link>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground sm:gap-6">
-          <Link to="/pricing" className="hidden hover:text-foreground sm:inline">Pricing</Link>
           <Link to="/privacy" className="hidden hover:text-foreground sm:inline">Privacy</Link>
           <Link to="/terms" className="hidden hover:text-foreground sm:inline">Terms</Link>
           <CustomisePanel />
