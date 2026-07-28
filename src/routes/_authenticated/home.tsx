@@ -63,8 +63,9 @@ function Home() {
   const unreadTotal = inbox.filter((m) => m.unread).length;
   const dynamicMetrics = categoryGroups.map((g) => ({
     key: g.slug,
-    label: g.label,
+    label: g.short,
     slug: g.slug,
+    cat: g.cats[0],
     meta: categoryMeta[g.cats[0]],
     count: inbox.filter((m) => g.cats.includes(m.category as Category)).length,
   }));
@@ -137,7 +138,7 @@ function Home() {
           style={{ scrollPaddingLeft: "1.25rem" }}
         >
           {dynamicMetrics.map((m, i) => {
-            const Icon = groupIcon[m.slug] ?? Tag;
+            const Icon = iconFor[m.cat] ?? Tag;
             const meta = m.meta;
             return (
               <Link
