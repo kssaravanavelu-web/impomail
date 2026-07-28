@@ -28,12 +28,21 @@ function PricingPage() {
   const [session, setSession] = useState<boolean | null>(null);
   const [currentTier, setCurrentTier] = useState<TierKey>("free");
   const [yearly, setYearly] = useState(false);
+  const usageFn = useServerFn(getCurrentUsage);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       setSession(!!data.session);
+      if (data.session) {
+        try {
+          const usage = await usageFn();
+          setCurrentTier(usage.tier);
+        } catch {
+          setCurrentTier("free");
+        }
+      }
     });
-  }, []);
+  }, [usageFn]);
 
   const tiers = (["free", "pro", "ultra"] as TierKey[]).map((key) => ({
     key,
