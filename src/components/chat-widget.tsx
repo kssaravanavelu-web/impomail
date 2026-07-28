@@ -53,6 +53,10 @@ export function ChatWidget() {
     enabled: open,
   });
 
+  const aiLimit = usage?.aiMessages.limit ?? TIERS.free.limits.maxAiMessagesPerMonth;
+  const aiCurrent = usage?.aiMessages.current ?? 0;
+  const aiLimited = Number.isFinite(aiLimit) && aiCurrent >= aiLimit;
+
   const runActions = useCallback(
     (actions: SiteAction[]) => {
       for (const a of actions) {
