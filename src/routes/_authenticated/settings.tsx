@@ -27,6 +27,9 @@ function Settings() {
   // Ensure no aesthetic background is applied since we removed that feature
   useEffect(() => { if (background.kind !== "none") setBackground({ kind: "none" }); }, [background.kind, setBackground]);
 
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn() });
+
   const connectGmail = () => {
     navigate({ to: "/connect-gmail" });
   };
