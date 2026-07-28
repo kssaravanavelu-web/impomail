@@ -1,5 +1,7 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot, IdCard } from "lucide-react";
+import { Inbox, Send, FileText, Trash2, Archive, Settings, PenSquare, LogOut, Menu, Home, User, Bot, IdCard, Wallet, Receipt, TrendingUp, Target, PieChart, FileClock, RefreshCcw } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { syncFinance } from "@/lib/finance.functions";
 import { HeaderSearch } from "@/components/header-search";
 import { NotificationBell } from "@/components/notification-bell";
 import { ChatWidget } from "@/components/chat-widget";
@@ -12,7 +14,10 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 
 type SidebarItem = {
-  to: "/compose" | "/home" | "/inbox" | "/cards" | "/sent" | "/drafts" | "/trash" | "/archive" | "/settings" | "/profile" | "/assistant";
+  to:
+    | "/compose" | "/home" | "/inbox" | "/cards" | "/sent" | "/drafts" | "/trash" | "/archive"
+    | "/settings" | "/profile" | "/assistant"
+    | "/finance" | "/expenses" | "/income" | "/budgets" | "/analytics" | "/bills" | "/subscriptions";
   label: string;
   icon: typeof Inbox;
   accent?: boolean;
@@ -31,6 +36,16 @@ const sidebarItems: SidebarItem[] = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
+const financeItems: SidebarItem[] = [
+  { to: "/finance", label: "Personal Finance", icon: Wallet },
+  { to: "/expenses", label: "Expense Tracker", icon: Receipt },
+  { to: "/income", label: "Income", icon: TrendingUp },
+  { to: "/budgets", label: "Budgets", icon: Target },
+  { to: "/analytics", label: "Analytics", icon: PieChart },
+  { to: "/bills", label: "Bills", icon: FileClock },
+  { to: "/subscriptions", label: "Subscriptions", icon: RefreshCcw },
+];
+
 const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/assistant", label: "Impo", icon: Bot },
@@ -45,6 +60,19 @@ export function AppLayout() {
   const [open, setOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [initial, setInitial] = useState<string>("?");
+  const runFinanceSync = useServerFn(syncFinance);
+
+  // Keep the expense tracker current: quietly re-scan money mail at most
+  // once every 15 minutes while the app is open.
+  useEffect(() => {
+    const KEY = "impomail:finance-sync-at";
+    const last = Number(localStorage.getItem(KEY) ?? 0);
+    if (Date.now() - last < 15 * 60 * 1000) return;
+    localStorage.setItem(KEY, String(Date.now()));
+    runFinanceSync({ data: {} }).catch(() => {
+      /* background sync is best-effort */
+    });
+  }, [runFinanceSync]);
 
   useEffect(() => {
     let ignore = false;
@@ -113,6 +141,26 @@ export function AppLayout() {
                 </Link>
               );
             }
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors",
+                  active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                )}
+              >
+                <Icon className="h-4 w-4" /> {item.label}
+              </Link>
+            );
+          })}
+          <p className="mt-4 px-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+            Personal Finance
+          </p>
+          {financeItems.map((item) => {
+            const active = pathname === item.to;
+            const Icon = item.icon;
             return (
               <Link
                 key={item.to}
@@ -199,6 +247,23 @@ export function AppLayout() {
                   </Link>
                 );
               }
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors",
+                    active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4" /> {item.label}
+                </Link>
+              );
+            })}
+            <span className="mx-2 h-5 w-px shrink-0 bg-border/70" />
+            {financeItems.map((item) => {
+              const active = pathname === item.to;
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.to}
