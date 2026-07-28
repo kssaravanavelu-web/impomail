@@ -355,8 +355,7 @@ function Assistant() {
           <MicButton
             size="sm"
             onTranscript={(t) => setInput(t)}
-            title="Speak your message"
-            disabled={aiLimited}
+            title={aiLimited ? "Upgrade to use voice" : "Speak your message"}
           />
           <Button
             size="sm"
