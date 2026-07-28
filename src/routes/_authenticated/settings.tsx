@@ -179,6 +179,22 @@ function Settings() {
         </Link>
       </Section>
 
+      <Section icon={Wallet} title="Personal finance data">
+        <Link to="/finance" className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40">
+          <span className="flex items-center gap-3"><Wallet className="h-4 w-4 text-muted-foreground" /> Finance dashboard</span>
+          <span className="text-muted-foreground">›</span>
+        </Link>
+        <button
+          type="button"
+          onClick={wipeFinance}
+          disabled={purging}
+          className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-destructive hover:bg-destructive/10 disabled:opacity-60"
+        >
+          <span className="flex items-center gap-3"><Trash2 className="h-4 w-4" /> Delete all financial data</span>
+          <span className="text-xs">{purging ? "Deleting…" : "Permanent"}</span>
+        </button>
+      </Section>
+
       <Button variant="outline" className="mt-6 w-full gap-2 text-destructive hover:text-destructive" onClick={signOut}>
         <LogOut className="h-4 w-4" /> Sign out
       </Button>
