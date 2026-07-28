@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage: {
+        Row: {
+          id: string
+          message_count: number
+          user_id: string
+          year_month: string
+        }
+        Insert: {
+          id?: string
+          message_count?: number
+          user_id: string
+          year_month: string
+        }
+        Update: {
+          id?: string
+          message_count?: number
+          user_id?: string
+          year_month?: string
+        }
+        Relationships: []
+      }
       app_user_connections: {
         Row: {
           connection_key_ciphertext: string
@@ -137,6 +158,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          tier: string
           updated_at: string
         }
         Insert: {
@@ -145,6 +167,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          tier?: string
           updated_at?: string
         }
         Update: {
@@ -153,6 +176,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          tier?: string
           updated_at?: string
         }
         Relationships: []
