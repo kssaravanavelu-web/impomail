@@ -147,15 +147,21 @@ export const addCardAddress = createServerFn({ method: "POST" })
     if (cerr) throw new Error(cerr.message);
     if (!card) throw new Error("Card not found");
     if (card.user_id !== context.userId) throw new Error("Only a host can add members");
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("tier")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const tier = TIERS[(profile?.tier as TierKey) ?? "free"];
     const { count } = await context.supabase
       .from("mail_card_addresses")
       .select("id", { count: "exact", head: true })
       .eq("card_id", data.cardId);
-    const limit = card.kind === "group" ? MAX_GROUP_MEMBERS : MAX_PERSONAL_CARD_EMAILS;
+    const limit = card.kind === "group" ? tier.limits.maxGroupMembers : MAX_PERSONAL_CARD_EMAILS;
     if ((count ?? 0) >= limit) {
       throw new Error(
         card.kind === "group"
-          ? `Groups can hold up to ${MAX_GROUP_MEMBERS} members`
+          ? `Your ${tier.name} plan allows up to ${limit} group members. Upgrade to add more.`
           : "A personal card can hold only one email address",
       );
     }
