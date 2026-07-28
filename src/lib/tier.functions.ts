@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { TIERS, type TierKey } from "./tier";
-import { checkAiLimit, incrementAiMessageCount } from "./tier.server";
+import { checkAiLimit, getAiUsage, incrementAiMessageCount } from "./tier.server";
 
 export type UsageSummary = {
   tier: TierKey;
@@ -28,7 +28,7 @@ export const getCurrentUsage = createServerFn({ method: "GET" })
     const currentCards = (cards ?? []).filter((c) => c.kind === "card").length;
     const currentGroups = (cards ?? []).filter((c) => c.kind === "group").length;
 
-    const { current, limit } = await incrementAiMessageCount({ supabase: context.supabase, userId: context.userId });
+    const { current, limit } = await getAiUsage({ supabase: context.supabase, userId: context.userId });
 
     return {
       tier: tierKey,
