@@ -1,0 +1,4 @@
+CREATE POLICY "Users can view their own connections" ON public.app_user_connections FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own connections" ON public.app_user_connections FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own connections" ON public.app_user_connections FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own connections" ON public.app_user_connections FOR DELETE TO authenticated USING (auth.uid() = user_id);

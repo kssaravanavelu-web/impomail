@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bot, X, Send, Loader2, Maximize2, Volume2, VolumeX } from "lucide-react";
+import { Bot, X, Send, Loader2, Maximize2, Volume2, VolumeX, Crown, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listChatHistory, sendChatMessage } from "@/lib/assistant.functions";
+import { getCurrentUsage } from "@/lib/tier.functions";
+import { TIERS } from "@/lib/tier";
 import { MicButton } from "@/components/mic-button";
 import { useVoiceCommand, useVoiceMode } from "@/lib/voice-command";
 import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
@@ -22,6 +24,8 @@ export function ChatWidget() {
   const navigate = useNavigate();
   const history = useServerFn(listChatHistory);
   const send = useServerFn(sendChatMessage);
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn(), enabled: open });
   const { conversing } = useVoiceCommand();
 
   useEffect(() => {
@@ -48,6 +52,10 @@ export function ChatWidget() {
     queryFn: () => history(),
     enabled: open,
   });
+
+  const aiLimit = usage?.aiMessages.limit ?? TIERS.free.limits.maxAiMessagesPerMonth;
+  const aiCurrent = usage?.aiMessages.current ?? 0;
+  const aiLimited = Number.isFinite(aiLimit) && aiCurrent >= aiLimit;
 
   const runActions = useCallback(
     (actions: SiteAction[]) => {
@@ -102,7 +110,7 @@ export function ChatWidget() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const text = input.trim();
-    if (!text || mutation.isPending) return;
+    if (!text || mutation.isPending || aiLimited) return;
     setInput("");
     mutation.mutate(text);
   };
@@ -199,22 +207,44 @@ export function ChatWidget() {
               </div>
             )}
             {mutation.error && (
-              <p className="text-xs text-destructive">{(mutation.error as Error).message}</p>
+              <div className="text-xs text-destructive">
+                {(mutation.error as Error).message}
+                {String((mutation.error as Error).message).toLowerCase().includes("limit") && (
+                  <Link to="/pricing" className="ml-1 inline-flex items-center gap-0.5 underline">
+                    Upgrade <ArrowRight className="h-3 w-3" />
+                  </Link>
+                )}
+              </div>
             )}
           </div>
+
+          {aiLimited && (
+            <div className="border-t border-primary/10 bg-primary/10 px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-xs font-medium">
+                  <Crown className="h-3.5 w-3.5 text-primary" />
+                  AI limit reached
+                </span>
+                <Link to="/pricing" className="inline-flex items-center gap-0.5 text-xs text-primary hover:underline">
+                  Upgrade <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={submit} className="flex items-center gap-2 border-t border-primary/10 px-3 py-3">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Message Impo…"
-              className="min-w-0 flex-1 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm outline-none focus:border-primary/60"
+              placeholder={aiLimited ? "Upgrade to keep chatting" : "Message Impo…"}
+              disabled={aiLimited}
+              className="min-w-0 flex-1 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm outline-none focus:border-primary/60 disabled:opacity-50"
             />
-            <MicButton onTranscript={(t) => setInput(t)} title="Speak to Impo" />
+            <MicButton onTranscript={(t) => setInput(t)} title={aiLimited ? "Upgrade to use voice" : "Speak to Impo"} />
             <button
               type="submit"
               aria-label="Send"
-              disabled={!input.trim() || mutation.isPending}
+              disabled={!input.trim() || mutation.isPending || aiLimited}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-primary-foreground disabled:opacity-40"
               style={{ background: "var(--gradient-primary)" }}
             >

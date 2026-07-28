@@ -1,14 +1,16 @@
 import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bot, Loader2, Send, Sparkles, Trash2, Volume2, VolumeX, Square } from "lucide-react";
+import { Bot, Loader2, Send, Sparkles, Trash2, Volume2, VolumeX, Square, Crown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
+import { getCurrentUsage } from "@/lib/tier.functions";
+import { TIERS } from "@/lib/tier";
 import { MicButton } from "@/components/mic-button";
 import { parseDialogue, pickVoiceForRole, voiceProfile, SOFT_VOLUME } from "@/lib/multi-voice";
 
@@ -39,6 +41,12 @@ function Assistant() {
     queryKey: ["assistant-history"],
     queryFn: () => listFn(),
   });
+
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn() });
+  const aiLimit = usage?.aiMessages.limit ?? TIERS.free.limits.maxAiMessagesPerMonth;
+  const aiCurrent = usage?.aiMessages.current ?? 0;
+  const aiLimited = Number.isFinite(aiLimit) && aiCurrent >= aiLimit;
 
   const [pending, setPending] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
@@ -175,7 +183,7 @@ function Assistant() {
 
   const submit = () => {
     const text = input.trim();
-    if (!text || mutation.isPending) return;
+    if (!text || mutation.isPending || aiLimited) return;
     setInput("");
     mutation.mutate(text);
   };
@@ -311,31 +319,49 @@ function Assistant() {
         )}
       </div>
 
-      <div className="mt-3 rounded-2xl border border-primary/10 bg-card/70 p-2 backdrop-blur">
+      {aiLimited && (
+        <div className="mt-3 rounded-2xl border border-primary/20 bg-primary/10 p-3 backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Crown className="h-4 w-4 text-primary" />
+              <span>You've reached your {TIERS[usage?.tier ?? "free"].name} plan AI limit.</span>
+            </div>
+            <Link to="/pricing">
+              <Button size="sm" className="gap-1.5 text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
+                Upgrade <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      <div className={cn("mt-3 rounded-2xl border border-primary/10 bg-card/70 p-2 backdrop-blur", aiLimited && "opacity-60")}>
         <Textarea
           ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Ask Impo anything about ImpoMail…"
+          placeholder={aiLimited ? "Upgrade to keep chatting with Impo" : "Ask Impo anything about ImpoMail…"}
           className="min-h-[52px] resize-none border-0 bg-transparent focus-visible:ring-0"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || aiLimited}
         />
         <div className="flex items-center justify-between px-2 pb-1">
           <span className="text-[11px] text-muted-foreground">
-            {muted ? "Voice muted" : "Voice ready · tap Speak on any reply"} · Enter to send
+            {aiLimited
+              ? `${aiCurrent} / ${aiLimit} AI messages used this month`
+              : `${aiCurrent}${Number.isFinite(aiLimit) ? ` / ${aiLimit}` : ""} AI messages · ${muted ? "Voice muted" : "Voice ready · tap Speak on any reply"}`}
           </span>
           <div className="flex items-center gap-1">
           <MicButton
             size="sm"
             onTranscript={(t) => setInput(t)}
-            title="Speak your message"
+            title={aiLimited ? "Upgrade to use voice" : "Speak your message"}
           />
           <Button
             size="sm"
             className="gap-2"
             onClick={submit}
-            disabled={mutation.isPending || !input.trim()}
+            disabled={mutation.isPending || !input.trim() || aiLimited}
             style={{ background: "var(--gradient-primary)" }}
           >
             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

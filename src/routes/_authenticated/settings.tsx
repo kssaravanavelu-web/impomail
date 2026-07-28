@@ -1,12 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Activity } from "lucide-react";
+import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Activity, Crown, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/message-list";
 import { toast } from "sonner";
 import { ACCENTS, useTheme } from "@/lib/theme";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUsage } from "@/lib/tier.functions";
+import { TIERS } from "@/lib/tier";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — ImpoMail" }, { name: "description", content: "Manage your account and preferences." }] }),
@@ -22,6 +26,9 @@ function Settings() {
   const { mode, setMode, accent, setAccent, contrast, setContrast, background, setBackground } = useTheme();
   // Ensure no aesthetic background is applied since we removed that feature
   useEffect(() => { if (background.kind !== "none") setBackground({ kind: "none" }); }, [background.kind, setBackground]);
+
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn() });
 
   const connectGmail = () => {
     navigate({ to: "/connect-gmail" });
@@ -75,6 +82,29 @@ function Settings() {
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-border/60 px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
           >
             <Activity className="h-4 w-4" /> Connection status
+          </Link>
+        </div>
+      </Section>
+
+      <Section icon={Crown} title="Subscription & usage">
+        <div className="px-4 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="text-sm font-medium">Current plan</div>
+            <div className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+              {usage ? TIERS[usage.tier].name : "Free"}
+            </div>
+          </div>
+          <div className="space-y-3">
+            <UsageBar label="Personal cards" current={usage?.cards.current ?? 0} limit={usage?.cards.limit ?? 3} />
+            <UsageBar label="Groups" current={usage?.groups.current ?? 0} limit={usage?.groups.limit ?? 1} />
+            <UsageBar
+              label="AI messages this month"
+              current={usage?.aiMessages.current ?? 0}
+              limit={Number.isFinite(usage?.aiMessages.limit ?? 0) ? (usage?.aiMessages.limit ?? 0) : Infinity}
+            />
+          </div>
+          <Link to="/pricing" className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border/60 px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground">
+            <CreditCard className="h-4 w-4" /> View plans
           </Link>
         </div>
       </Section>
@@ -188,6 +218,28 @@ function Row({ label, desc, checked, onChange }: { label: string; desc: string; 
         <div className="text-xs text-muted-foreground">{desc}</div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
+function UsageBar({ label, current, limit }: { label: string; current: number; limit: number }) {
+  const infinite = !Number.isFinite(limit);
+  const pct = infinite ? 0 : Math.min(100, Math.round((current / limit) * 100));
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium">
+          {current}
+          {infinite ? " / unlimited" : ` / ${limit}`}
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-accent">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
+        />
+      </div>
     </div>
   );
 }

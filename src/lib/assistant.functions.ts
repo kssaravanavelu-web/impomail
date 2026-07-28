@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { checkAiLimit, incrementAiMessageCount } from "./tier.server";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
@@ -61,6 +62,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("Assistant is not configured");
 
+    await checkAiLimit({ supabase: context.supabase, userId: context.userId });
+
     const { data: history, error: histErr } = await context.supabase
       .from("chat_messages")
       .select("role, content")
@@ -93,6 +96,8 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       choices?: { message?: { content?: string } }[];
     };
     const reply = json.choices?.[0]?.message?.content?.trim() || "…";
+
+    await incrementAiMessageCount({ supabase: context.supabase, userId: context.userId });
 
     const { error: insErr } = await context.supabase.from("chat_messages").insert([
       { user_id: context.userId, role: "user", content: data.content },
