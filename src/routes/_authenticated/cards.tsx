@@ -76,7 +76,7 @@ function CardsPage() {
       toast.error(
         kind === "card"
           ? "A personal card can hold only one email address"
-          : `Groups can hold up to ${MAX_GROUP_MEMBERS} members`,
+          : `Groups can hold up to ${maxGroupMembers} members`,
       );
       return;
     }
