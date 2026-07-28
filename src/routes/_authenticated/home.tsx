@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, GraduationCap, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus, Sparkles } from "lucide-react";
+import { Briefcase, GraduationCap, BookOpen, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus, Sparkles } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { categoryGroups } from "@/lib/category-groups";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
@@ -13,6 +13,7 @@ const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
   jobs: Briefcase,
   internships: GraduationCap,
+  education: BookOpen,
   otp: KeyRound,
   recharges: Smartphone,
   personal: User,
@@ -23,6 +24,7 @@ const iconFor: Record<Category, typeof Briefcase> = {
 const groupIcon: Record<string, typeof Briefcase> = {
   payment: CreditCard,
   career: Briefcase,
+  education: BookOpen,
   otp: KeyRound,
   recharges: Smartphone,
   personal: User,
