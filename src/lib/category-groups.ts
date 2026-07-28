@@ -6,6 +6,7 @@ export type CategoryGroup = { slug: string; label: string; cats: Category[] };
 export const categoryGroups: CategoryGroup[] = [
   { slug: "payment", label: "Payment", cats: ["payment"] },
   { slug: "career", label: "Career", cats: ["jobs", "internships"] },
+  { slug: "education", label: "Education", cats: ["education"] },
   { slug: "otp", label: "OTP", cats: ["otp"] },
   { slug: "recharges", label: "Recharges", cats: ["recharges"] },
   { slug: "personal", label: "Personal", cats: ["personal"] },
