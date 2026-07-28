@@ -24,6 +24,7 @@ const iconFor: Record<Category, typeof Briefcase> = {
 const groupIcon: Record<string, typeof Briefcase> = {
   payment: CreditCard,
   career: Briefcase,
+  education: BookOpen,
   otp: KeyRound,
   recharges: Smartphone,
   personal: User,
