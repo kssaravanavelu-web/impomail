@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
 import { MicButton } from "@/components/mic-button";
-import { MusicPlayer } from "@/components/music-player";
 import { parseDialogue, pickVoiceForRole, voiceProfile, SOFT_VOLUME } from "@/lib/multi-voice";
 
 export const Route = createFileRoute("/_authenticated/assistant")({
@@ -211,7 +210,6 @@ function Assistant() {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <MusicPlayer />
           <Button
             variant="ghost"
             size="icon"
