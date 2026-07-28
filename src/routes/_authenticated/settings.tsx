@@ -86,6 +86,29 @@ function Settings() {
         </div>
       </Section>
 
+      <Section icon={Crown} title="Subscription & usage">
+        <div className="px-4 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="text-sm font-medium">Current plan</div>
+            <div className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+              {usage ? TIERS[usage.tier].name : "Free"}
+            </div>
+          </div>
+          <div className="space-y-3">
+            <UsageBar label="Personal cards" current={usage?.cards.current ?? 0} limit={usage?.cards.limit ?? 3} />
+            <UsageBar label="Groups" current={usage?.groups.current ?? 0} limit={usage?.groups.limit ?? 1} />
+            <UsageBar
+              label="AI messages this month"
+              current={usage?.aiMessages.current ?? 0}
+              limit={Number.isFinite(usage?.aiMessages.limit ?? 0) ? (usage?.aiMessages.limit ?? 0) : Infinity}
+            />
+          </div>
+          <Link to="/pricing" className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border/60 px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground">
+            <CreditCard className="h-4 w-4" /> View plans
+          </Link>
+        </div>
+      </Section>
+
       <Section icon={Sparkles} title="Smart features">
         <Row label="AI categorization" desc="Auto-sort mail into Business, Jobs, OTP, etc." checked={aiCategorize} onChange={setAiCategorize} />
         <Row label="OTP Vault" desc="Extract and store OTP codes securely." checked={otpVault} onChange={setOtpVault} />
