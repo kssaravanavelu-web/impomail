@@ -56,6 +56,27 @@ export const createMailCard = createServerFn({ method: "POST" })
     return { name, kind, emails };
   })
   .handler(async ({ data, context }) => {
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("tier")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const tier = TIERS[(profile?.tier as TierKey) ?? "free"];
+
+    const { data: existing } = await context.supabase
+      .from("mail_cards")
+      .select("id, kind")
+      .eq("user_id", context.userId);
+    const currentCards = (existing ?? []).filter((c) => c.kind === "card").length;
+    const currentGroups = (existing ?? []).filter((c) => c.kind === "group").length;
+
+    if (data.kind === "card" && currentCards >= tier.limits.maxCards) {
+      throw new Error(`Your ${tier.name} plan allows up to ${tier.limits.maxCards} personal cards. Upgrade to create more.`);
+    }
+    if (data.kind === "group" && currentGroups >= tier.limits.maxGroups) {
+      throw new Error(`Your ${tier.name} plan allows up to ${tier.limits.maxGroups} group${tier.limits.maxGroups === 1 ? "" : "s"}. Upgrade to create more.`);
+    }
+
     const { data: card, error } = await context.supabase
       .from("mail_cards")
       .insert({ user_id: context.userId, name: data.name, kind: data.kind })
