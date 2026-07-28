@@ -214,7 +214,6 @@ export function AppLayout() {
                 </Link>
               );
             })}
-            })}
             <Button variant="ghost" size="sm" onClick={signOut} className="ml-auto shrink-0 gap-2 text-muted-foreground">
               <LogOut className="h-4 w-4" /> Sign out
             </Button>

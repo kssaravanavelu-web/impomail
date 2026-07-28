@@ -1,9 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Activity, Wallet, Trash2 } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { useQueryClient } from "@tanstack/react-query";
-import { deleteAllFinanceData } from "@/lib/finance.functions";
+import { User, Bell, Shield, Palette, Sparkles, LogOut, Sun, Moon, Check, Home, Mail, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -19,23 +16,6 @@ export const Route = createFileRoute("/_authenticated/settings")({
 function Settings() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const purgeFinance = useServerFn(deleteAllFinanceData);
-  const [purging, setPurging] = useState(false);
-
-  const wipeFinance = async () => {
-    if (!window.confirm("Delete every transaction, budget, bill and subscription ImpoMail extracted from your mail? This cannot be undone.")) return;
-    setPurging(true);
-    try {
-      await purgeFinance();
-      await queryClient.invalidateQueries({ queryKey: ["finance"] });
-      toast.success("All financial data deleted");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not delete financial data");
-    } finally {
-      setPurging(false);
-    }
-  };
   const [notifications, setNotifications] = useState(true);
   const [aiCategorize, setAiCategorize] = useState(true);
   const [otpVault, setOtpVault] = useState(true);
@@ -177,22 +157,6 @@ function Settings() {
           <span className="flex items-center gap-3"><Shield className="h-4 w-4 text-muted-foreground" /> Terms of Service</span>
           <span className="text-muted-foreground">›</span>
         </Link>
-      </Section>
-
-      <Section icon={Wallet} title="Personal finance data">
-        <Link to="/finance" className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-accent/40">
-          <span className="flex items-center gap-3"><Wallet className="h-4 w-4 text-muted-foreground" /> Finance dashboard</span>
-          <span className="text-muted-foreground">›</span>
-        </Link>
-        <button
-          type="button"
-          onClick={wipeFinance}
-          disabled={purging}
-          className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-destructive hover:bg-destructive/10 disabled:opacity-60"
-        >
-          <span className="flex items-center gap-3"><Trash2 className="h-4 w-4" /> Delete all financial data</span>
-          <span className="text-xs">{purging ? "Deleting…" : "Permanent"}</span>
-        </button>
       </Section>
 
       <Button variant="outline" className="mt-6 w-full gap-2 text-destructive hover:text-destructive" onClick={signOut}>
