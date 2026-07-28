@@ -1,10 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Reply, Loader2 } from "lucide-react";
-import { categoryMeta } from "@/lib/mock-data";
+import { ArrowLeft, Reply, Loader2, FolderInput, Check } from "lucide-react";
+import { categoryMeta, type Category } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import { getGmailMessage } from "@/lib/gmail.functions";
+import { setSenderRule } from "@/lib/sender-rules.functions";
+import { domainOf } from "@/lib/categorize";
 
 export const Route = createFileRoute("/_authenticated/message/$id")({
   head: () => ({ meta: [{ title: "Message — ImpoMail" }, { name: "description", content: "View your Gmail message." }] }),
@@ -16,10 +20,21 @@ export const Route = createFileRoute("/_authenticated/message/$id")({
 function MessagePage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const fetchFn = useServerFn(getGmailMessage);
   const { data: m, isLoading, error } = useQuery({
     queryKey: ["gmail", "message", id],
     queryFn: () => fetchFn({ data: { id } }),
+  });
+  const saveRule = useServerFn(setSenderRule);
+  const refile = useMutation({
+    mutationFn: (category: Category) =>
+      saveRule({ data: { pattern: m?.fromEmail || domainOf(m?.from ?? ""), category } }),
+    onSuccess: (_r, category) => {
+      toast.success(`Future mail from this sender goes to ${categoryMeta[category].label}`);
+      queryClient.invalidateQueries({ queryKey: ["gmail"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -49,6 +64,24 @@ function MessagePage() {
               {categoryMeta[m.category].label}
             </span>
             <span className="text-xs text-muted-foreground">{m.date && new Date(m.date).toLocaleString()}</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-primary/20 px-2 py-1 text-[11px] text-muted-foreground transition hover:text-primary">
+                  <FolderInput className="h-3.5 w-3.5" /> Move to
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
+                  Always file this sender under…
+                </DropdownMenuLabel>
+                {(Object.keys(categoryMeta) as Category[]).map((c) => (
+                  <DropdownMenuItem key={c} onSelect={() => refile.mutate(c)} className="text-xs">
+                    {c === m.category && <Check className="mr-1 h-3.5 w-3.5 text-primary" />}
+                    {categoryMeta[c].label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <h1 className="font-display text-2xl tracking-tight">{m.subject || "(no subject)"}</h1>
           <div className="mt-4 flex items-center gap-3 border-b border-primary/10 pb-4">

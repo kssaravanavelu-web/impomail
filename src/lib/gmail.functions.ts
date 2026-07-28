@@ -179,6 +179,8 @@ export type GmailMessageSummary = {
   date: string;
   unread: boolean;
   category: import("@/lib/mock-data").Category;
+  /** priority score (0-100) computed on top of the category */
+  priority: number;
 };
 
 export const listGmailMessages = createServerFn({ method: "GET" })
@@ -195,7 +197,14 @@ export const listGmailMessages = createServerFn({ method: "GET" })
     const { callAsAppUser } = await import(
       "@/integrations/lovable/appUserConnector"
     );
-    const { categorizeGmail } = await import("./categorize");
+    const { classify, priorityScore } = await import("./categorize");
+    const { data: ruleRows } = await context.supabase
+      .from("sender_rules")
+      .select("pattern, category");
+    const rules = (ruleRows ?? []).map((r) => ({
+      pattern: r.pattern as string,
+      category: r.category as import("@/lib/mock-data").Category,
+    }));
     const params = new URLSearchParams();
     params.set("maxResults", String(Math.min(data.maxResults ?? 20, 50)));
     if (data.q) params.set("q", data.q);
@@ -215,7 +224,7 @@ export const listGmailMessages = createServerFn({ method: "GET" })
           gatewayBaseUrl: GATEWAY_BASE_URL,
           connectionAPIKey: key,
           connectorId: CONNECTOR_ID,
-          path: `/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject&metadataHeaders=Date`,
+          path: `/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject&metadataHeaders=Date&metadataHeaders=List-Unsubscribe&metadataHeaders=Precedence`,
         });
         if (!r.ok) return null;
         const msg = (await r.json()) as {
@@ -230,21 +239,62 @@ export const listGmailMessages = createServerFn({ method: "GET" })
           msg.payload?.headers?.find((x) => x.name.toLowerCase() === n.toLowerCase())?.value ?? "";
         const from = h("From");
         const subject = h("Subject");
+        const snippet = msg.snippet ?? "";
+        const date = h("Date") || (msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : "");
+        const unread = (msg.labelIds ?? []).includes("UNREAD");
+        const result = classify(
+          { from, subject, snippet, listUnsubscribe: h("List-Unsubscribe"), precedence: h("Precedence") },
+          rules,
+        );
         return {
           id: msg.id,
           threadId: msg.threadId,
-          snippet: msg.snippet ?? "",
+          snippet,
           from,
           to: h("To"),
           cc: h("Cc"),
           subject,
-          date: h("Date") || (msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : ""),
-          unread: (msg.labelIds ?? []).includes("UNREAD"),
-          category: categorizeGmail(from, subject),
-        } satisfies GmailMessageSummary;
+          date,
+          unread,
+          category: result.category ?? ("personal" as const),
+          needsAI: result.category === null,
+          priority: priorityScore({
+            from,
+            subject,
+            snippet,
+            category: result.category ?? "personal",
+            date,
+            unread,
+          }),
+        };
       }),
     );
-    return detailed.filter((x): x is GmailMessageSummary => x !== null);
+    const items = detailed.filter((x): x is NonNullable<(typeof detailed)[number]> => x !== null);
+
+    // L3: only the leftovers reach the model, in one batched call.
+    const ambiguous = items.filter((i) => i.needsAI);
+    if (ambiguous.length) {
+      const { classifyWithAI } = await import("./ai-classify.server");
+      const guessed = await classifyWithAI(
+        ambiguous.map((a) => ({ id: a.id, from: a.from, subject: a.subject, snippet: a.snippet })),
+      );
+      for (const item of items) {
+        const g = guessed[item.id];
+        if (g) {
+          item.category = g;
+          item.priority = priorityScore({
+            from: item.from,
+            subject: item.subject,
+            snippet: item.snippet,
+            category: g,
+            date: item.date,
+            unread: item.unread,
+          });
+        }
+      }
+    }
+
+    return items.map(({ needsAI: _needsAI, ...rest }) => rest satisfies GmailMessageSummary);
   });
 
 export type GmailMessageFull = {

@@ -2,7 +2,7 @@ import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { messages, type Category, type Folder } from "@/lib/mock-data";
 
-const CATEGORIES = ["payment", "jobs", "internships", "education", "otp", "recharges", "personal", "promotions", "updates"] as const;
+const CATEGORIES = ["payment", "otp", "jobs", "recharges", "personal", "promotions", "updates", "travel"] as const;
 const FOLDERS = ["inbox", "sent", "drafts", "trash", "archive"] as const;
 
 export default defineTool({

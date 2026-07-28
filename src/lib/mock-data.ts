@@ -1,15 +1,14 @@
-export type Category = "payment" | "jobs" | "internships" | "education" | "otp" | "recharges" | "personal" | "promotions" | "updates";
+export type Category = "payment" | "otp" | "jobs" | "recharges" | "personal" | "promotions" | "updates" | "travel";
 
 export const categoryMeta: Record<Category, { label: string; color: string; bg: string }> = {
-  payment:     { label: "Payment",     color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
-  jobs:        { label: "Jobs",        color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
-  internships: { label: "Internships", color: "text-violet-300",  bg: "bg-violet-500/15 border-violet-500/30" },
-  education:   { label: "Education",   color: "text-teal-300",    bg: "bg-teal-500/15 border-teal-500/30" },
-  otp:         { label: "OTP",         color: "text-amber-300",   bg: "bg-amber-500/15 border-amber-500/30" },
-  recharges:   { label: "Recharges",   color: "text-pink-300",    bg: "bg-pink-500/15 border-pink-500/30" },
-  personal:    { label: "Personal",    color: "text-cyan-300",    bg: "bg-cyan-500/15 border-cyan-500/30" },
-  promotions:  { label: "Promotions",  color: "text-rose-300",    bg: "bg-rose-500/15 border-rose-500/30" },
-  updates:     { label: "Updates",     color: "text-sky-300",     bg: "bg-sky-500/15 border-sky-500/30" },
+  payment:    { label: "Payments & Bills",         color: "text-blue-300",    bg: "bg-blue-500/15 border-blue-500/30" },
+  otp:        { label: "OTP & Security",           color: "text-amber-300",   bg: "bg-amber-500/15 border-amber-500/30" },
+  jobs:       { label: "Jobs & Internships",       color: "text-emerald-300", bg: "bg-emerald-500/15 border-emerald-500/30" },
+  recharges:  { label: "Recharges & Subscriptions",color: "text-pink-300",    bg: "bg-pink-500/15 border-pink-500/30" },
+  personal:   { label: "Personal",                 color: "text-cyan-300",    bg: "bg-cyan-500/15 border-cyan-500/30" },
+  promotions: { label: "Promotions",               color: "text-rose-300",    bg: "bg-rose-500/15 border-rose-500/30" },
+  updates:    { label: "Updates",                  color: "text-sky-300",     bg: "bg-sky-500/15 border-sky-500/30" },
+  travel:     { label: "Travel & Bookings",        color: "text-violet-300",  bg: "bg-violet-500/15 border-violet-500/30" },
 };
 
 export type Folder = "inbox" | "sent" | "drafts" | "trash" | "archive";
@@ -45,7 +44,7 @@ export const messages: Message[] = [
   { id: "m4", from: "Internshala", fromEmail: "team@internshala.com", subject: "Product Design internship at Zomato",
     preview: "3-month remote internship. Stipend ₹25,000/month. Apply by Aug 5.",
     body: "A new Product Design internship at Zomato matches your profile.\n\nDuration: 3 months\nStipend: ₹25,000/month\nLocation: Remote\n\nApply by August 5.",
-    category: "internships", folder: "inbox", time: "Yesterday", unread: true, starred: false },
+    category: "jobs", folder: "inbox", time: "Yesterday", unread: true, starred: false },
   { id: "m5", from: "Notion", fromEmail: "team@notion.so", subject: "Your Notion workspace invoice",
     preview: "Invoice #INV-8821 for July 2026 is ready.",
     body: "Your invoice for July 2026 is ready.\n\nAmount: $16.00\nPlan: Plus\n\nDownload from your billing dashboard.",
@@ -87,7 +86,7 @@ export const messages: Message[] = [
 export const metrics = [
   { key: "payment",     label: "Payment",     count: 24, category: "payment" as Category },
   { key: "jobs",        label: "Jobs",        count: 12, category: "jobs" as Category },
-  { key: "internships", label: "Internships", count: 7,  category: "internships" as Category },
+  { key: "travel",      label: "Travel",      count: 7,  category: "travel" as Category },
   { key: "otp",         label: "OTP Vault",   count: 38, category: "otp" as Category },
   { key: "recharges",   label: "Recharges",   count: 9,  category: "recharges" as Category },
 ];

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, GraduationCap, BookOpen, KeyRound, Smartphone, CreditCard, User, Tag, Bell, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus, Sparkles } from "lucide-react";
+import { Briefcase, KeyRound, Smartphone, CreditCard, User, Tag, Bell, Plane, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { categoryGroups } from "@/lib/category-groups";
 import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
@@ -11,25 +11,15 @@ import { CardTile } from "@/components/card-tile";
 
 const iconFor: Record<Category, typeof Briefcase> = {
   payment: CreditCard,
-  jobs: Briefcase,
-  internships: GraduationCap,
-  education: BookOpen,
   otp: KeyRound,
+  jobs: Briefcase,
   recharges: Smartphone,
   personal: User,
   promotions: Tag,
   updates: Bell,
+  travel: Plane,
 };
 
-const groupIcon: Record<string, typeof Briefcase> = {
-  payment: CreditCard,
-  career: Briefcase,
-  education: BookOpen,
-  otp: KeyRound,
-  recharges: Smartphone,
-  personal: User,
-  others: Sparkles,
-};
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
@@ -73,8 +63,9 @@ function Home() {
   const unreadTotal = inbox.filter((m) => m.unread).length;
   const dynamicMetrics = categoryGroups.map((g) => ({
     key: g.slug,
-    label: g.label,
+    label: g.short,
     slug: g.slug,
+    cat: g.cats[0],
     meta: categoryMeta[g.cats[0]],
     count: inbox.filter((m) => g.cats.includes(m.category as Category)).length,
   }));
@@ -147,7 +138,7 @@ function Home() {
           style={{ scrollPaddingLeft: "1.25rem" }}
         >
           {dynamicMetrics.map((m, i) => {
-            const Icon = groupIcon[m.slug] ?? Tag;
+            const Icon = iconFor[m.cat] ?? Tag;
             const meta = m.meta;
             return (
               <Link

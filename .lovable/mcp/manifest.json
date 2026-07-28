@@ -59,14 +59,13 @@
               "type": "string",
               "enum": [
                 "payment",
-                "jobs",
-                "internships",
-                "education",
                 "otp",
+                "jobs",
                 "recharges",
                 "personal",
                 "promotions",
-                "updates"
+                "updates",
+                "travel"
               ],
               "description": "Filter by category."
             },
