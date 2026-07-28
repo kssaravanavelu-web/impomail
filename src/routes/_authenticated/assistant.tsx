@@ -319,31 +319,50 @@ function Assistant() {
         )}
       </div>
 
-      <div className="mt-3 rounded-2xl border border-primary/10 bg-card/70 p-2 backdrop-blur">
+      {aiLimited && (
+        <div className="mt-3 rounded-2xl border border-primary/20 bg-primary/10 p-3 backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Crown className="h-4 w-4 text-primary" />
+              <span>You've reached your {TIERS[usage?.tier ?? "free"].name} plan AI limit.</span>
+            </div>
+            <Link to="/pricing">
+              <Button size="sm" className="gap-1.5 text-primary-foreground" style={{ background: "var(--gradient-primary)" }}>
+                Upgrade <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      <div className={cn("mt-3 rounded-2xl border border-primary/10 bg-card/70 p-2 backdrop-blur", aiLimited && "opacity-60")}>
         <Textarea
           ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Ask Impo anything about ImpoMail…"
+          placeholder={aiLimited ? "Upgrade to keep chatting with Impo" : "Ask Impo anything about ImpoMail…"}
           className="min-h-[52px] resize-none border-0 bg-transparent focus-visible:ring-0"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || aiLimited}
         />
         <div className="flex items-center justify-between px-2 pb-1">
           <span className="text-[11px] text-muted-foreground">
-            {muted ? "Voice muted" : "Voice ready · tap Speak on any reply"} · Enter to send
+            {aiLimited
+              ? `${aiCurrent} / ${aiLimit} AI messages used this month`
+              : `${aiCurrent}${Number.isFinite(aiLimit) ? ` / ${aiLimit}` : ""} AI messages · ${muted ? "Voice muted" : "Voice ready · tap Speak on any reply"}`}
           </span>
           <div className="flex items-center gap-1">
           <MicButton
             size="sm"
             onTranscript={(t) => setInput(t)}
             title="Speak your message"
+            disabled={aiLimited}
           />
           <Button
             size="sm"
             className="gap-2"
             onClick={submit}
-            disabled={mutation.isPending || !input.trim()}
+            disabled={mutation.isPending || !input.trim() || aiLimited}
             style={{ background: "var(--gradient-primary)" }}
           >
             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
