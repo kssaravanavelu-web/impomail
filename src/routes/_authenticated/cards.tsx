@@ -35,6 +35,13 @@ function CardsPage() {
   const list = useServerFn(listMailCards);
   const create = useServerFn(createMailCard);
   const remove = useServerFn(deleteMailCard);
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn() });
+  const maxGroupMembers = usage?.tier ? TIERS[usage.tier].limits.maxGroupMembers : TIERS.free.limits.maxGroupMembers;
+  const maxCards = usage?.tier ? TIERS[usage.tier].limits.maxCards : TIERS.free.limits.maxCards;
+  const maxGroups = usage?.tier ? TIERS[usage.tier].limits.maxGroups : TIERS.free.limits.maxGroups;
+  const atCardLimit = (usage?.cards.current ?? 0) >= maxCards;
+  const atGroupLimit = (usage?.groups.current ?? 0) >= maxGroups;
 
   const [name, setName] = useState("");
   const [emailInput, setEmailInput] = useState("");
@@ -50,8 +57,9 @@ function CardsPage() {
   const inbox = inboxData ?? [];
   const [filter, setFilter] = useState<"all" | "card" | "group">("all");
 
-  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : MAX_GROUP_MEMBERS;
+  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : maxGroupMembers;
   const atLimit = maxEmails !== undefined && emails.length >= maxEmails;
+  const atKindLimit = kind === "card" ? atCardLimit : atGroupLimit;
 
   const addEmail = () => {
     const email = emailInput.trim().toLowerCase();
