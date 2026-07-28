@@ -86,7 +86,7 @@ export const messages: Message[] = [
 export const metrics = [
   { key: "payment",     label: "Payment",     count: 24, category: "payment" as Category },
   { key: "jobs",        label: "Jobs",        count: 12, category: "jobs" as Category },
-  { key: "internships", label: "Internships", count: 7,  category: "jobs" as Category },
+  { key: "travel",      label: "Travel",      count: 7,  category: "travel" as Category },
   { key: "otp",         label: "OTP Vault",   count: 38, category: "otp" as Category },
   { key: "recharges",   label: "Recharges",   count: 9,  category: "recharges" as Category },
 ];
