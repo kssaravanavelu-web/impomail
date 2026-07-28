@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Mail } from "lucide-react";
 import { categoryMeta } from "@/lib/mock-data";
@@ -25,11 +26,13 @@ export function GmailList({
   loading,
   error,
   emptyText,
+  renderActions,
 }: {
   items: GmailMessageSummary[];
   loading?: boolean;
   error?: string | null;
   emptyText: string;
+  renderActions?: (message: GmailMessageSummary) => ReactNode;
 }) {
   if (loading) {
     return (
@@ -59,11 +62,11 @@ export function GmailList({
         const meta = categoryMeta[m.category];
         const name = nameFromHeader(m.from);
         return (
+          <div key={m.id} className="flex items-center gap-2 pr-3 transition-colors hover:bg-primary/[0.04]">
           <Link
-            key={m.id}
             to="/message/$id"
             params={{ id: m.id }}
-            className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-primary/[0.04]"
+            className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
           >
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold">
               {name.charAt(0).toUpperCase()}
@@ -78,6 +81,8 @@ export function GmailList({
             </div>
             <span className="shrink-0 text-xs text-muted-foreground">{formatTime(m.date)}</span>
           </Link>
+          {renderActions ? <div className="flex shrink-0 items-center gap-1">{renderActions(m)}</div> : null}
+          </div>
         );
       })}
     </div>
