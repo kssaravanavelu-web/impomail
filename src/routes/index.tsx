@@ -6,8 +6,9 @@ import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Sparkles, Shield, Mail, ArrowRight, Check, Search,
-  Lock, CreditCard, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
+  Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
 } from "lucide-react";
+
 
 const TITLE = "IMPOMAIL | Smart Gmail Management & Organisation";
 const DESC =
