@@ -2,15 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Users, IdCard, X, Crown, ArrowRight } from "lucide-react";
+import { Loader2, Plus, Users, IdCard, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/message-list";
 import { listMailCards, createMailCard, deleteMailCard } from "@/lib/cards.functions";
-import { getCurrentUsage } from "@/lib/tier.functions";
-import { TIERS } from "@/lib/tier";
-import { MAX_PERSONAL_CARD_EMAILS } from "@/lib/cards.constants";
+import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "@/lib/cards.constants";
 import { CardTile } from "@/components/card-tile";
 import { listGmailMessages } from "@/lib/gmail.functions";
 import { messageBelongsToCard } from "@/lib/card-filter";
@@ -35,14 +33,6 @@ function CardsPage() {
   const list = useServerFn(listMailCards);
   const create = useServerFn(createMailCard);
   const remove = useServerFn(deleteMailCard);
-  const usageFn = useServerFn(getCurrentUsage);
-  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn() });
-  const maxGroupMembers = usage?.tier ? TIERS[usage.tier].limits.maxGroupMembers : TIERS.free.limits.maxGroupMembers;
-  const maxCards = usage?.tier ? TIERS[usage.tier].limits.maxCards : TIERS.free.limits.maxCards;
-  const maxGroups = usage?.tier ? TIERS[usage.tier].limits.maxGroups : TIERS.free.limits.maxGroups;
-  const atCardLimit = (usage?.cards.current ?? 0) >= maxCards;
-  const atGroupLimit = (usage?.groups.current ?? 0) >= maxGroups;
-
   const [name, setName] = useState("");
   const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<string[]>([]);
@@ -57,9 +47,8 @@ function CardsPage() {
   const inbox = inboxData ?? [];
   const [filter, setFilter] = useState<"all" | "card" | "group">("all");
 
-  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : maxGroupMembers;
+  const maxEmails = kind === "card" ? MAX_PERSONAL_CARD_EMAILS : MAX_GROUP_MEMBERS;
   const atLimit = maxEmails !== undefined && emails.length >= maxEmails;
-  const atKindLimit = kind === "card" ? atCardLimit : atGroupLimit;
 
   const addEmail = () => {
     const email = emailInput.trim().toLowerCase();
@@ -209,20 +198,14 @@ function CardsPage() {
           </div>
           <Button
             onClick={() => createMut.mutate()}
-            disabled={!name.trim() || createMut.isPending || atKindLimit}
+            disabled={!name.trim() || createMut.isPending}
             className="h-11"
           >
             {createMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            <span className="ml-1.5">{atKindLimit ? "Limit reached" : "Create"}</span>
+            <span className="ml-1.5">Create</span>
           </Button>
         </div>
-        {atKindLimit ? (
-          <Link to="/pricing" className="mt-2 flex items-center gap-1.5 text-xs text-primary hover:underline">
-            <Crown className="h-3.5 w-3.5" />
-            Your {usage?.tier ? TIERS[usage.tier].name : "Free"} plan is at the {kind === "card" ? "personal card" : "group"} limit. Upgrade to create more.
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        ) : maxEmails !== undefined ? (
+        {maxEmails !== undefined ? (
           <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             {kind === "card" ? "Personal card" : "Group"}: {emails.length}/{maxEmails}{" "}
             {kind === "card" ? "email" : "members"} · you are the host
