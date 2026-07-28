@@ -172,10 +172,11 @@ function LandingPage() {
                 </div>
                 <div className="space-y-3">
                   <PreviewRow icon={Inbox} label="Unread mail" value="12" />
-                  <PreviewRow icon={CreditCard} label="Payments and Bills" value="3" />
+                  <PreviewRow icon={Tags} label="Payments and Bills" value="3" />
                   <PreviewRow icon={Shield} label="OTP and Security" value="2" />
                   <PreviewRow icon={Mail} label="Jobs and Internships" value="5" />
                 </div>
+
                 <div className="mt-6 rounded-2xl border border-border/60 bg-background/30 p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
