@@ -221,3 +221,25 @@ function Row({ label, desc, checked, onChange }: { label: string; desc: string; 
     </div>
   );
 }
+
+function UsageBar({ label, current, limit }: { label: string; current: number; limit: number }) {
+  const infinite = !Number.isFinite(limit);
+  const pct = infinite ? 0 : Math.min(100, Math.round((current / limit) * 100));
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium">
+          {current}
+          {infinite ? " / unlimited" : ` / ${limit}`}
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-accent">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${pct}%`, background: "var(--gradient-primary)" }}
+        />
+      </div>
+    </div>
+  );
+}
