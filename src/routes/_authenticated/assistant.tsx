@@ -1,14 +1,16 @@
 import { parseSiteActions, stripSiteActions, type SiteAction } from "@/lib/site-commands";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bot, Loader2, Send, Sparkles, Trash2, Volume2, VolumeX, Square } from "lucide-react";
+import { Bot, Loader2, Send, Sparkles, Trash2, Volume2, VolumeX, Square, Crown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listChatHistory, sendChatMessage, clearChatHistory } from "@/lib/assistant.functions";
+import { getCurrentUsage } from "@/lib/tier.functions";
+import { TIERS } from "@/lib/tier";
 import { MicButton } from "@/components/mic-button";
 import { parseDialogue, pickVoiceForRole, voiceProfile, SOFT_VOLUME } from "@/lib/multi-voice";
 
