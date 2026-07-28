@@ -24,6 +24,8 @@ export function ChatWidget() {
   const navigate = useNavigate();
   const history = useServerFn(listChatHistory);
   const send = useServerFn(sendChatMessage);
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn(), enabled: open });
   const { conversing } = useVoiceCommand();
 
   useEffect(() => {
