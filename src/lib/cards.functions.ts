@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { MAX_PERSONAL_CARD_EMAILS, MAX_GROUP_MEMBERS } from "./cards.constants";
+import { TIERS, type TierKey } from "./tier";
 
 export type MailCard = {
   id: string;
