@@ -16,6 +16,19 @@ export async function getUserTier(context: SupabaseContext): Promise<TierKey> {
   return (profile?.tier as TierKey) ?? "free";
 }
 
+export async function getAiUsage(context: SupabaseContext): Promise<{ current: number; limit: number }> {
+  const tierKey = await getUserTier(context);
+  const tier = TIERS[tierKey];
+  const ym = currentYearMonth();
+  const { data: usage } = await context.supabase
+    .from("ai_usage")
+    .select("message_count")
+    .eq("user_id", context.userId)
+    .eq("year_month", ym)
+    .maybeSingle();
+  return { current: usage?.message_count ?? 0, limit: tier.limits.maxAiMessagesPerMonth };
+}
+
 export async function incrementAiMessageCount(context: SupabaseContext): Promise<{ current: number; limit: number }> {
   const tierKey = await getUserTier(context);
   const tier = TIERS[tierKey];
@@ -50,17 +63,8 @@ export async function incrementAiMessageCount(context: SupabaseContext): Promise
 }
 
 export async function checkAiLimit(context: SupabaseContext): Promise<void> {
-  const tierKey = await getUserTier(context);
-  const tier = TIERS[tierKey];
-  const ym = currentYearMonth();
-  const { data: usage } = await context.supabase
-    .from("ai_usage")
-    .select("message_count")
-    .eq("user_id", context.userId)
-    .eq("year_month", ym)
-    .maybeSingle();
-  const current = usage?.message_count ?? 0;
-  if (Number.isFinite(tier.limits.maxAiMessagesPerMonth) && current >= tier.limits.maxAiMessagesPerMonth) {
+  const { current, limit } = await getAiUsage(context);
+  if (Number.isFinite(limit) && current >= limit) {
     throw new Error("You have reached your monthly AI assistant limit. Upgrade to Pro for unlimited messages.");
   }
 }
