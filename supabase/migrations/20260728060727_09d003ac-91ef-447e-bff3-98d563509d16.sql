@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public.ai_usage; ALTER TABLE public.profiles DROP COLUMN IF EXISTS tier;
