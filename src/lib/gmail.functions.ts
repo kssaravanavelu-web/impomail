@@ -569,3 +569,56 @@ export const getGmailMessageMedia = createServerFn({ method: "GET" })
     }
     return out;
   });
+
+export const modifyGmailMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: { id: string; addLabelIds?: string[]; removeLabelIds?: string[] }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    if (!key) throw new Error("Gmail is not connected");
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey: key,
+      connectorId: CONNECTOR_ID,
+      path: `/gmail/v1/users/me/messages/${data.id}/modify`,
+      init: {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          addLabelIds: data.addLabelIds ?? [],
+          removeLabelIds: data.removeLabelIds ?? [],
+        }),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Gmail update failed [${res.status}]: ${body.slice(0, 200)}`);
+    }
+    return { ok: true as const };
+  });
+
+export const untrashGmailMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    if (!key) throw new Error("Gmail is not connected");
+    const { callAsAppUser } = await import("@/integrations/lovable/appUserConnector");
+    const res = await callAsAppUser({
+      gatewayBaseUrl: GATEWAY_BASE_URL,
+      connectionAPIKey: key,
+      connectorId: CONNECTOR_ID,
+      path: `/gmail/v1/users/me/messages/${data.id}/untrash`,
+      init: { method: "POST" },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Restore failed [${res.status}]: ${body.slice(0, 200)}`);
+    }
+    return { ok: true as const };
+  });

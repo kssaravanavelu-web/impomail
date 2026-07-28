@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/message-list";
 import { GmailList } from "@/components/gmail-list";
+import { MailActions } from "@/components/mail-actions";
 import { listGmailMessages } from "@/lib/gmail.functions";
 
 export const Route = createFileRoute("/_authenticated/inbox")({
@@ -25,7 +26,7 @@ function InboxPage() {
         items={items}
         loading={isLoading}
         error={error ? (error as Error).message : null}
-        emptyText="Your inbox is empty."
+        emptyText="Your inbox is empty." renderActions={(m) => <MailActions id={m.id} actions={["archive", "trash"]} />}
       />
     </div>
   );
