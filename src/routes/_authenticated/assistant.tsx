@@ -42,6 +42,12 @@ function Assistant() {
     queryFn: () => listFn(),
   });
 
+  const usageFn = useServerFn(getCurrentUsage);
+  const { data: usage } = useQuery({ queryKey: ["usage"], queryFn: () => usageFn() });
+  const aiLimit = usage?.aiMessages.limit ?? TIERS.free.limits.maxAiMessagesPerMonth;
+  const aiCurrent = usage?.aiMessages.current ?? 0;
+  const aiLimited = Number.isFinite(aiLimit) && aiCurrent >= aiLimit;
+
   const [pending, setPending] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [muted, setMuted] = useState<boolean>(() => {
