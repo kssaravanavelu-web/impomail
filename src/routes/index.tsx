@@ -57,7 +57,6 @@ const FEATURES = [
   { emoji: "🔒", icon: Shield, title: "Secure Google Sign-In", desc: "Uses Google's secure OAuth authentication." },
 ];
 
-
 const PERMISSIONS = [
   { icon: Inbox, text: "Read emails for organisation and categorisation" },
   { icon: Send, text: "Send emails on behalf of the user when requested" },
@@ -66,8 +65,8 @@ const PERMISSIONS = [
   { icon: Search, text: "Search and retrieve relevant email threads" },
 ];
 
-
 const PRIVACY_POINTS = [
+
   { icon: Lock, title: "User data belongs to the user", desc: "You own your Gmail content. IMPOMAIL only processes it to deliver the features you use." },
   { icon: Shield, title: "OAuth authentication is provided by Google", desc: "IMPOMAIL never sees or stores your Google password." },
   { icon: Globe, title: "Data is transmitted securely using HTTPS", desc: "All traffic between your browser, IMPOMAIL and Google APIs is encrypted in transit." },
