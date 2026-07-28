@@ -4,9 +4,11 @@ import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { TIERS, type TierKey } from "@/lib/tier";
+import { getCurrentUsage } from "@/lib/tier.functions";
 import { useEffect, useState } from "react";
 import { Check, Sparkles, ArrowRight, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
