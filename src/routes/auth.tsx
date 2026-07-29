@@ -185,9 +185,22 @@ function AuthPage() {
                 className="h-11 bg-input/60"
               />
             </div>
+            {mode === "signup" && (
+              <ul className="space-y-1 rounded-xl border border-border/60 bg-background/30 p-3">
+                {passwordChecks.map((c) => (
+                  <li
+                    key={c.label}
+                    className={`flex items-center gap-2 text-xs ${c.ok ? "text-primary" : "text-muted-foreground"}`}
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${c.ok ? "bg-primary" : "bg-muted-foreground/50"}`} />
+                    {c.label}
+                  </li>
+                ))}
+              </ul>
+            )}
             <Button
               type="submit"
-              disabled={loading || !accepted}
+              disabled={loading || !accepted || (mode === "signup" && !passwordValid)}
               className="h-11 w-full font-semibold text-primary-foreground"
               style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
             >
