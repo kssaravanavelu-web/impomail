@@ -132,8 +132,8 @@ function Home() {
           <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">
             {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
           </p>
-          <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight lg:text-6xl">
-            <span className="italic text-foreground/80">{greeting()},</span>{" "}
+          <h1 className="mt-3 font-display text-3xl leading-[1.08] tracking-tight lg:text-5xl">
+            <span className="text-foreground/70">{greeting()},</span>{" "}
             <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>{name}</span>
           </h1>
         </div>
@@ -162,7 +162,7 @@ function Home() {
         <div className="mb-4 flex items-end justify-between px-5 lg:px-10">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Curated</p>
-            <h2 className="mt-2 font-display text-2xl tracking-tight lg:text-3xl">Swipe categories</h2>
+          <h2 className="mt-2 font-display text-xl tracking-tight lg:text-2xl">Swipe categories</h2>
           </div>
           <span className="hidden text-[10px] uppercase tracking-[0.24em] text-muted-foreground/60 sm:inline">← swipe →</span>
         </div>
@@ -187,7 +187,7 @@ function Home() {
                   <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/50 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" strokeWidth={1.5} />
                 </div>
                 <div className="mt-8">
-                  <div className="font-display text-5xl font-light leading-none tracking-tight">{m.count}</div>
+                  <div className="font-display text-4xl font-semibold leading-none tracking-tight">{m.count}</div>
                   <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{m.label}</div>
                 </div>
               </Link>
@@ -201,7 +201,7 @@ function Home() {
         <div className="mb-6 flex items-end justify-between">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Yours</p>
-            <h2 className="mt-2 font-display text-3xl tracking-tight">Cards &amp; Groups</h2>
+            <h2 className="mt-2 font-display text-2xl tracking-tight">Cards &amp; Groups</h2>
           </div>
           <Link to="/cards" className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em] text-primary hover:opacity-80">
             Manage <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -241,7 +241,7 @@ function Home() {
         <div className="mb-6 flex items-end justify-between">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-muted-foreground">Curated</p>
-            <h2 className="mt-2 font-display text-3xl tracking-tight">Sector mail</h2>
+            <h2 className="mt-2 font-display text-2xl tracking-tight">Sector mail</h2>
           </div>
           <Link to="/inbox" className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em] text-primary hover:opacity-80">
             View all <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -277,7 +277,7 @@ function Home() {
                       key={m.id}
                       to="/message/$id"
                       params={{ id: m.id }}
-                      className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-primary/[0.04]"
+                      className="feed-row group flex items-center gap-4 px-5 py-3.5"
                       style={{ borderTop: i === 0 ? "none" : "1px solid color-mix(in oklab, var(--primary) 10%, transparent)" }}
                     >
                       <div className="flex-shrink-0">
