@@ -45,6 +45,8 @@ function Home() {
   const { data, isLoading } = useQuery({
     queryKey: ["gmail", "inbox-all"],
     queryFn: () => fetchFn({ data: { labelIds: ["INBOX"], maxResults: 50 } }),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
   const inbox: GmailMessageSummary[] = data ?? [];
   const listCards = useServerFn(listMailCards);
@@ -61,14 +63,27 @@ function Home() {
     }),
   );
   const unreadTotal = inbox.filter((m) => m.unread).length;
-  const dynamicMetrics = categoryGroups.map((g) => ({
-    key: g.slug,
-    label: g.short,
-    slug: g.slug,
-    cat: g.cats[0],
-    meta: categoryMeta[g.cats[0]],
-    count: inbox.filter((m) => g.cats.includes(m.category as Category)).length,
-  }));
+  /** Weightage = urgency of the mail in a bucket, boosted for unread and fresh mail. */
+  const weightOf = (m: GmailMessageSummary) => {
+    const ageHours = Math.max(0, (Date.now() - new Date(m.date).getTime()) / 3.6e6);
+    const freshness = ageHours < 1 ? 1.6 : ageHours < 6 ? 1.3 : ageHours < 24 ? 1.1 : 1;
+    return (m.priority || 1) * (m.unread ? 1.5 : 1) * freshness;
+  };
+  const dynamicMetrics = categoryGroups
+    .map((g) => {
+      const items = inbox.filter((m) => g.cats.includes(m.category as Category));
+      return {
+        key: g.slug,
+        label: g.short,
+        slug: g.slug,
+        cat: g.cats[0],
+        meta: categoryMeta[g.cats[0]],
+        count: items.length,
+        unread: items.filter((m) => m.unread).length,
+        weight: items.reduce((sum, m) => sum + weightOf(m), 0),
+      };
+    })
+    .sort((a, b) => b.weight - a.weight || b.unread - a.unread || b.count - a.count);
   const sectors = (Object.keys(categoryMeta) as Category[])
     .map((cat) => ({ cat, items: inbox.filter((m) => m.category === cat) }))
     .filter((s) => s.items.length > 0);
