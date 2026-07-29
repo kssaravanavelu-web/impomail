@@ -6,12 +6,18 @@ import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Sparkles, Shield, Mail, ArrowRight, Check, Search,
-  Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
+  Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive, Mic,
 } from "lucide-react";
 
-const TITLE = "IMPOMAIL | Smart Gmail Management & Organisation";
+const VOICE_LINES = [
+  "Hi impo, read my unread mail",
+  "Any OTP in the last ten minutes?",
+  "Archive everything from promotions",
+];
+
+const TITLE = "IMPOMAIL | Run Your Gmail Inbox With Your Voice";
 const DESC =
-  "IMPOMAIL helps users organise Gmail, manage emails efficiently, categorise conversations, search quickly, and securely connect with Google using OAuth.";
+  "Say \"hi impo\" and clear your inbox hands-free. IMPOMAIL is a voice-controlled Gmail client that reads, searches, sorts, archives and sends mail while you talk. Secure Google OAuth.";
 
 export const Route = createFileRoute("/")({
 
@@ -125,19 +131,31 @@ function LandingPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div className="silk-rise max-w-xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Gmail integration · Google OAuth
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Voice-controlled Gmail
               </div>
               <h1 className="font-display text-4xl font-semibold leading-[1.06] tracking-tight lg:text-5xl">
-                Manage Your Gmail Smarter with{" "}
+                Say{" "}
                 <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>
-                  IMPOMAIL
-                </span>
+                  &ldquo;hi impo&rdquo;
+                </span>{" "}
+                and never touch your inbox again
               </h1>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground lg:text-lg">
-                IMPOMAIL is an intelligent email management platform that securely connects to your Google account
-                (with your permission) to help organise your Gmail, categorise messages, search quickly,
-                and control your inbox using a built-in voice assistant.
+                IMPOMAIL is a voice-controlled Gmail client. One wake word puts you in conversation mode — then just
+                talk. &ldquo;Read my unread.&rdquo; &ldquo;Any OTP?&rdquo; &ldquo;Archive that.&rdquo; &ldquo;Reply
+                saying I&rsquo;ll be there at six.&rdquo; It listens, answers out loud, and does it.
               </p>
+
+              <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
+                {VOICE_LINES.map((line) => (
+                  <li key={line} className="flex items-center gap-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Mic className="h-3.5 w-3.5" strokeWidth={1.8} />
+                    </span>
+                    <span className="italic">&ldquo;{line}&rdquo;</span>
+                  </li>
+                ))}
+              </ul>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link to={connectHref}>
@@ -146,17 +164,17 @@ function LandingPage() {
                     className="h-12 w-full gap-2 px-7 text-base font-semibold text-primary-foreground sm:w-auto"
                     style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
                   >
-                    <Mail className="h-4 w-4" /> Connect Gmail
+                    <Mic className="h-4 w-4" /> Start talking to your inbox
                   </Button>
                 </Link>
                 <a href="#about">
                   <Button size="lg" variant="outline" className="h-12 w-full gap-2 border-border/60 px-7 text-base hover:border-primary/40 sm:w-auto">
-                    Learn More <ArrowRight className="h-4 w-4" />
+                    See how it works <ArrowRight className="h-4 w-4" />
                   </Button>
                 </a>
               </div>
               <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Explicit user consent required</span>
+                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Hands-free in one wake word</span>
                 <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> Encrypted HTTPS transport</span>
                 <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-primary" /> No data selling</span>
               </div>
