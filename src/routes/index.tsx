@@ -127,7 +127,7 @@ function LandingPage() {
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 text-primary" /> Gmail integration · Google OAuth
               </div>
-              <h1 className="font-display text-4xl font-light leading-[1.08] tracking-tight lg:text-6xl">
+              <h1 className="font-display text-4xl font-semibold leading-[1.06] tracking-tight lg:text-5xl">
                 Manage Your Gmail Smarter with{" "}
                 <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-primary)" }}>
                   IMPOMAIL
