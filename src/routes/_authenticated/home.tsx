@@ -223,7 +223,7 @@ function Home() {
             ))}
             <Link
               to="/cards"
-              className="silk-hover glass-card flex min-h-[190px] flex-col items-center justify-center gap-3 rounded-[1.75rem] border-dashed p-5 text-center transition hover:-translate-y-1"
+              className="silk-hover glass-card flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-2xl border-dashed p-5 text-center transition hover:-translate-y-0.5"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
                 <Plus className="h-5 w-5" strokeWidth={1.5} />
