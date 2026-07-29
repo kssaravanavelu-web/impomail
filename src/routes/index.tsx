@@ -6,8 +6,14 @@ import { CustomisePanel } from "@/components/customise-panel";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Sparkles, Shield, Mail, ArrowRight, Check, Search,
-  Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive,
+  Lock, Tags, Star, KeyRound, Globe, Send, FileEdit, Archive, Mic,
 } from "lucide-react";
+
+const VOICE_LINES = [
+  "Hi impo, read my unread mail",
+  "Any OTP in the last ten minutes?",
+  "Archive everything from promotions",
+];
 
 const TITLE = "IMPOMAIL | Run Your Gmail Inbox With Your Voice";
 const DESC =
