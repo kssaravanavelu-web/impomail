@@ -11,6 +11,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BrandLogo } from "@/components/brand-logo";
 import { markConsentPending } from "@/lib/consent";
 
+const PASSWORD_RULES = [
+  { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
+  { label: "One uppercase letter (A–Z)", test: (v: string) => /[A-Z]/.test(v) },
+  { label: "One number (0–9)", test: (v: string) => /[0-9]/.test(v) },
+  { label: "One special character (!@#$…)", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
+];
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>): { next?: string } => ({
@@ -37,6 +44,8 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const passwordChecks = PASSWORD_RULES.map((r) => ({ ...r, ok: r.test(password) }));
+  const passwordValid = passwordChecks.every((c) => c.ok);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -87,6 +96,11 @@ function AuthPage() {
         if (safeNext) window.location.assign(safeNext);
         else navigate({ to: "/connect-gmail", replace: true });
       } else {
+        if (!passwordValid) {
+          toast.error("Password must have 8+ characters, an uppercase letter, a number and a special character.");
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -171,9 +185,22 @@ function AuthPage() {
                 className="h-11 bg-input/60"
               />
             </div>
+            {mode === "signup" && (
+              <ul className="space-y-1 rounded-xl border border-border/60 bg-background/30 p-3">
+                {passwordChecks.map((c) => (
+                  <li
+                    key={c.label}
+                    className={`flex items-center gap-2 text-xs ${c.ok ? "text-primary" : "text-muted-foreground"}`}
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${c.ok ? "bg-primary" : "bg-muted-foreground/50"}`} />
+                    {c.label}
+                  </li>
+                ))}
+              </ul>
+            )}
             <Button
               type="submit"
-              disabled={loading || !accepted}
+              disabled={loading || !accepted || (mode === "signup" && !passwordValid)}
               className="h-11 w-full font-semibold text-primary-foreground"
               style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}
             >
