@@ -11,6 +11,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BrandLogo } from "@/components/brand-logo";
 import { markConsentPending } from "@/lib/consent";
 
+const PASSWORD_RULES = [
+  { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
+  { label: "One uppercase letter (A–Z)", test: (v: string) => /[A-Z]/.test(v) },
+  { label: "One number (0–9)", test: (v: string) => /[0-9]/.test(v) },
+  { label: "One special character (!@#$…)", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
+];
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>): { next?: string } => ({
@@ -37,6 +44,8 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const passwordChecks = PASSWORD_RULES.map((r) => ({ ...r, ok: r.test(password) }));
+  const passwordValid = passwordChecks.every((c) => c.ok);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -87,6 +96,11 @@ function AuthPage() {
         if (safeNext) window.location.assign(safeNext);
         else navigate({ to: "/connect-gmail", replace: true });
       } else {
+        if (!passwordValid) {
+          toast.error("Password must have 8+ characters, an uppercase letter, a number and a special character.");
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
