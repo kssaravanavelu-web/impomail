@@ -41,7 +41,7 @@ export function CardTile({
       <Link
         to="/card/$id"
         params={{ id: card.id }}
-        className="glass-card gold-hairline relative flex h-full flex-col overflow-hidden rounded-[1.75rem] p-5 transition duration-500 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_color-mix(in_oklab,var(--primary)_60%,transparent)]"
+        className="glass-card gold-hairline relative flex h-full flex-col overflow-hidden rounded-2xl p-5 transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_18px_44px_-28px_color-mix(in_oklab,var(--primary)_55%,transparent)]"
       >
         {/* aura wash */}
         <span
@@ -51,12 +51,12 @@ export function CardTile({
 
         <div className="relative flex items-start gap-3">
           <span
-            className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${toneFor(card.name)} font-display text-xl text-background ring-1 ring-primary/30`}
+            className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${toneFor(card.name)} font-display text-lg font-semibold text-background ring-1 ring-primary/25`}
           >
             {card.name.charAt(0).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-display text-2xl leading-tight tracking-tight">{card.name}</p>
+            <p className="truncate font-display text-lg font-semibold leading-tight tracking-tight">{card.name}</p>
             <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.18em] text-primary">
               <Icon className="h-3 w-3" strokeWidth={1.5} />
               {isGroup ? "Group" : "Personal"}
