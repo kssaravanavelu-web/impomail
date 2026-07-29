@@ -53,15 +53,10 @@ function Home() {
   const { data: cardsData, isLoading: cardsLoading } = useQuery({
     queryKey: ["mail-cards"],
     queryFn: () => listCards(),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
-  const myCards = cardsData ?? [];
   const myEmail = user.email ?? undefined;
-  const cardCounts = new Map(
-    myCards.map((c) => {
-      const mine = inbox.filter((m) => messageBelongsToCard(m, c, myEmail));
-      return [c.id, { total: mine.length, unread: mine.filter((m) => m.unread).length }];
-    }),
-  );
   const unreadTotal = inbox.filter((m) => m.unread).length;
   /** Weightage = urgency of the mail in a bucket, boosted for unread and fresh mail. */
   const weightOf = (m: GmailMessageSummary) => {
@@ -69,6 +64,29 @@ function Home() {
     const freshness = ageHours < 1 ? 1.6 : ageHours < 6 ? 1.3 : ageHours < 24 ? 1.1 : 1;
     return (m.priority || 1) * (m.unread ? 1.5 : 1) * freshness;
   };
+  const cardCounts = new Map(
+    (cardsData ?? []).map((c) => {
+      const mine = inbox.filter((m) => messageBelongsToCard(m, c, myEmail));
+      return [
+        c.id,
+        {
+          total: mine.length,
+          unread: mine.filter((m) => m.unread).length,
+          weight: mine.reduce((sum, m) => sum + weightOf(m), 0),
+        },
+      ];
+    }),
+  );
+  /** Heaviest mail weight first, so freshly-received mail reorders cards automatically. */
+  const myCards = [...(cardsData ?? [])].sort((a, b) => {
+    const x = cardCounts.get(a.id);
+    const y = cardCounts.get(b.id);
+    return (
+      (y?.weight ?? 0) - (x?.weight ?? 0) ||
+      (y?.unread ?? 0) - (x?.unread ?? 0) ||
+      (y?.total ?? 0) - (x?.total ?? 0)
+    );
+  });
   const dynamicMetrics = categoryGroups
     .map((g) => {
       const items = inbox.filter((m) => g.cats.includes(m.category as Category));
