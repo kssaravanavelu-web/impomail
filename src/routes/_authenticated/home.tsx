@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Briefcase, KeyRound, Smartphone, CreditCard, User, Tag, Bell, Plane, ChevronRight, Inbox as InboxIcon, Loader2, ArrowUpRight, Users, IdCard, Plus } from "lucide-react";
 import { categoryMeta, type Category } from "@/lib/mock-data";
 import { categoryGroups } from "@/lib/category-groups";
-import { listGmailMessages, type GmailMessageSummary } from "@/lib/gmail.functions";
+import { listGmailMessages, getCardMailCounts, type GmailMessageSummary } from "@/lib/gmail.functions";
 import { listMailCards } from "@/lib/cards.functions";
 import { messageBelongsToCard } from "@/lib/card-filter";
 import { CardTile } from "@/components/card-tile";
@@ -57,6 +57,20 @@ function Home() {
     refetchOnWindowFocus: true,
   });
   const myEmail = user.email ?? undefined;
+  const fetchCardCounts = useServerFn(getCardMailCounts);
+  const cardIdsKey = (cardsData ?? []).map((c) => c.id).join(",");
+  const { data: allTimeCounts } = useQuery({
+    queryKey: ["card-mail-counts", cardIdsKey],
+    enabled: (cardsData ?? []).length > 0,
+    queryFn: () =>
+      fetchCardCounts({
+        data: {
+          cards: (cardsData ?? []).map((c) => ({ id: c.id, emails: c.addresses.map((a) => a.email) })),
+        },
+      }),
+    refetchInterval: 120_000,
+    refetchOnWindowFocus: true,
+  });
   const unreadTotal = inbox.filter((m) => m.unread).length;
   /** Weightage = urgency of the mail in a bucket, boosted for unread and fresh mail. */
   const weightOf = (m: GmailMessageSummary) => {
@@ -217,8 +231,8 @@ function Home() {
               <CardTile
                 key={c.id}
                 card={c}
-                total={cardCounts.get(c.id)?.total}
-                unread={cardCounts.get(c.id)?.unread}
+                total={allTimeCounts?.[c.id]?.total ?? cardCounts.get(c.id)?.total}
+                unread={allTimeCounts?.[c.id]?.unread ?? cardCounts.get(c.id)?.unread}
               />
             ))}
             <Link
