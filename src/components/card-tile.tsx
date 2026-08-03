@@ -98,7 +98,12 @@ export function CardTile({
         <div className="relative mt-5 flex items-center justify-between border-t border-primary/10 pt-3">
           <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             <Mail className="h-3.5 w-3.5" strokeWidth={1.5} />
-            {typeof total === "number" ? `${total} mail` : `${card.addresses.length} address${card.addresses.length === 1 ? "" : "es"}`}
+            {typeof total === "number"
+              ? `${total} mail total`
+              : `${card.addresses.length} address${card.addresses.length === 1 ? "" : "es"}`}
+            {typeof unread === "number" && unread > 0 && (
+              <span className="text-primary">· {unread} new</span>
+            )}
           </span>
           <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary opacity-0 transition group-hover:opacity-100">
             Open <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
