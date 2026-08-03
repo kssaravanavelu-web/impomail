@@ -183,118 +183,84 @@ export type GmailMessageSummary = {
   priority: number;
 };
 
+type ListInput = { q?: string; maxResults?: number; labelIds?: string[]; pageToken?: string };
+
+async function loadRules(supabase: { from: (t: string) => any }) {
+  const { data } = await supabase.from("sender_rules").select("pattern, category");
+  return ((data ?? []) as { pattern: string; category: import("@/lib/mock-data").Category }[]).map((r) => ({
+    pattern: r.pattern,
+    category: r.category,
+  }));
+}
+
 export const listGmailMessages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (input: { q?: string; maxResults?: number; labelIds?: string[] } | undefined) => input ?? {},
-  )
+  .inputValidator((input: ListInput | undefined) => input ?? {})
   .handler(async ({ data, context }): Promise<GmailMessageSummary[]> => {
-    const { getConnectionKeyForUser } = await import(
-      "./app-user-connections.server"
-    );
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
     const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
     if (!key) return [];
-    const { callAsAppUser } = await import(
-      "@/integrations/lovable/appUserConnector"
-    );
-    const { classify, priorityScore } = await import("./categorize");
-    const { data: ruleRows } = await context.supabase
-      .from("sender_rules")
-      .select("pattern, category");
-    const rules = (ruleRows ?? []).map((r) => ({
-      pattern: r.pattern as string,
-      category: r.category as import("@/lib/mock-data").Category,
-    }));
-    const params = new URLSearchParams();
-    params.set("maxResults", String(Math.min(data.maxResults ?? 20, 50)));
-    if (data.q) params.set("q", data.q);
-    for (const l of data.labelIds ?? []) params.append("labelIds", l);
-    const listRes = await callAsAppUser({
-      gatewayBaseUrl: GATEWAY_BASE_URL,
-      connectionAPIKey: key,
-      connectorId: CONNECTOR_ID,
-      path: `/gmail/v1/users/me/messages?${params}`,
+    const { fetchMessagePage } = await import("./gmail-fetch.server");
+    const rules = await loadRules(context.supabase);
+    const page = await fetchMessagePage({
+      key,
+      rules,
+      q: data.q,
+      labelIds: data.labelIds,
+      maxResults: data.maxResults ?? 25,
+      pageToken: data.pageToken,
     });
-    if (!listRes.ok) throw new Error(`Gmail list failed: ${listRes.status}`);
-    const list = (await listRes.json()) as { messages?: { id: string; threadId: string }[] };
-    if (!list.messages?.length) return [];
-    const detailed = await Promise.all(
-      list.messages.slice(0, 20).map(async (m) => {
-        const r = await callAsAppUser({
-          gatewayBaseUrl: GATEWAY_BASE_URL,
-          connectionAPIKey: key,
-          connectorId: CONNECTOR_ID,
-          path: `/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject&metadataHeaders=Date&metadataHeaders=List-Unsubscribe&metadataHeaders=Precedence`,
-        });
-        if (!r.ok) return null;
-        const msg = (await r.json()) as {
-          id: string;
-          threadId: string;
-          snippet?: string;
-          labelIds?: string[];
-          payload?: { headers?: { name: string; value: string }[] };
-          internalDate?: string;
-        };
-        const h = (n: string) =>
-          msg.payload?.headers?.find((x) => x.name.toLowerCase() === n.toLowerCase())?.value ?? "";
-        const from = h("From");
-        const subject = h("Subject");
-        const snippet = msg.snippet ?? "";
-        const date = h("Date") || (msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : "");
-        const unread = (msg.labelIds ?? []).includes("UNREAD");
-        const result = classify(
-          { from, subject, snippet, listUnsubscribe: h("List-Unsubscribe"), precedence: h("Precedence") },
-          rules,
-        );
-        return {
-          id: msg.id,
-          threadId: msg.threadId,
-          snippet,
-          from,
-          to: h("To"),
-          cc: h("Cc"),
-          subject,
-          date,
-          unread,
-          category: result.category ?? ("personal" as const),
-          needsAI: result.category === null,
-          priority: priorityScore({
-            from,
-            subject,
-            snippet,
-            category: result.category ?? "personal",
-            date,
-            unread,
-          }),
-        };
+    return page.items;
+  });
+
+/** Paginated listing — returns a page of messages plus the token for the next page. */
+export const listGmailMessagesPage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: ListInput | undefined) => input ?? {})
+  .handler(
+    async ({ data, context }): Promise<{ items: GmailMessageSummary[]; nextPageToken: string | null }> => {
+      const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+      const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+      if (!key) return { items: [], nextPageToken: null };
+      const { fetchMessagePage } = await import("./gmail-fetch.server");
+      const rules = await loadRules(context.supabase);
+      return fetchMessagePage({
+        key,
+        rules,
+        q: data.q,
+        labelIds: data.labelIds,
+        maxResults: data.maxResults ?? 25,
+        pageToken: data.pageToken,
+      });
+    },
+  );
+
+/** All-time mail totals + unread counts per card, straight from Gmail. */
+export const getCardMailCounts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { cards: { id: string; emails: string[] }[] }) => input)
+  .handler(async ({ data, context }): Promise<Record<string, { total: number; unread: number }>> => {
+    const { getConnectionKeyForUser } = await import("./app-user-connections.server");
+    const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
+    const out: Record<string, { total: number; unread: number }> = {};
+    if (!key) return out;
+    const { countMessages } = await import("./gmail-fetch.server");
+    await Promise.all(
+      data.cards.map(async (c) => {
+        const emails = c.emails.filter(Boolean);
+        if (!emails.length) {
+          out[c.id] = { total: 0, unread: 0 };
+          return;
+        }
+        const scope = `{${emails.map((e) => `from:${e} to:${e} cc:${e}`).join(" ")}}`;
+        const [total, unread] = await Promise.all([
+          countMessages(key, scope),
+          countMessages(key, `${scope} is:unread`, 2),
+        ]);
+        out[c.id] = { total, unread };
       }),
     );
-    const items = detailed.filter((x): x is NonNullable<(typeof detailed)[number]> => x !== null);
-
-    // L3: only the leftovers reach the model, in one batched call.
-    const ambiguous = items.filter((i) => i.needsAI);
-    if (ambiguous.length) {
-      const { classifyWithAI } = await import("./ai-classify.server");
-      const guessed = await classifyWithAI(
-        ambiguous.map((a) => ({ id: a.id, from: a.from, subject: a.subject, snippet: a.snippet })),
-      );
-      for (const item of items) {
-        const g = guessed[item.id];
-        if (g) {
-          item.category = g;
-          item.priority = priorityScore({
-            from: item.from,
-            subject: item.subject,
-            snippet: item.snippet,
-            category: g,
-            date: item.date,
-            unread: item.unread,
-          });
-        }
-      }
-    }
-
-    return items.map(({ needsAI: _needsAI, ...rest }) => rest satisfies GmailMessageSummary);
+    return out;
   });
 
 export type GmailMessageFull = {
