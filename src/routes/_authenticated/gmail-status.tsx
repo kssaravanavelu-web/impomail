@@ -236,8 +236,9 @@ function GmailStatusPage() {
   );
 }
 
-function VerificationIcon({ status }: { status: "verified" | "failed" | "disconnected" }) {
+function VerificationIcon({ status }: { status: "verified" | "failed" | "expired" | "disconnected" }) {
   if (status === "verified") return <ShieldCheck className="h-4 w-4 text-emerald-400" />;
+  if (status === "expired") return <ShieldAlert className="h-4 w-4 text-amber-400" />;
   if (status === "failed") return <ShieldAlert className="h-4 w-4 text-destructive" />;
   return <Shield className="h-4 w-4 text-muted-foreground" />;
 }
