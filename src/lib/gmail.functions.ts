@@ -135,10 +135,15 @@ export const getGmailConnectionDetails = createServerFn({ method: "GET" })
       });
       if (!res.ok) {
         const body = await res.text().catch(() => "");
+        const { isReauthBody, REAUTH_MESSAGE } = await import("./gmail-errors");
+        const expired = isReauthBody(res.status, body);
         return {
           connected: true as const,
           scopes: GOOGLE_SCOPES,
-          verification: { status: "failed" as const, error: `Google API returned ${res.status}: ${body.slice(0, 200)}` },
+          verification: {
+            status: (expired ? "expired" : "failed") as "expired" | "failed",
+            error: expired ? REAUTH_MESSAGE : `Google API returned ${res.status}: ${body.slice(0, 200)}`,
+          },
           lastSyncAt: metadata?.updated_at ?? null,
           createdAt: metadata?.created_at ?? null,
           email: null,
@@ -149,17 +154,22 @@ export const getGmailConnectionDetails = createServerFn({ method: "GET" })
       return {
         connected: true as const,
         scopes: GOOGLE_SCOPES,
-        verification: { status: "verified" as const, error: null },
+        verification: { status: "verified" as "expired" | "failed" | "verified", error: null as string | null },
         lastSyncAt: metadata?.updated_at ?? null,
         createdAt: metadata?.created_at ?? null,
         email: p.emailAddress ?? null,
         messagesTotal: p.messagesTotal ?? 0,
       };
     } catch (e) {
+      const { isReauthError, REAUTH_MESSAGE } = await import("./gmail-errors");
+      const expired = isReauthError(e);
       return {
         connected: true as const,
         scopes: GOOGLE_SCOPES,
-        verification: { status: "failed" as const, error: e instanceof Error ? e.message : "Connection test failed" },
+        verification: {
+          status: (expired ? "expired" : "failed") as "expired" | "failed",
+          error: expired ? REAUTH_MESSAGE : e instanceof Error ? e.message : "Connection test failed",
+        },
         lastSyncAt: metadata?.updated_at ?? null,
         createdAt: metadata?.created_at ?? null,
         email: null,
