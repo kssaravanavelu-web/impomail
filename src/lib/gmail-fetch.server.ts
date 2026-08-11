@@ -1,6 +1,6 @@
 import { callAsAppUser } from "@/integrations/lovable/appUserConnector";
 import { classify, priorityScore } from "./categorize";
-import { GMAIL_REAUTH_REQUIRED, isReauthBody } from "./gmail-errors";
+import { GMAIL_REAUTH_REQUIRED, REAUTH_MESSAGE, isReauthBody } from "./gmail-errors";
 import type { Category } from "@/lib/mock-data";
 import type { GmailMessageSummary } from "./gmail.functions";
 
@@ -18,7 +18,8 @@ async function gmail(key: string, path: string) {
   });
   if (!res.ok && (res.status === 401 || res.status === 403)) {
     const body = await res.clone().text().catch(() => "");
-    if (isReauthBody(res.status, body)) throw new Error(GMAIL_REAUTH_REQUIRED);
+    if (isReauthBody(res.status, body))
+      throw new Error(`${REAUTH_MESSAGE} (${GMAIL_REAUTH_REQUIRED})`);
   }
   return res;
 }
