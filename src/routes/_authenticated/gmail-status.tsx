@@ -129,12 +129,25 @@ function GmailStatusPage() {
                 "Unable to check status right now."
               ) : status?.verification?.status === "verified" ? (
                 "ImpoMail can successfully reach your Gmail account."
+              ) : status?.verification?.status === "expired" ? (
+                <span className="text-amber-400">
+                  {status.verification.error ?? "Your Google sign-in expired. Reconnect Gmail to keep syncing."}
+                </span>
               ) : status?.verification?.status === "failed" ? (
                 <span className="text-destructive">{status.verification.error ?? "Connection test failed."}</span>
               ) : (
                 "Connect Gmail to verify the integration."
               )}
             </p>
+            {status?.verification?.status === "expired" && (
+              <Button
+                className="mt-3 gap-2"
+                style={{ background: "var(--gradient-primary)" }}
+                onClick={() => navigate({ to: "/connect-gmail" })}
+              >
+                <RefreshCw className="h-4 w-4" /> Reconnect Gmail
+              </Button>
+            )}
           </div>
 
           {/* Sync time */}
